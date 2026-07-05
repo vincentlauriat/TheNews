@@ -68,6 +68,11 @@ struct ArticleDetailView: View {
                         )
                     }
                     .buttonStyle(.bordered)
+
+                    ShareLink(item: article.link) {
+                        Label(settings.t("share"), systemImage: "square.and.arrow.up")
+                    }
+                    .buttonStyle(.bordered)
                 }
                 .padding(.top, 4)
 

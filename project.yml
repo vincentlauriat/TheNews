@@ -1,0 +1,112 @@
+name: TheNews
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    macOS: "14.0"
+    iOS: "17.0"
+
+# Schemes explicites (sinon xcodegen n'en génère pas → schemes perdus à chaque régénération).
+schemes:
+  TheNews:
+    build:
+      targets:
+        TheNews: all
+    run:
+      config: Debug
+  TheNewsiOS:
+    build:
+      targets:
+        TheNewsiOS: all
+    run:
+      config: Debug
+
+targets:
+  # ---------------------------------------------------------------------------
+  # macOS
+  # ---------------------------------------------------------------------------
+  TheNews:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: TheNews
+        excludes:
+          - "**/*.entitlements"
+          - "Info.plist"
+          - "Info-iOS.plist"
+    settings:
+      base:
+        PRODUCT_NAME: TheNews
+        PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_VERSION: "5.9"
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        CODE_SIGN_ENTITLEMENTS: TheNews/TheNews.entitlements
+        CODE_SIGN_IDENTITY: ""
+        CODE_SIGNING_REQUIRED: NO
+        CODE_SIGNING_ALLOWED: NO
+    info:
+      path: TheNews/Info.plist
+      properties:
+        CFBundleName: TheNews
+        CFBundleDisplayName: TheNews
+        CFBundleIdentifier: fr.vincentlauriat.thenews
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSMinimumSystemVersion: "14.0"
+        NSHumanReadableCopyright: ""
+
+  # ---------------------------------------------------------------------------
+  # iOS / iPadOS — codebase partagé avec la cible macOS
+  # ---------------------------------------------------------------------------
+  TheNewsiOS:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: TheNews
+        excludes:
+          - "**/*.entitlements"
+          - "Info.plist"
+          - "Info-iOS.plist"
+    settings:
+      base:
+        PRODUCT_NAME: TheNews
+        PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        SWIFT_VERSION: "5.9"
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        TARGETED_DEVICE_FAMILY: "1,2"
+        # Signature automatique (compte Apple de Vincent, team KFLACS69T9).
+        # Xcode crée/télécharge le provisioning profile via -allowProvisioningUpdates.
+        # Le build de vérification simulateur passe CODE_SIGNING_ALLOWED=NO en argument.
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: KFLACS69T9
+    info:
+      path: TheNews/Info-iOS.plist
+      properties:
+        CFBundleName: TheNews
+        CFBundleDisplayName: TheNews
+        CFBundleIdentifier: fr.vincentlauriat.thenews
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        UILaunchScreen: {}
+        # Rafraîchissement en tâche de fond + notifications de veille (phase 4).
+        UIBackgroundModes:
+          - fetch
+          - processing
+        BGTaskSchedulerPermittedIdentifiers:
+          - fr.vincentlauriat.thenews.refresh
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight

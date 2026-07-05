@@ -1,0 +1,114 @@
+import SwiftUI
+import SwiftData
+
+/// Réglages de veille : abonnements aux rubriques (Le Monde + Les Echos) + sujets de veille
+/// (mots-clés) qui alimentent la section « Alertes » et les notifications.
+struct WatchSettingsView: View {
+    @Environment(AppSettings.self) private var settings
+    @Environment(\.modelContext) private var modelContext
+    @Query private var subscriptions: [FeedSubscription]
+    @Query(sort: \WatchTopic.createdAt) private var topics: [WatchTopic]
+
+    @State private var editingTopic: WatchTopic?
+    @State private var creatingTopic = false
+
+    private var subscribedIDs: Set<String> { Set(subscriptions.map(\.feedID)) }
+
+    var body: some View {
+        List {
+            // MARK: Sujets de veille
+            Section {
+                if topics.isEmpty {
+                    Text(settings.t("no_topics"))
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(topics) { topic in
+                    topicRow(topic)
+                }
+                .onDelete(perform: deleteTopics)
+
+                Button {
+                    creatingTopic = true
+                } label: {
+                    Label(settings.t("topic_add"), systemImage: "plus.circle")
+                }
+            } header: {
+                Text(settings.t("watch_topics"))
+            } footer: {
+                Text(settings.t("watch_topics_footer"))
+            }
+
+            // MARK: Rubriques — une section par source (multi-journaux)
+            ForEach(Array(Feed.bySource.enumerated()), id: \.element.source.id) { index, group in
+                Section {
+                    ForEach(group.feeds) { feed in
+                        Toggle(isOn: binding(for: feed)) {
+                            Label(feed.title, systemImage: feed.symbol)
+                        }
+                    }
+                } header: {
+                    Text(group.source.name)
+                } footer: {
+                    // Le rappel « ces rubriques alimentent la veille » ne s'affiche
+                    // qu'une fois, sous la dernière source.
+                    if index == Feed.bySource.count - 1 {
+                        Text(settings.t("sections_footer"))
+                    }
+                }
+            }
+        }
+        .navigationTitle(settings.t("manage_sections"))
+        #if os(iOS)
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
+        .sheet(isPresented: $creatingTopic) {
+            NavigationStack { WatchTopicEditor(topic: nil).environment(settings) }
+        }
+        .sheet(item: $editingTopic) { topic in
+            NavigationStack { WatchTopicEditor(topic: topic).environment(settings) }
+        }
+    }
+
+    @ViewBuilder
+    private func topicRow(_ topic: WatchTopic) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(topic.label)
+                    .fontWeight(.medium)
+                Text(topic.keywordsText)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+            }
+            Spacer()
+            if topic.notify {
+                Image(systemName: "bell.fill").font(.caption).foregroundStyle(.secondary)
+            }
+            Toggle("", isOn: enabledBinding(for: topic))
+                .labelsHidden()
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { editingTopic = topic }
+    }
+
+    // MARK: - Bindings & actions
+
+    private func binding(for feed: Feed) -> Binding<Bool> {
+        Binding(
+            get: { subscribedIDs.contains(feed.id) },
+            set: { _ in try? SubscriptionStore(context: modelContext).toggle(feed.id) }
+        )
+    }
+
+    private func enabledBinding(for topic: WatchTopic) -> Binding<Bool> {
+        Binding(
+            get: { topic.isEnabled },
+            set: { topic.isEnabled = $0; try? modelContext.save() }
+        )
+    }
+
+    private func deleteTopics(_ offsets: IndexSet) {
+        for index in offsets { modelContext.delete(topics[index]) }
+        try? modelContext.save()
+    }
+}

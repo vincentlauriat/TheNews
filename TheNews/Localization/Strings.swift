@@ -1,0 +1,160 @@
+import Foundation
+
+/// Table de traductions bilingue (fr / en). Clé → chaîne. `en` sert de repli.
+/// Ajoute des langues en ajoutant une entrée de premier niveau (ex. "zh") et le
+/// cas correspondant dans `AppLanguage` / `AppSettings.localeIdentifier`.
+enum Strings {
+    static let table: [String: [String: String]] = [
+        "fr": [
+            "app_name": "TheNews",
+
+            // Sidebar / liste
+            "search_placeholder": "Rechercher…",
+            "refresh": "Rafraîchir",
+            "refresh_help": "Recharger la liste",
+            "no_items_title": "Aucun article",
+            "no_items_desc": "Rafraîchis pour récupérer les derniers articles.",
+
+            // Article
+            "read_article": "Lire l'article",
+            "favorite": "Favori",
+            "unfavorite": "Retirer",
+
+            // Rubriques
+            "all_feeds": "Tous les articles",
+            "favorites": "Favoris",
+            "mark_all_read": "Tout marquer comme lu",
+            "sections": "Rubriques",
+            "no_subscriptions": "Aucune rubrique suivie. Touche le bouton pour en ajouter.",
+            "manage_sections": "Gérer les rubriques",
+            "sections_footer": "Active les rubriques (Le Monde, Les Echos) que tu veux suivre.",
+
+            // Veille / alertes
+            "alerts": "Alertes",
+            "watch_topics": "Sujets de veille",
+            "watch_topics_footer": "Reçois une alerte quand un article contient l'un de tes mots-clés.",
+            "no_topics": "Aucun sujet de veille.",
+            "topic_add": "Ajouter un sujet",
+            "topic_new": "Nouveau sujet",
+            "topic_edit": "Modifier le sujet",
+            "topic_label": "Nom du sujet",
+            "topic_label_footer": "Ex. « Intelligence artificielle », « Élection ».",
+            "topic_keywords": "Mots-clés",
+            "topic_keywords_footer": "Séparés par des virgules. Insensible aux accents et à la casse.",
+            "topic_notify": "Me notifier",
+            "topic_notify_footer": "Envoyer une notification pour les nouveaux articles correspondants.",
+            "cancel": "Annuler",
+            "save": "Enregistrer",
+
+            // Notifications
+            "notif_section": "Notifications",
+            "notif_footer": "TheNews t'alerte quand un nouvel article correspond à un sujet de veille.",
+            "notif_on": "Notifications activées",
+            "notif_denied": "Notifications refusées — active-les dans Réglages.",
+            "notif_enable": "Activer les notifications",
+            "notif_test": "Envoyer une notification test",
+
+            // Groupes de dates
+            "group_today": "Aujourd'hui",
+            "group_week": "Cette semaine",
+            "group_earlier": "Plus tôt",
+
+            // Sélection vide
+            "empty_title": "Sélectionne un élément",
+            "empty_desc": "Choisis un élément dans la liste pour voir son détail.",
+
+            // Réglages
+            "settings_title": "Réglages",
+            "settings_appearance": "Apparence",
+            "appearance_system": "Système",
+            "appearance_light": "Clair",
+            "appearance_dark": "Sombre",
+            "settings_language": "Langue",
+            "language_system": "Système",
+            "settings_apikey": "Clé API",
+            "apikey_placeholder": "Colle ta clé API…",
+            "apikey_help": "Stockée de façon sécurisée dans le Trousseau, jamais en clair.",
+            "apikey_present": "Une clé API est enregistrée.",
+            "apikey_absent": "Aucune clé API enregistrée.",
+            "settings_about": "À propos",
+            "settings_about_text": "TheNews — veille d'information multi-sources (Le Monde, Les Echos) sur flux RSS. macOS + iOS, sans serveur.",
+
+            // Divers
+            "ok": "OK",
+            "error_title": "Erreur",
+        ],
+        "en": [
+            "app_name": "TheNews",
+
+            "search_placeholder": "Search…",
+            "refresh": "Refresh",
+            "refresh_help": "Reload the list",
+            "no_items_title": "No articles",
+            "no_items_desc": "Refresh to fetch the latest articles.",
+
+            // Article
+            "read_article": "Read article",
+            "favorite": "Favorite",
+            "unfavorite": "Remove",
+
+            // Sections
+            "all_feeds": "All articles",
+            "favorites": "Favorites",
+            "mark_all_read": "Mark all as read",
+            "sections": "Sections",
+            "no_subscriptions": "No sections followed yet. Tap the button to add some.",
+            "manage_sections": "Manage sections",
+            "sections_footer": "Enable the sections (Le Monde, Les Echos) you want to follow.",
+
+            // Watch / alerts
+            "alerts": "Alerts",
+            "watch_topics": "Watch topics",
+            "watch_topics_footer": "Get an alert when an article contains one of your keywords.",
+            "no_topics": "No watch topics yet.",
+            "topic_add": "Add a topic",
+            "topic_new": "New topic",
+            "topic_edit": "Edit topic",
+            "topic_label": "Topic name",
+            "topic_label_footer": "e.g. “Artificial intelligence”, “Election”.",
+            "topic_keywords": "Keywords",
+            "topic_keywords_footer": "Comma-separated. Case- and accent-insensitive.",
+            "topic_notify": "Notify me",
+            "topic_notify_footer": "Send a notification for matching new articles.",
+            "cancel": "Cancel",
+            "save": "Save",
+
+            // Notifications
+            "notif_section": "Notifications",
+            "notif_footer": "TheNews alerts you when a new article matches a watch topic.",
+            "notif_on": "Notifications enabled",
+            "notif_denied": "Notifications denied — enable them in Settings.",
+            "notif_enable": "Enable notifications",
+            "notif_test": "Send a test notification",
+
+            "group_today": "Today",
+            "group_week": "This week",
+            "group_earlier": "Earlier",
+
+            "empty_title": "Select an item",
+            "empty_desc": "Pick an item from the list to see its detail.",
+
+            "settings_title": "Settings",
+            "settings_appearance": "Appearance",
+            "appearance_system": "System",
+            "appearance_light": "Light",
+            "appearance_dark": "Dark",
+            "settings_language": "Language",
+            "language_system": "System",
+            "settings_apikey": "API Key",
+            "apikey_placeholder": "Paste your API key…",
+            "apikey_help": "Stored securely in the Keychain, never in plain text.",
+            "apikey_present": "An API key is stored.",
+            "apikey_absent": "No API key stored.",
+            "settings_about": "About",
+            "settings_about_text": "TheNews — multi-source news monitoring (Le Monde, Les Echos) over RSS feeds. macOS + iOS, serverless.",
+
+            "ok": "OK",
+            "error_title": "Error",
+        ],
+    ]
+}

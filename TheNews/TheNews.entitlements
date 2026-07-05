@@ -2,7 +2,20 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <!-- CloudKit requiert l'App Sandbox activé sur macOS. -->
     <key>com.apple.security.app-sandbox</key>
-    <false/>
+    <true/>
+    <!-- Accès réseau sortant (téléchargement des flux RSS + images) sous sandbox. -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+    <!-- Sync iCloud des données SwiftData (mêmes conteneur/services que la cible iOS). -->
+    <key>com.apple.developer.icloud-container-identifiers</key>
+    <array>
+        <string>iCloud.fr.vincentlauriat.thenews</string>
+    </array>
+    <key>com.apple.developer.icloud-services</key>
+    <array>
+        <string>CloudKit</string>
+    </array>
 </dict>
 </plist>

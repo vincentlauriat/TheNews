@@ -44,9 +44,10 @@ targets:
         CURRENT_PROJECT_VERSION: "1"
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         CODE_SIGN_ENTITLEMENTS: TheNews/TheNews.entitlements
-        CODE_SIGN_IDENTITY: ""
-        CODE_SIGNING_REQUIRED: NO
-        CODE_SIGNING_ALLOWED: NO
+        # Signature dev automatique (team KFLACS69T9) : requise pour activer CloudKit
+        # sur macOS. Le provisioning iCloud est créé via -allowProvisioningUpdates.
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: KFLACS69T9
     info:
       path: TheNews/Info.plist
       properties:

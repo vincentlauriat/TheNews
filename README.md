@@ -53,10 +53,10 @@ articles · détail), swipe entre articles (iOS), apparence & langue (fr/en).
 | Sujets de veille par mots-clés + alertes locales | ✅ | ✅ |
 | Rafraîchissement en tâche de fond | 30 min | `BGAppRefreshTask` |
 | Widget d'écran d'accueil | — | ✅ |
-| Sync iCloud (SwiftData + CloudKit) | ✅¹ | ✅ |
+| Sync iCloud (SwiftData + CloudKit) | ✅ | ✅ |
 
 > Le flux RSS ne fournit que titre, chapô et image ; l'article complet s'ouvre dans le navigateur.
-> ¹ macOS : la sync iCloud s'activera à la première release signée (Sandbox + provisioning).
+> Sur macOS, la sync iCloud requiert une app signée avec App Sandbox (activés ici).
 
 ## Ajouter une source
 

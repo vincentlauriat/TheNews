@@ -130,7 +130,13 @@ Contraintes CloudKit prises en compte dans les modèles (`Article`, `FeedSubscri
 
 Entitlements iOS : `icloud-container-identifiers` (`iCloud.fr.vincentlauriat.thenews`),
 `icloud-services: CloudKit`, `aps-environment`, + background mode `remote-notification` (push de sync).
-Provisionnés automatiquement (build device signé vérifié).
+
+Sur **macOS**, CloudKit exige l'**App Sandbox** : la cible macOS l'active (`app-sandbox`), rouvre
+l'accès réseau sortant (`network.client`, pour les flux/images) et porte les mêmes entitlements iCloud.
+La cible macOS est donc **signée** (dev, team KFLACS69T9) — build via `-allowProvisioningUpdates
+-allowProvisioningDeviceRegistration` (plus de `CODE_SIGNING_ALLOWED=NO`). Les deux plateformes
+partagent le même conteneur CloudKit → sync des données SwiftData (abonnements, favoris, sujets, flux
+perso). Les réglages d'interface (`UserDefaults`) ne sont pas synchronisés.
 
 ## Flux RSS (couche métier)
 

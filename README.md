@@ -1,40 +1,82 @@
+<div align="center">
+
 # TheNews
 
-Outil de **veille d'information multi-sources** pour macOS + iOS/iPadOS, en SwiftUI (codebase partagé).
-TheNews agrège dans une **même interface** les flux RSS du *Monde* **et** des *Echos*, te laisse
-suivre les rubriques qui t'intéressent (tous journaux confondus), définir des **sujets de veille**
-par mots-clés, et t'**alerte** localement quand un nouvel article correspond — sans serveur,
-100 % sur l'appareil.
+**Veille d'information multi-sources pour macOS & iOS — sans serveur, 100 % sur l'appareil.**
 
-> Mix de [NewsWatch](../TheWorld) (*Le Monde*) et [LesEchos](../LesEchos) : même architecture,
-> déjà agnostique de la source, réunie en une seule app **multi-journaux**.
+Agrège *Le Monde*, *Les Echos* et **n'importe quel flux RSS** dans une seule app, regroupe
+automatiquement les articles qui parlent du même sujet, et te livre un briefing quotidien condensé.
 
-## Fonctionnalités
+![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20iOS%20%7C%20iPadOS-blue)
+![Swift](https://img.shields.io/badge/Swift-5.9-orange)
+![SwiftUI](https://img.shields.io/badge/SwiftUI-SwiftData%20%7C%20WidgetKit%20%7C%20CloudKit-4B9CD3)
+![Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
+
+</div>
+
+> **Capture d'écran à ajouter** — `docs/screenshot.png` (sidebar groupée par source · « Aussi couvert par… » · briefing).
+
+---
+
+## Pourquoi TheNews ?
+
+La plupart des applications d'actualité te lient à **un seul média** ou envoient tes données à
+**leurs serveurs**. TheNews prend le contre-pied :
+
+- **Multi-sources** — tes journaux et tes flux, réunis dans une interface unique, groupés par source.
+- **Sans serveur** — tout le traitement (parsing, veille, regroupement, résumé) se fait **sur l'appareil**.
+  Aucune télémétrie, aucun compte.
+- **Zéro dépendance** — que du natif Apple : SwiftData, XMLParser, UserNotifications, BackgroundTasks,
+  WidgetKit, CloudKit.
+
+## Fonctionnalités inédites
+
+| | Fonctionnalité | Ce qui la rend différente |
+|---|---|---|
+| 🗞️ | **Sources RSS personnalisées** | Ajoute n'importe quel flux (validé à l'ajout). Le catalogue est **dynamique** : tes sources rejoignent le tien comme un journal de plus. |
+| 🔗 | **Regroupement cross-source** | En bas d'un article, « **Aussi couvert par…** » : le même événement vu par d'autres sources, détecté **on-device** (similarité de Jaccard sur les titres/chapôs). |
+| ☀️ | **Briefing quotidien** | Un « résumé du jour » condensé : les sujets marquants des dernières 24 h, **doublons cross-source retirés**, avec notification à l'heure que tu choisis. |
+| 📱 | **Widget & iCloud** | Widget d'écran d'accueil (WidgetKit, 3 tailles) + **sync iCloud** (CloudKit) de tes abonnements, favoris, sujets de veille et flux perso entre tes appareils. |
+
+Plus le socle classique : veille par mots-clés, alertes locales, favoris, 3 colonnes (rubriques ·
+articles · détail), swipe entre articles (iOS), apparence & langue (fr/en).
+
+## Fonctionnalités par plateforme
 
 | Fonctionnalité | macOS | iOS/iPadOS |
 |---|:---:|:---:|
-| **Deux journaux agrégés** : Le Monde (11 rubriques) + Les Echos (9 rubriques) | ✅ | ✅ |
-| **Sources RSS personnalisées** : ajoute n'importe quel flux (validé à l'ajout) | ✅ | ✅ |
-| **Regroupement cross-source** : « Aussi couvert par… » — le même sujet vu par d'autres sources | ✅ | ✅ |
-| **Briefing quotidien** : résumé condensé (24 h, doublons cross-source retirés) + notif à heure réglable | ✅ | ✅ |
-| **Widget d'écran d'accueil** (WidgetKit) : les derniers sujets suivis, 3 tailles | — | ✅ |
-| **Sync iCloud** (SwiftData + CloudKit) : abonnements, favoris, sujets et flux perso entre appareils | ✅¹ | ✅ |
-| Sidebar **groupée par journal** (une section par source) | ✅ | ✅ |
-| Abonnement / désabonnement par rubrique, toutes sources | ✅ | ✅ |
-| Vue « Tous les articles » (agrégation multi-flux, multi-sources) | ✅ | ✅ |
-| Sujets de veille par mots-clés (insensible casse/accents) | ✅ | ✅ |
-| Section « Alertes » + badge d'articles non lus | ✅ | ✅ |
-| Favoris & « tout marquer comme lu » | ✅ | ✅ |
-| Navigation entre articles par swipe horizontal | — | ✅ |
-| Notifications locales sur nouveaux articles suivis | ✅ | ✅ |
-| Rafraîchissement en tâche de fond | périodique (30 min) | `BGAppRefreshTask` |
-| Réglages : apparence, langue (fr/en), notifications | ✅ | ✅ |
+| Le Monde (11 rubriques) + Les Echos (9 rubriques) + flux perso | ✅ | ✅ |
+| Sidebar groupée par source · vue « Tous les articles » | ✅ | ✅ |
+| Regroupement cross-source « Aussi couvert par… » | ✅ | ✅ |
+| Briefing quotidien + notification programmée | ✅ | ✅ |
+| Sujets de veille par mots-clés + alertes locales | ✅ | ✅ |
+| Rafraîchissement en tâche de fond | 30 min | `BGAppRefreshTask` |
+| Widget d'écran d'accueil | — | ✅ |
+| Sync iCloud (SwiftData + CloudKit) | ✅¹ | ✅ |
 
-> Le flux RSS ne fournit que le titre, le chapô et l'image ; l'article complet s'ouvre dans le
-> navigateur (réservé aux abonnés du journal concerné).
->
-> ¹ Sur macOS, la sync iCloud s'activera à la première release signée (Sandbox + provisioning) ;
-> le conteneur est en mode `.automatic` (local tant que l'entitlement CloudKit n'est pas appliqué).
+> Le flux RSS ne fournit que titre, chapô et image ; l'article complet s'ouvre dans le navigateur.
+> ¹ macOS : la sync iCloud s'activera à la première release signée (Sandbox + provisioning).
+
+## Ajouter une source
+
+1. **Gérer les rubriques** (icône réglages) → section **« Mes flux »** → **Ajouter un flux**.
+2. Saisis un nom et l'**URL du flux RSS** (souvent en `/rss` ou `/feed`).
+3. TheNews vérifie le flux (au moins un article) puis l'ajoute et l'abonne — il apparaît dans la
+   sidebar sous **« Mes flux »** et alimente ta veille, ton briefing et le widget.
+
+## Sous le capot
+
+Application SwiftUI **à codebase unique partagé** entre macOS et iOS (`#if os(...)`). Points de design :
+
+- **Catalogue dynamique** : `Feed.catalog = builtInCatalog + customCatalog` — les journaux fournis +
+  tes flux perso (SwiftData). L'ajout d'un journal ne demande qu'une `Source` + un catalogue.
+- **Services agnostiques de la source** : parsing, stockage, dédup, veille, regroupement opèrent sur
+  un `Feed` quelconque.
+- **On-device, sans serveur** : regroupement cross-source et briefing sont de simples algorithmes
+  locaux (tokenisation normalisée + similarité de Jaccard).
+
+Détails et diagrammes dans [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
 ## Build
 
@@ -45,33 +87,29 @@ xcodegen generate            # génère TheNews.xcodeproj
 open TheNews.xcodeproj        # macOS : scheme TheNews — iOS : scheme TheNewsiOS
 ```
 
-## Release (macOS)
+Projet Xcode **généré** (le `.xcodeproj` n'est pas versionné). Release macOS :
+`./Scripts/release.sh 1.0.0` (build → sign Developer ID → DMG → notarize → staple).
 
-```bash
-./Scripts/release.sh 1.0.0   # build → sign Developer ID → DMG → notarize → staple
-```
-
-## Architecture
-
-Voir [`ARCHITECTURE.md`](ARCHITECTURE.md). En bref :
+## Structure
 
 ```
 TheNews/
-├── TheNewsApp.swift            # @main — SwiftData container, BGTask (iOS), delegate notifs
-├── Models/                     # Source (Le Monde + Les Echos), Feed (catalogue combiné), Article, FeedSubscription, WatchTopic
-├── ViewModels/FeedViewModel    # portée (tous/alertes/favoris/rubrique), refresh parallèle multi-sources
-├── Views/                      # sidebar groupée par source, liste, détail, réglages, éditeur de sujets
-├── Services/                   # RSSParser, RSSService, FeedStore, SubscriptionStore,
-│                               # MatchingEngine, NotificationService, RefreshEngine
-├── Localization/               # AppSettings + tables fr/en
-└── Assets.xcassets/            # AppIcon
-Scripts/                        # release.sh, make-thenews-icon.swift, make-dmg-background.swift
-project.yml                     # config XcodeGen (2 cibles, 2 schemes)
+├── TheNewsApp.swift            # @main — SwiftData container (CloudKit), BGTask, notifs
+├── Models/                     # Source, Feed (catalogue dynamique), Article, FeedSubscription, WatchTopic, CustomFeed
+├── ViewModels/FeedViewModel    # portées (briefing/tous/alertes/favoris/rubrique), refresh parallèle
+├── Views/                      # sidebar, liste, détail (+ « aussi couvert par… »), réglages, éditeurs
+├── Services/                   # RSSParser/Service, FeedStore, SubscriptionStore, CustomFeedStore,
+│                               # MatchingEngine, RelatedArticlesEngine, BriefingEngine,
+│                               # NotificationService, RefreshEngine, WidgetPublisher
+├── Shared/                     # WidgetSnapshot (App Group, partagé avec le widget)
+└── Localization/               # AppSettings + tables fr/en
+TheNewsWidget/                  # extension WidgetKit (iOS)
+Scripts/                        # release.sh, make-thenews-icon.swift
 ```
 
-Aucune dépendance externe : parsing `XMLParser`, persistance **SwiftData**, notifications
-`UserNotifications`, tâches de fond `BackgroundTasks` — tout natif. **Ajouter un 3ᵉ journal** ne
-demande qu'une entrée dans `Source.all` + un catalogue `Feed` (voir ARCHITECTURE.md).
+## Contribuer
+
+Les contributions sont bienvenues — voir [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Licence
 

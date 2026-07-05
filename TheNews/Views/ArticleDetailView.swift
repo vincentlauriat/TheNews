@@ -74,6 +74,7 @@ struct ArticleDetailView: View {
                     }
                     .buttonStyle(.bordered)
                 }
+                .font(.subheadline)
                 .padding(.top, 4)
 
                 if !related.isEmpty {

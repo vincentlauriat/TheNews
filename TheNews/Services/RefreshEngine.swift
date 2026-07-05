@@ -52,6 +52,7 @@ enum RefreshEngine {
         if notify && !matched.isEmpty {
             await NotificationService.shared.notify(articles: matched)
         }
+        WidgetPublisher.publish(context: context)
         return matched.count
     }
 }

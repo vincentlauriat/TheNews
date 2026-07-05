@@ -99,6 +99,21 @@ programmée par `NotificationService.scheduleDailyBriefing(enabled:hour:)`
 (`UNCalendarNotificationTrigger`), pilotée par les réglages persistés `briefingEnabled` / `briefingHour`
 (reprogrammée au démarrage et à chaque changement de réglage).
 
+### Widget d'écran d'accueil (WidgetKit, iOS)
+
+Cible d'extension `TheNewsWidgetExtension` séparée, reliée à l'app par un **App Group**
+(`group.fr.vincentlauriat.thenews`) — pas de SwiftData partagé entre cibles :
+
+- `WidgetSnapshot` (`Codable`, dans `TheNews/Shared/`, compilé dans les deux cibles) : liste réduite
+  d'articles + horodatage, lue/écrite via `WidgetSnapshotStore` dans le container de l'App Group.
+- Côté app, `WidgetPublisher.publish(context:)` reprend la sélection du briefing, écrit le snapshot et
+  appelle `WidgetCenter.reloadAllTimelines()` après chaque rafraîchissement (`FeedViewModel.refresh`,
+  `RefreshEngine.run`).
+- Côté widget, `TheNewsProvider` (TimelineProvider) lit le snapshot ; `TheNewsWidgetView` s'adapte aux
+  tailles small/medium/large.
+- Le build **simulateur non signé** n'applique pas l'entitlement App Group (write = no-op) ; le build
+  **signé** (device) provisionne l'App Group automatiquement — vérifié sur l'appareil.
+
 ## Flux RSS (couche métier)
 
 - `RSSService.fetch(Feed)` télécharge le flux (`URLSession`, hors `MainActor`).

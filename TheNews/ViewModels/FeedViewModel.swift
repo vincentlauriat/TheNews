@@ -100,6 +100,7 @@ final class FeedViewModel {
                 try store.ingest(parsed, feedID: feedID)
             }
             reload(context: context)
+            WidgetPublisher.publish(context: context)
         } catch {
             errorMessage = error.localizedDescription
         }

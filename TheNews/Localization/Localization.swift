@@ -55,6 +55,32 @@ enum ArticleSwipeMode: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Configuration de la synthèse IA
+
+enum DigestLength: String, CaseIterable, Identifiable {
+    case concise, detailed
+    var id: String { rawValue }
+    var titleKey: String { self == .concise ? "digest_concise" : "digest_detailed" }
+}
+
+enum DigestFormat: String, CaseIterable, Identifiable {
+    case bullets, paragraph
+    var id: String { rawValue }
+    var titleKey: String { self == .bullets ? "digest_bullets" : "digest_paragraph" }
+}
+
+enum DigestTone: String, CaseIterable, Identifiable {
+    case neutral, explanatory, wire
+    var id: String { rawValue }
+    var titleKey: String {
+        switch self {
+        case .neutral:     return "digest_tone_neutral"
+        case .explanatory: return "digest_tone_explanatory"
+        case .wire:        return "digest_tone_wire"
+        }
+    }
+}
+
 /// Identifiant de locale courant, lu par les modèles (formatage de dates)
 /// sans dépendance directe à l'environnement SwiftUI.
 enum AppLocale {
@@ -99,6 +125,16 @@ final class AppSettings {
     }
     var swipeMode: ArticleSwipeMode { ArticleSwipeMode(rawValue: swipeModeRaw) ?? .all }
 
+    // MARK: Synthèse IA (configurable)
+    var digestLengthRaw: String { didSet { UserDefaults.standard.set(digestLengthRaw, forKey: "digestLength") } }
+    var digestFormatRaw: String { didSet { UserDefaults.standard.set(digestFormatRaw, forKey: "digestFormat") } }
+    var digestToneRaw: String { didSet { UserDefaults.standard.set(digestToneRaw, forKey: "digestTone") } }
+    var digestCount: Int { didSet { UserDefaults.standard.set(digestCount, forKey: "digestCount") } }
+
+    var digestLength: DigestLength { DigestLength(rawValue: digestLengthRaw) ?? .concise }
+    var digestFormat: DigestFormat { DigestFormat(rawValue: digestFormatRaw) ?? .bullets }
+    var digestTone: DigestTone { DigestTone(rawValue: digestToneRaw) ?? .neutral }
+
     init() {
         appearanceRaw = UserDefaults.standard.string(forKey: "appearance") ?? AppearanceMode.system.rawValue
         languageRaw = UserDefaults.standard.string(forKey: "language") ?? AppLanguage.system.rawValue
@@ -106,6 +142,10 @@ final class AppSettings {
         briefingEnabled = UserDefaults.standard.bool(forKey: "briefingEnabled")
         briefingHour = UserDefaults.standard.object(forKey: "briefingHour") as? Int ?? 8
         swipeModeRaw = UserDefaults.standard.string(forKey: "swipeMode") ?? ArticleSwipeMode.all.rawValue
+        digestLengthRaw = UserDefaults.standard.string(forKey: "digestLength") ?? DigestLength.concise.rawValue
+        digestFormatRaw = UserDefaults.standard.string(forKey: "digestFormat") ?? DigestFormat.bullets.rawValue
+        digestToneRaw = UserDefaults.standard.string(forKey: "digestTone") ?? DigestTone.neutral.rawValue
+        digestCount = UserDefaults.standard.object(forKey: "digestCount") as? Int ?? 25
         AppLocale.identifier = localeIdentifier
     }
 

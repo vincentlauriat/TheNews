@@ -63,6 +63,25 @@ struct SettingsView: View {
             }
             #endif
 
+            Section {
+                Picker(settings.t("digest_length"), selection: $settings.digestLengthRaw) {
+                    ForEach(DigestLength.allCases) { Text(settings.t($0.titleKey)).tag($0.rawValue) }
+                }
+                Picker(settings.t("digest_format"), selection: $settings.digestFormatRaw) {
+                    ForEach(DigestFormat.allCases) { Text(settings.t($0.titleKey)).tag($0.rawValue) }
+                }
+                Picker(settings.t("digest_tone"), selection: $settings.digestToneRaw) {
+                    ForEach(DigestTone.allCases) { Text(settings.t($0.titleKey)).tag($0.rawValue) }
+                }
+                Picker(settings.t("digest_count"), selection: $settings.digestCount) {
+                    ForEach([15, 25, 50], id: \.self) { Text("\($0)").tag($0) }
+                }
+            } header: {
+                Text(settings.t("digest_section"))
+            } footer: {
+                Text(settings.t("digest_section_footer"))
+            }
+
             Section(settings.t("settings_appearance")) {
                 Picker(settings.t("settings_appearance"), selection: $settings.appearanceRaw) {
                     ForEach(AppearanceMode.allCases) { mode in

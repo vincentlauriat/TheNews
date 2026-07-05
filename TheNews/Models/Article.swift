@@ -6,20 +6,24 @@ import SwiftData
 /// défaut) pour permettre la déduplication entre deux rafraîchissements.
 @Model
 final class Article: Identifiable {
+    // Valeurs par défaut sur chaque propriété : requises par SwiftData + CloudKit
+    // (sync iCloud). L'unicité de `id` (guid) n'est plus une contrainte de schéma
+    // — CloudKit ne les supporte pas — mais reste garantie par la déduplication
+    // applicative de `FeedStore.ingest` (fetch par id avant insertion).
     /// Identifiant stable = guid RSS (ou lien normalisé si le flux n'a pas de guid).
-    @Attribute(.unique) var id: String
+    var id: String = ""
     /// Identifiant de la rubrique d'origine (`Feed.id`).
-    var feedID: String
-    var title: String
+    var feedID: String = ""
+    var title: String = ""
     /// Chapô / extrait fourni par le flux (le corps complet n'est pas dans le RSS).
-    var summary: String
-    var link: URL
+    var summary: String = ""
+    var link: URL = URL(string: "https://thenews.app")!
     var imageURL: URL?
-    var publishedAt: Date
+    var publishedAt: Date = Date()
     /// Date de première insertion locale (sert au tri de repli et à « nouveauté »).
-    var fetchedAt: Date
-    var isRead: Bool
-    var isFavorite: Bool
+    var fetchedAt: Date = Date()
+    var isRead: Bool = false
+    var isFavorite: Bool = false
 
     init(
         id: String,

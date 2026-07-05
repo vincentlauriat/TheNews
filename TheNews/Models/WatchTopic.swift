@@ -6,14 +6,15 @@ import SwiftData
 /// mots-clés (comparaison insensible à la casse et aux accents, cf. `MatchingEngine`).
 @Model
 final class WatchTopic: Identifiable {
-    @Attribute(.unique) var id: String
-    var label: String
-    var keywords: [String]
+    // Valeurs par défaut + pas de `.unique` : exigences SwiftData + CloudKit (sync iCloud).
+    var id: String = UUID().uuidString
+    var label: String = ""
+    var keywords: [String] = []
     /// Le sujet participe-t-il au filtrage/alertes ?
-    var isEnabled: Bool
+    var isEnabled: Bool = true
     /// Les nouveaux articles correspondants peuvent-ils déclencher une notification ? (phase 4)
-    var notify: Bool
-    var createdAt: Date
+    var notify: Bool = true
+    var createdAt: Date = Date()
 
     init(
         id: String = UUID().uuidString,

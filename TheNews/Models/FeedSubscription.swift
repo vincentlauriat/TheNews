@@ -6,9 +6,11 @@ import SwiftData
 /// rubrique peuvent déclencher une notification (utilisé en phase 4).
 @Model
 final class FeedSubscription {
-    @Attribute(.unique) var feedID: String
-    var alertsEnabled: Bool
-    var subscribedAt: Date
+    // Valeurs par défaut + pas de contrainte `.unique` : exigences SwiftData + CloudKit.
+    // L'unicité par `feedID` est assurée par `SubscriptionStore` (vérif avant insertion).
+    var feedID: String = ""
+    var alertsEnabled: Bool = true
+    var subscribedAt: Date = Date()
 
     init(feedID: String, alertsEnabled: Bool = true, subscribedAt: Date = Date()) {
         self.feedID = feedID

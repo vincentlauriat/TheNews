@@ -7,12 +7,14 @@ import SwiftData
 /// (`Source.custom`) pour le regroupement dans la sidebar et l'écran de gestion.
 @Model
 final class CustomFeed {
-    @Attribute(.unique) var id: String
-    var title: String
-    var urlString: String
+    // Valeurs par défaut + pas de `.unique` : exigences SwiftData + CloudKit. `id` est
+    // un UUID, unique par construction.
+    var id: String = "custom.\(UUID().uuidString)"
+    var title: String = ""
+    var urlString: String = ""
     /// Nom court d'icône SF Symbols pour la sidebar.
-    var symbol: String
-    var createdAt: Date
+    var symbol: String = "dot.radiowaves.up.forward"
+    var createdAt: Date = Date()
 
     init(
         id: String = "custom.\(UUID().uuidString)",

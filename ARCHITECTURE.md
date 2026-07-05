@@ -114,6 +114,24 @@ Cible d'extension `TheNewsWidgetExtension` séparée, reliée à l'app par un **
 - Le build **simulateur non signé** n'applique pas l'entitlement App Group (write = no-op) ; le build
   **signé** (device) provisionne l'App Group automatiquement — vérifié sur l'appareil.
 
+### Sync iCloud (SwiftData + CloudKit)
+
+Le `ModelContainer` est configuré avec `ModelConfiguration(cloudKitDatabase: .automatic)` : la sync
+CloudKit s'active dès que l'entitlement iCloud est présent (build signé), sinon le store reste local
+(dev macOS non signé) — sans crash.
+
+Contraintes CloudKit prises en compte dans les modèles (`Article`, `FeedSubscription`, `WatchTopic`,
+`CustomFeed`) :
+
+- **Aucun `@Attribute(.unique)`** (CloudKit ne les supporte pas) — l'unicité reste garantie par la
+  **déduplication applicative** : `FeedStore.ingest` (fetch par `id` avant insertion),
+  `SubscriptionStore` (vérif avant abonnement), `id` en UUID pour `CustomFeed`/`WatchTopic`.
+- **Valeur par défaut sur chaque propriété stockée** (exigence CloudKit).
+
+Entitlements iOS : `icloud-container-identifiers` (`iCloud.fr.vincentlauriat.thenews`),
+`icloud-services: CloudKit`, `aps-environment`, + background mode `remote-notification` (push de sync).
+Provisionnés automatiquement (build device signé vérifié).
+
 ## Flux RSS (couche métier)
 
 - `RSSService.fetch(Feed)` télécharge le flux (`URLSession`, hors `MainActor`).

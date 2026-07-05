@@ -103,6 +103,7 @@ targets:
         UIBackgroundModes:
           - fetch
           - processing
+          - remote-notification
         BGTaskSchedulerPermittedIdentifiers:
           - fr.vincentlauriat.thenews.refresh
         UISupportedInterfaceOrientations:

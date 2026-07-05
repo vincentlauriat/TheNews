@@ -13,10 +13,14 @@ struct TheNewsApp: App {
     /// Doit être déclaré dans `BGTaskSchedulerPermittedIdentifiers` (Info-iOS.plist).
     static let refreshTaskID = "fr.vincentlauriat.thenews.refresh"
 
-    /// Conteneur SwiftData partagé (articles persistés + dédup).
+    /// Conteneur SwiftData partagé. `cloudKitDatabase: .automatic` active la **sync
+    /// iCloud** dès que l'app dispose de l'entitlement CloudKit (build signé) ; sinon
+    /// il reste local (ex. build de dev macOS non signé) — pas de crash.
     let modelContainer: ModelContainer = {
         do {
-            return try ModelContainer(for: Article.self, FeedSubscription.self, WatchTopic.self, CustomFeed.self)
+            let schema = Schema([Article.self, FeedSubscription.self, WatchTopic.self, CustomFeed.self])
+            let config = ModelConfiguration(schema: schema, cloudKitDatabase: .automatic)
+            return try ModelContainer(for: schema, configurations: config)
         } catch {
             fatalError("Impossible d'initialiser SwiftData : \(error)")
         }

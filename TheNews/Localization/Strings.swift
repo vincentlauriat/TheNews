@@ -20,9 +20,9 @@ enum Strings {
             "favorite": "Favori",
             "unfavorite": "Retirer",
             "share": "Partager",
-            "summarize": "Résumé IA",
-            "summary_title": "En bref",
-            "summarizing": "Résumé en cours…",
+            "summarizing": "Synthèse en cours…",
+            "digest": "Synthèse IA",
+            "digest_subtitle": "Les grands thèmes des articles affichés, résumés sur l'appareil.",
             "also_covered": "Aussi couvert par…",
 
             // Rubriques
@@ -126,9 +126,9 @@ enum Strings {
             "read_article": "Read article",
             "also_covered": "Also covered by…",
             "share": "Share",
-            "summarize": "AI summary",
-            "summary_title": "In brief",
             "summarizing": "Summarizing…",
+            "digest": "AI digest",
+            "digest_subtitle": "The main themes of the shown articles, summarized on-device.",
             "favorite": "Favorite",
             "unfavorite": "Remove",
 

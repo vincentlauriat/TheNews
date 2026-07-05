@@ -3,13 +3,13 @@ import Foundation
 import FoundationModels
 #endif
 
-/// Résume un article en quelques phrases. Utilise **Apple Intelligence**
-/// (Foundation Models) en local, sur l'appareil, quand c'est disponible ; sinon
-/// repli **extractif** (premières phrases du chapô). Aucun serveur, aucune donnée
-/// ne quitte l'appareil.
+/// Produit une **synthèse d'une liste d'articles** : à partir des titres affichés,
+/// dégage les grands thèmes du moment. Utilise **Apple Intelligence** (Foundation
+/// Models) en local quand c'est disponible ; sinon repli simple (premiers titres).
+/// 100 % sur l'appareil, aucun serveur.
 enum ArticleSummarizer {
 
-    /// Le résumé génératif on-device est-il disponible sur cet appareil ?
+    /// La synthèse générative on-device est-elle disponible sur cet appareil ?
     static var aiAvailable: Bool {
         #if canImport(FoundationModels)
         if #available(iOS 26.0, macOS 26.0, *) {
@@ -19,47 +19,29 @@ enum ArticleSummarizer {
         return false
     }
 
-    /// Résumé de l'article. `lang` = code langue courant ("fr"/"en") pour la consigne.
-    static func summarize(title: String, body: String, lang: String) async -> String {
-        let source = "\(title)\n\n\(body)".trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !source.isEmpty else { return "" }
+    /// Synthèse des grands thèmes à partir d'une liste de titres. `lang` = "fr"/"en".
+    static func digest(titles: [String], lang: String, limit: Int = 25) async -> String {
+        let headlines = titles.prefix(limit).map { "- \($0)" }.joined(separator: "\n")
+        guard !headlines.isEmpty else { return "" }
 
         #if canImport(FoundationModels)
         if #available(iOS 26.0, macOS 26.0, *),
            SystemLanguageModel.default.availability == .available {
             let instructions = lang.hasPrefix("fr")
-                ? "Tu résumes des articles de presse en 2 phrases claires et factuelles, en français, sans introduction."
-                : "You summarize news articles in 2 clear, factual sentences, in English, with no preamble."
-            let prompt = (lang.hasPrefix("fr") ? "Résume cet article :\n" : "Summarize this article:\n") + source
+                ? "Tu es un assistant de veille de presse. À partir d'une liste de titres d'actualité, dégage en 3 à 5 puces les grands thèmes du moment, en français, de façon concise et factuelle. Pas d'introduction."
+                : "You are a news assistant. From a list of headlines, extract the 3 to 5 main themes as concise, factual bullet points, in English. No preamble."
+            let prompt = (lang.hasPrefix("fr") ? "Titres du moment :\n" : "Current headlines:\n") + headlines
             do {
                 let session = LanguageModelSession(instructions: instructions)
                 let response = try await session.respond(to: prompt)
                 let text = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !text.isEmpty { return text }
             } catch {
-                // repli silencieux ci-dessous
+                // repli ci-dessous
             }
         }
         #endif
-        return extractive(body)
-    }
-
-    /// Repli extractif : les premières phrases significatives, tronquées.
-    static func extractive(_ text: String, maxChars: Int = 220) -> String {
-        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return "" }
-        var out = ""
-        for sentence in trimmed.split(whereSeparator: { ".!?".contains($0) }) {
-            let s = sentence.trimmingCharacters(in: .whitespaces)
-            guard !s.isEmpty else { continue }
-            if out.isEmpty { out = s } else { out += ". " + s }
-            if out.count >= maxChars { break }
-        }
-        if out.count > maxChars {
-            out = String(out.prefix(maxChars)).trimmingCharacters(in: .whitespaces) + "…"
-        } else if !out.isEmpty {
-            out += "."
-        }
-        return out
+        // Repli sans IA : les premiers titres en puces.
+        return titles.prefix(5).map { "• \($0)" }.joined(separator: "\n")
     }
 }

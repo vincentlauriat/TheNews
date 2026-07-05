@@ -8,6 +8,10 @@ struct ArticleListView: View {
     @Bindable var vm: FeedViewModel
     @Binding var selectedId: String?
 
+    @State private var showingDigest = false
+    @State private var digest: String?
+    @State private var generatingDigest = false
+
     var body: some View {
         List(selection: $selectedId) {
             ForEach(vm.grouped, id: \.key) { group in
@@ -27,6 +31,15 @@ struct ArticleListView: View {
         .searchable(text: $vm.searchText, prompt: settings.t("search_placeholder"))
         .navigationTitle(vm.title(settings.t))
         .toolbar {
+            ToolbarItem(placement: .automatic) {
+                Button {
+                    Task { await generateDigest() }
+                } label: {
+                    Label(settings.t("digest"), systemImage: "sparkles")
+                }
+                .disabled(vm.filtered.isEmpty || generatingDigest)
+                .help(settings.t("digest"))
+            }
             ToolbarItem(placement: .automatic) {
                 Button {
                     vm.markAllRead(context: modelContext)
@@ -59,5 +72,50 @@ struct ArticleListView: View {
                 )
             }
         }
+        .sheet(isPresented: $showingDigest) { digestSheet }
+    }
+
+    // MARK: - Synthèse IA (niveau liste)
+
+    private var digestSheet: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    Label(settings.t("digest_subtitle"), systemImage: "sparkles")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    if generatingDigest {
+                        HStack(spacing: 10) { ProgressView(); Text(settings.t("summarizing")) }
+                            .foregroundStyle(.secondary)
+                    } else if let digest {
+                        Text(digest).textSelection(.enabled)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding()
+            }
+            .navigationTitle(settings.t("digest"))
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(settings.t("ok")) { showingDigest = false }
+                }
+            }
+        }
+        #if os(macOS)
+        .frame(minWidth: 440, minHeight: 340)
+        #endif
+    }
+
+    private func generateDigest() async {
+        showingDigest = true
+        generatingDigest = true
+        digest = nil
+        let titles = vm.filtered.map(\.title)
+        digest = await ArticleSummarizer.digest(titles: titles, lang: settings.effectiveLang)
+        generatingDigest = false
     }
 }

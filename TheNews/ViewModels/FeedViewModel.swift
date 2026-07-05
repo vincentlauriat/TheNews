@@ -90,6 +90,7 @@ final class FeedViewModel {
     func load(context: ModelContext) async {
         CustomFeedStore(context: context).reloadCatalog()
         try? SubscriptionStore(context: context).seedIfNeeded()
+        try? FeedStore(context: context).pruneDuplicates()   // nettoie les doublons hérités de la sync
         reload(context: context)
         await refresh(context: context)
     }

@@ -46,7 +46,7 @@ struct FeedStore {
             predicate: #Predicate { $0.feedID == feedID },
             sortBy: [SortDescriptor(\.publishedAt, order: .reverse)]
         )
-        return try context.fetch(descriptor)
+        return dedupedByID(try context.fetch(descriptor))
     }
 
     /// Articles mis en favori, du plus récent au plus ancien.
@@ -55,7 +55,7 @@ struct FeedStore {
             predicate: #Predicate { $0.isFavorite },
             sortBy: [SortDescriptor(\.publishedAt, order: .reverse)]
         )
-        return try context.fetch(descriptor)
+        return dedupedByID(try context.fetch(descriptor))
     }
 
     /// Articles agrégés de plusieurs rubriques, du plus récent au plus ancien.
@@ -66,10 +66,11 @@ struct FeedStore {
             predicate: #Predicate { ids.contains($0.feedID) },
             sortBy: [SortDescriptor(\.publishedAt, order: .reverse)]
         )
-        return try context.fetch(descriptor)
+        return dedupedByID(try context.fetch(descriptor))
     }
 
-    /// Purge les articles plus vieux que `days` jours et non favoris (borne la base).
+    /// Purge les articles plus vieux que `days` jours et non favoris (borne la base),
+    /// puis retire les doublons éventuels.
     func prune(olderThan days: Int = 30) throws {
         let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? .distantPast
         let descriptor = FetchDescriptor<Article>(
@@ -77,5 +78,39 @@ struct FeedStore {
         )
         for stale in try context.fetch(descriptor) { context.delete(stale) }
         try context.save()
+        try pruneDuplicates()
+    }
+
+    /// Supprime les articles en double (même `id`), en conservant une seule instance —
+    /// de préférence celle en favori, sinon la plus ancienne. Nécessaire car, pour la
+    /// compatibilité CloudKit, `Article.id` n'a plus de contrainte d'unicité SwiftData
+    /// et la synchronisation peut créer des doublons.
+    func pruneDuplicates() throws {
+        let all = try context.fetch(FetchDescriptor<Article>(
+            sortBy: [SortDescriptor(\.fetchedAt)]
+        ))
+        var keep: [String: Article] = [:]
+        var toDelete: [Article] = []
+        for article in all {
+            if let existing = keep[article.id] {
+                if article.isFavorite && !existing.isFavorite {
+                    toDelete.append(existing)      // on préfère garder le favori
+                    keep[article.id] = article
+                } else {
+                    toDelete.append(article)
+                }
+            } else {
+                keep[article.id] = article
+            }
+        }
+        guard !toDelete.isEmpty else { return }
+        for duplicate in toDelete { context.delete(duplicate) }
+        try context.save()
+    }
+
+    /// Retire les doublons d'`id` d'une liste déjà triée (conserve la 1ʳᵉ occurrence).
+    private func dedupedByID(_ articles: [Article]) -> [Article] {
+        var seen = Set<String>()
+        return articles.filter { seen.insert($0.id).inserted }
     }
 }

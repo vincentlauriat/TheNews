@@ -34,6 +34,7 @@ targets:
           - "**/*.entitlements"
           - "Info.plist"
           - "Info-iOS.plist"
+          - "**/.omc/**"
     settings:
       base:
         PRODUCT_NAME: TheNews
@@ -75,6 +76,7 @@ targets:
           - "**/*.entitlements"
           - "Info.plist"
           - "Info-iOS.plist"
+          - "**/.omc/**"
     settings:
       base:
         PRODUCT_NAME: TheNews
@@ -93,6 +95,8 @@ targets:
         CODE_SIGN_ENTITLEMENTS: TheNews/TheNews-iOS.entitlements
     dependencies:
       - target: TheNewsWidgetExtension
+        embed: true
+      - target: TheNewsWatch
         embed: true
     info:
       path: TheNews/Info-iOS.plist
@@ -186,3 +190,35 @@ targets:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
+
+  # ---------------------------------------------------------------------------
+  # Apple Watch — app watchOS autonome, embarquée dans l'app iOS
+  # ---------------------------------------------------------------------------
+  TheNewsWatch:
+    type: application
+    platform: watchOS
+    deploymentTarget: "10.0"
+    sources:
+      - path: TheNewsWatch
+      - path: TheNews/Models/Source.swift       # partagés (catalogue + RSS)
+      - path: TheNews/Models/Feed.swift
+      - path: TheNews/Services/RSSService.swift
+      - path: TheNews/Services/RSSParser.swift
+    settings:
+      base:
+        PRODUCT_NAME: TheNews
+        PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.watchkitapp
+        SWIFT_VERSION: "5.9"
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        WATCHOS_DEPLOYMENT_TARGET: "10.0"
+        TARGETED_DEVICE_FAMILY: "4"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: KFLACS69T9
+    info:
+      path: TheNewsWatch/Info.plist
+      properties:
+        CFBundleDisplayName: TheNews
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: fr.vincentlauriat.thenews
+        UILaunchScreen: {}

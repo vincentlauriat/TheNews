@@ -11,6 +11,9 @@ struct ArticleDetailView: View {
 
     /// Articles d'autres sources couvrant le même sujet (calculés on-device).
     @State private var related: [Article] = []
+    /// Résumé généré on-device (Apple Intelligence, ou repli extractif).
+    @State private var summary: String?
+    @State private var summarizing = false
 
     var body: some View {
         ScrollView {
@@ -73,9 +76,21 @@ struct ArticleDetailView: View {
                         Label(settings.t("share"), systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(.bordered)
+
+                    Button {
+                        Task { await generateSummary() }
+                    } label: {
+                        Label(settings.t("summarize"), systemImage: "sparkles")
+                    }
+                    .buttonStyle(.bordered)
+                    .disabled(summarizing || article.summary.isEmpty)
                 }
                 .font(.subheadline)
                 .padding(.top, 4)
+
+                if summarizing || summary != nil {
+                    summaryCard
+                }
 
                 if !related.isEmpty {
                     Divider()
@@ -131,5 +146,39 @@ struct ArticleDetailView: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    /// Carte « En bref » : résumé on-device (Apple Intelligence ou repli extractif).
+    private var summaryCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Label(settings.t("summary_title"), systemImage: "sparkles")
+                .font(.subheadline.bold())
+                .foregroundStyle(.tint)
+            if summarizing {
+                HStack(spacing: 8) {
+                    ProgressView()
+                    Text(settings.t("summarizing")).foregroundStyle(.secondary)
+                }
+                .font(.callout)
+            } else if let summary {
+                Text(summary)
+                    .font(.callout)
+                    .textSelection(.enabled)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(.tint.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private func generateSummary() async {
+        guard !summarizing else { return }
+        summarizing = true
+        summary = nil
+        let result = await ArticleSummarizer.summarize(
+            title: article.title, body: article.summary, lang: settings.effectiveLang
+        )
+        summary = result
+        summarizing = false
     }
 }

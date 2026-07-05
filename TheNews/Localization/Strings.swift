@@ -20,6 +20,9 @@ enum Strings {
             "favorite": "Favori",
             "unfavorite": "Retirer",
             "share": "Partager",
+            "summarize": "Résumé IA",
+            "summary_title": "En bref",
+            "summarizing": "Résumé en cours…",
             "also_covered": "Aussi couvert par…",
 
             // Rubriques
@@ -123,6 +126,9 @@ enum Strings {
             "read_article": "Read article",
             "also_covered": "Also covered by…",
             "share": "Share",
+            "summarize": "AI summary",
+            "summary_title": "In brief",
+            "summarizing": "Summarizing…",
             "favorite": "Favorite",
             "unfavorite": "Remove",
 

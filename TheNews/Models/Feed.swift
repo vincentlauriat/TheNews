@@ -74,10 +74,19 @@ extension Feed {
         lesEchos("elections",    "Élections",          "checkmark.seal",            "elections"),
     ]
 
-    // MARK: - Catalogue combiné (multi-source)
+    // MARK: - Catalogue combiné (multi-source, dynamique)
 
-    /// Toutes les rubriques de toutes les sources, dans l'ordre des sources.
-    static let catalog: [Feed] = leMondeCatalog + lesEchosCatalog
+    /// Rubriques intégrées en dur (journaux fournis avec l'app).
+    static let builtInCatalog: [Feed] = leMondeCatalog + lesEchosCatalog
+
+    /// Flux ajoutés par l'utilisateur (`CustomFeed`), mis en cache pour un accès
+    /// synchrone depuis `byID`/`catalog`. Rechargé par `CustomFeedStore.reloadCatalog()`
+    /// au démarrage et à chaque ajout/suppression. Muté uniquement sur le `MainActor`
+    /// (tous les consommateurs du catalogue le sont : vues, FeedStore, RefreshEngine).
+    static var customCatalog: [Feed] = []
+
+    /// Toutes les rubriques de toutes les sources (intégrées + perso).
+    static var catalog: [Feed] { builtInCatalog + customCatalog }
 
     /// Rubriques d'une source donnée, dans l'ordre du catalogue.
     static func feeds(for sourceID: String) -> [Feed] {

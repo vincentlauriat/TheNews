@@ -69,8 +69,10 @@ final class FeedViewModel {
 
     // MARK: - Chargement
 
-    /// Premier chargement : seed des abonnements par défaut, cache local, puis réseau.
+    /// Premier chargement : recharge les flux perso, seed des abonnements par défaut,
+    /// cache local, puis réseau.
     func load(context: ModelContext) async {
+        CustomFeedStore(context: context).reloadCatalog()
         try? SubscriptionStore(context: context).seedIfNeeded()
         reload(context: context)
         await refresh(context: context)

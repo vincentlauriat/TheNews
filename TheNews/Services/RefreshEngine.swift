@@ -13,6 +13,7 @@ enum RefreshEngine {
     @discardableResult
     static func run(container: ModelContainer, notify: Bool) async -> Int {
         let context = ModelContext(container)
+        CustomFeedStore(context: context).reloadCatalog()
         let subscriptions = SubscriptionStore(context: context)
         try? subscriptions.seedIfNeeded()
 

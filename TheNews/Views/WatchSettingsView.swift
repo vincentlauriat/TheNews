@@ -8,9 +8,11 @@ struct WatchSettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var subscriptions: [FeedSubscription]
     @Query(sort: \WatchTopic.createdAt) private var topics: [WatchTopic]
+    @Query(sort: \CustomFeed.createdAt) private var customFeeds: [CustomFeed]
 
     @State private var editingTopic: WatchTopic?
     @State private var creatingTopic = false
+    @State private var addingFeed = false
 
     private var subscribedIDs: Set<String> { Set(subscriptions.map(\.feedID)) }
 
@@ -56,6 +58,36 @@ struct WatchSettingsView: View {
                     }
                 }
             }
+
+            // MARK: Mes flux — sources RSS personnalisées
+            Section {
+                if customFeeds.isEmpty {
+                    Text(settings.t("no_custom_feeds"))
+                        .foregroundStyle(.secondary)
+                }
+                ForEach(customFeeds) { feed in
+                    HStack {
+                        Label(feed.title, systemImage: feed.symbol)
+                        Spacer()
+                        Text(feed.urlString)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
+                }
+                .onDelete(perform: deleteFeeds)
+
+                Button {
+                    addingFeed = true
+                } label: {
+                    Label(settings.t("feed_add"), systemImage: "plus.circle")
+                }
+            } header: {
+                Text(settings.t("my_feeds"))
+            } footer: {
+                Text(settings.t("my_feeds_footer"))
+            }
         }
         .navigationTitle(settings.t("manage_sections"))
         #if os(iOS)
@@ -67,6 +99,14 @@ struct WatchSettingsView: View {
         .sheet(item: $editingTopic) { topic in
             NavigationStack { WatchTopicEditor(topic: topic).environment(settings) }
         }
+        .sheet(isPresented: $addingFeed) {
+            NavigationStack { AddCustomFeedView().environment(settings) }
+        }
+    }
+
+    private func deleteFeeds(_ offsets: IndexSet) {
+        let store = CustomFeedStore(context: modelContext)
+        for index in offsets { try? store.remove(customFeeds[index]) }
     }
 
     @ViewBuilder

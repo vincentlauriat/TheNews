@@ -59,6 +59,20 @@ Aucun service n'a de connaissance de la source : `RSSService`/`RSSParser`/`FeedS
 par flux. Le fetch « Tous les articles » lance en parallèle toutes les rubriques abonnées, quel que
 soit leur journal.
 
+### Catalogue dynamique (sources RSS personnalisées)
+
+Le catalogue n'est plus figé : `Feed.catalog = builtInCatalog + customCatalog`.
+
+- `builtInCatalog` — les journaux fournis (Le Monde, Les Echos), statiques en code.
+- `customCatalog` — cache des flux ajoutés par l'utilisateur, dérivé du modèle SwiftData `CustomFeed`.
+  `CustomFeedStore.reloadCatalog()` le reconstruit depuis la base au démarrage (`FeedViewModel.load`,
+  `RefreshEngine.run`) et après chaque ajout/suppression. Tous les consommateurs du catalogue étant
+  `@MainActor`, ce cache statique est muté sur le seul `MainActor`.
+- Les flux perso sont rattachés à la pseudo-source `Source.custom` (« Mes flux »), donc regroupés
+  automatiquement par `Feed.bySource` comme n'importe quel journal — sidebar et gestion inchangées.
+- À l'ajout, `CustomFeedStore.validate(urlString:)` sonde l'URL (fetch + parse ≥ 1 article) avant
+  de persister ; le nouveau flux est abonné aussitôt pour apparaître dans la sidebar.
+
 ## Flux RSS (couche métier)
 
 - `RSSService.fetch(Feed)` télécharge le flux (`URLSession`, hors `MainActor`).

@@ -16,7 +16,7 @@ struct TheNewsApp: App {
     /// Conteneur SwiftData partagé (articles persistés + dédup).
     let modelContainer: ModelContainer = {
         do {
-            return try ModelContainer(for: Article.self, FeedSubscription.self, WatchTopic.self)
+            return try ModelContainer(for: Article.self, FeedSubscription.self, WatchTopic.self, CustomFeed.self)
         } catch {
             fatalError("Impossible d'initialiser SwiftData : \(error)")
         }

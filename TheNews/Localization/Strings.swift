@@ -29,6 +29,17 @@ enum Strings {
             "manage_sections": "Gérer les rubriques",
             "sections_footer": "Active les rubriques (Le Monde, Les Echos) que tu veux suivre.",
 
+            // Flux personnalisés
+            "my_feeds": "Mes flux",
+            "my_feeds_footer": "Ajoute n'importe quel flux RSS. Il rejoint tes rubriques et ta veille.",
+            "no_custom_feeds": "Aucun flux personnalisé.",
+            "feed_add": "Ajouter un flux",
+            "feed_title": "Nom du flux",
+            "feed_title_footer": "Ex. « Le Monde Diplomatique », « Hacker News ».",
+            "feed_url": "URL du flux RSS",
+            "feed_url_footer": "L'adresse du flux (souvent en /rss ou /feed). Vérifiée à l'ajout.",
+            "add": "Ajouter",
+
             // Veille / alertes
             "alerts": "Alertes",
             "watch_topics": "Sujets de veille",
@@ -105,6 +116,17 @@ enum Strings {
             "no_subscriptions": "No sections followed yet. Tap the button to add some.",
             "manage_sections": "Manage sections",
             "sections_footer": "Enable the sections (Le Monde, Les Echos) you want to follow.",
+
+            // Custom feeds
+            "my_feeds": "My feeds",
+            "my_feeds_footer": "Add any RSS feed. It joins your sections and your watch list.",
+            "no_custom_feeds": "No custom feed yet.",
+            "feed_add": "Add a feed",
+            "feed_title": "Feed name",
+            "feed_title_footer": "E.g. “Le Monde Diplomatique”, “Hacker News”.",
+            "feed_url": "RSS feed URL",
+            "feed_url_footer": "The feed address (often under /rss or /feed). Checked when adding.",
+            "add": "Add",
 
             // Watch / alerts
             "alerts": "Alerts",

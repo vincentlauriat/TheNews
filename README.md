@@ -14,6 +14,7 @@ par mots-clés, et t'**alerte** localement quand un nouvel article correspond �
 | Fonctionnalité | macOS | iOS/iPadOS |
 |---|:---:|:---:|
 | **Deux journaux agrégés** : Le Monde (11 rubriques) + Les Echos (9 rubriques) | ✅ | ✅ |
+| **Sources RSS personnalisées** : ajoute n'importe quel flux (validé à l'ajout) | ✅ | ✅ |
 | Sidebar **groupée par journal** (une section par source) | ✅ | ✅ |
 | Abonnement / désabonnement par rubrique, toutes sources | ✅ | ✅ |
 | Vue « Tous les articles » (agrégation multi-flux, multi-sources) | ✅ | ✅ |

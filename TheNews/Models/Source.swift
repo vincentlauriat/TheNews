@@ -20,8 +20,15 @@ struct Source: Identifiable, Hashable, Codable, Sendable {
         homepageURL: URL(string: "https://www.lesechos.fr")!
     )
 
-    /// Sources agrégées par TheNews, dans l'ordre d'affichage.
-    static let all: [Source] = [.leMonde, .lesEchos]
+    /// Pseudo-source regroupant les flux RSS ajoutés par l'utilisateur (`CustomFeed`).
+    static let custom = Source(
+        id: "custom",
+        name: "Mes flux",
+        homepageURL: URL(string: "https://www.thenews.app")!
+    )
+
+    /// Sources agrégées par TheNews, dans l'ordre d'affichage. « Mes flux » en dernier.
+    static let all: [Source] = [.leMonde, .lesEchos, .custom]
 
     static func byID(_ id: String) -> Source? { all.first { $0.id == id } }
 }

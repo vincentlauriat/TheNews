@@ -73,6 +73,21 @@ Le catalogue n'est plus figé : `Feed.catalog = builtInCatalog + customCatalog`.
 - À l'ajout, `CustomFeedStore.validate(urlString:)` sonde l'URL (fetch + parse ≥ 1 article) avant
   de persister ; le nouveau flux est abonné aussitôt pour apparaître dans la sidebar.
 
+### Regroupement cross-source (« Aussi couvert par… »)
+
+`RelatedArticlesEngine` (`@MainActor`) détecte les articles de **sources différentes** traitant le
+**même sujet**, entièrement on-device :
+
+1. `tokens(_:)` — normalise (via `MatchingEngine.normalize`, insensible casse/accents) puis extrait les
+   mots significatifs (≥ 4 lettres, hors liste de mots vides fr/en).
+2. `similarity(_:_:)` — similarité de **Jaccard** entre les deux ensembles de mots, avec un plancher de
+   2 mots forts en commun pour éviter les faux positifs.
+3. `related(to:context:)` — parmi les articles récents (fenêtre de N jours), garde ceux d'une **autre
+   source** dont le score dépasse le seuil, triés par pertinence.
+
+Validé sur cas réels : « Crédit Agricole / Banco BPM » (Les Echos ↔ Le Monde) → score 0.27, regroupé ;
+« Crédit Agricole ↔ incendies » → 0.0, écarté. Affiché en bas de `ArticleDetailView`.
+
 ## Flux RSS (couche métier)
 
 - `RSSService.fetch(Feed)` télécharge le flux (`URLSession`, hors `MainActor`).

@@ -6,7 +6,11 @@ import SwiftUI
 struct ArticleDetailView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(\.openURL) private var openURL
+    @Environment(\.modelContext) private var modelContext
     @Bindable var article: Article
+
+    /// Articles d'autres sources couvrant le même sujet (calculés on-device).
+    @State private var related: [Article] = []
 
     var body: some View {
         ScrollView {
@@ -67,6 +71,11 @@ struct ArticleDetailView: View {
                 }
                 .padding(.top, 4)
 
+                if !related.isEmpty {
+                    Divider()
+                    relatedSection
+                }
+
                 Spacer(minLength: 0)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -76,5 +85,45 @@ struct ArticleDetailView: View {
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
+        // Recalcule le regroupement cross-source à chaque changement d'article.
+        .task(id: article.id) {
+            related = RelatedArticlesEngine.related(to: article, context: modelContext)
+        }
+    }
+
+    /// « Aussi couvert par… » : mêmes faits vus par d'autres journaux/sources.
+    private var relatedSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(settings.t("also_covered"), systemImage: "square.stack.3d.up.fill")
+                .font(.headline)
+            ForEach(related) { rel in
+                Button {
+                    openURL(rel.link)
+                } label: {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: rel.feed?.symbol ?? "newspaper")
+                            .foregroundStyle(Color.accentColor)
+                            .frame(width: 22)
+                        VStack(alignment: .leading, spacing: 2) {
+                            if let source = rel.feed?.source?.name {
+                                Text(source.uppercased())
+                                    .font(.caption2.bold())
+                                    .foregroundStyle(.secondary)
+                            }
+                            Text(rel.title)
+                                .font(.callout)
+                                .foregroundStyle(.primary)
+                                .multilineTextAlignment(.leading)
+                        }
+                        Spacer(minLength: 0)
+                        Image(systemName: "arrow.up.right.square")
+                            .foregroundStyle(.tertiary)
+                    }
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

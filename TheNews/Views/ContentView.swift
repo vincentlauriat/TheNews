@@ -4,6 +4,9 @@ import SwiftData
 struct ContentView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(\.modelContext) private var modelContext
+    /// Observe les flux perso pour rafraîchir le catalogue en mémoire même quand un
+    /// flux arrive par **sync iCloud** (et pas seulement par ajout local).
+    @Query private var customFeeds: [CustomFeed]
     @State private var vm = FeedViewModel()
     @State private var router = NotificationRouter.shared
     @State private var feedSelection: FeedSelection? = .all
@@ -49,6 +52,12 @@ struct ContentView: View {
         #endif
         .onChange(of: feedSelection) { _, sel in
             Task { await vm.changeSelection(sel ?? .all, context: modelContext) }
+        }
+        .onChange(of: customFeeds.map(\.id)) { _, _ in
+            // Un flux perso a été ajouté/supprimé (localement ou par sync iCloud) :
+            // recharge le catalogue en mémoire puis rafraîchit pour charger ses articles.
+            CustomFeedStore(context: modelContext).reloadCatalog()
+            Task { await vm.refresh(context: modelContext) }
         }
         .onChange(of: selectedId) { _, id in
             guard let id, let article = vm.articles.first(where: { $0.id == id }) else { return }

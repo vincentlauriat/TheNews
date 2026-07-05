@@ -6,6 +6,7 @@ import SwiftData
 /// soit une rubrique précise.
 enum FeedSelection: Hashable {
     case all
+    case briefing          // « résumé du jour » : sélection condensée dédupliquée cross-source
     case alerts            // articles correspondant aux sujets de veille
     case favorites         // articles mis en favori
     case feed(String)      // Feed.id
@@ -30,6 +31,7 @@ final class FeedViewModel {
     func title(_ t: (String) -> String) -> String {
         switch selection {
         case .all:            return t("all_feeds")
+        case .briefing:       return t("briefing")
         case .alerts:         return t("alerts")
         case .favorites:      return t("favorites")
         case .feed(let id):   return Feed.byID(id)?.title ?? t("all_feeds")
@@ -108,7 +110,7 @@ final class FeedViewModel {
 
     private func feedsInScope(context: ModelContext) -> [Feed] {
         switch selection {
-        case .all, .alerts:
+        case .all, .alerts, .briefing:
             return (try? SubscriptionStore(context: context).subscribedFeeds()) ?? []
         case .favorites:
             return []   // les favoris sont déjà stockés : pas de fetch réseau
@@ -158,6 +160,8 @@ final class FeedViewModel {
         case .all:
             let ids = (try? SubscriptionStore(context: context).subscribedFeedIDs()) ?? []
             articles = (try? store.articles(feedIDs: ids)) ?? []
+        case .briefing:
+            articles = BriefingEngine.today(context: context)
         case .alerts:
             let ids = (try? SubscriptionStore(context: context).subscribedFeedIDs()) ?? []
             let all = (try? store.articles(feedIDs: ids)) ?? []

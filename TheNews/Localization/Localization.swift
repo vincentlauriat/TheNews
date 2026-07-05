@@ -67,10 +67,21 @@ final class AppSettings {
 
     var apiKeyConfigured: Bool { !apiKey.isEmpty }
 
+    /// Briefing quotidien : notification récapitulative programmée chaque jour.
+    var briefingEnabled: Bool {
+        didSet { UserDefaults.standard.set(briefingEnabled, forKey: "briefingEnabled") }
+    }
+    /// Heure d'envoi du briefing (0–23), par défaut 8 h.
+    var briefingHour: Int {
+        didSet { UserDefaults.standard.set(briefingHour, forKey: "briefingHour") }
+    }
+
     init() {
         appearanceRaw = UserDefaults.standard.string(forKey: "appearance") ?? AppearanceMode.system.rawValue
         languageRaw = UserDefaults.standard.string(forKey: "language") ?? AppLanguage.system.rawValue
         apiKey = Keychain.get(account: "api-key") ?? ""
+        briefingEnabled = UserDefaults.standard.bool(forKey: "briefingEnabled")
+        briefingHour = UserDefaults.standard.object(forKey: "briefingHour") as? Int ?? 8
         AppLocale.identifier = localeIdentifier
     }
 

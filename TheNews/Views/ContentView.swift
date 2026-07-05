@@ -110,6 +110,11 @@ struct ContentView: View {
         if NotificationService.shared.status == .notDetermined {
             await NotificationService.shared.requestAuthorization()
         }
+        // (Re)programme le briefing quotidien selon les réglages persistés.
+        await NotificationService.shared.scheduleDailyBriefing(
+            enabled: settings.briefingEnabled,
+            hour: settings.briefingHour
+        )
     }
 
     /// Ouvre l'article ciblé par un tap de notification (deep-link).

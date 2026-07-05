@@ -23,6 +23,7 @@ enum Strings {
 
             // Rubriques
             "all_feeds": "Tous les articles",
+            "briefing": "Briefing",
             "favorites": "Favoris",
             "mark_all_read": "Tout marquer comme lu",
             "sections": "Rubriques",
@@ -65,6 +66,12 @@ enum Strings {
             "notif_denied": "Notifications refusées — active-les dans Réglages.",
             "notif_enable": "Activer les notifications",
             "notif_test": "Envoyer une notification test",
+
+            // Briefing quotidien
+            "briefing_section": "Briefing quotidien",
+            "briefing_enable": "Briefing quotidien",
+            "briefing_hour": "Heure d'envoi",
+            "briefing_footer": "Une notification récapitulative chaque jour. Le briefing condense les sujets marquants des dernières 24 h (doublons cross-source retirés).",
 
             // Groupes de dates
             "group_today": "Aujourd'hui",
@@ -112,6 +119,7 @@ enum Strings {
 
             // Sections
             "all_feeds": "All articles",
+            "briefing": "Briefing",
             "favorites": "Favorites",
             "mark_all_read": "Mark all as read",
             "sections": "Sections",
@@ -154,6 +162,12 @@ enum Strings {
             "notif_denied": "Notifications denied — enable them in Settings.",
             "notif_enable": "Enable notifications",
             "notif_test": "Send a test notification",
+
+            // Daily briefing
+            "briefing_section": "Daily briefing",
+            "briefing_enable": "Daily briefing",
+            "briefing_hour": "Delivery time",
+            "briefing_footer": "A daily recap notification. The briefing condenses the key stories of the last 24 h (cross-source duplicates removed).",
 
             "group_today": "Today",
             "group_week": "This week",

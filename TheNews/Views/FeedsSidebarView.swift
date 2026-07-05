@@ -34,6 +34,9 @@ struct FeedsSidebarView: View {
     var body: some View {
         List(selection: $selection) {
             Section {
+                Label(settings.t("briefing"), systemImage: "sun.max")
+                    .tag(FeedSelection.briefing)
+
                 Label(settings.t("all_feeds"), systemImage: "square.stack.3d.up")
                     .tag(FeedSelection.all)
 

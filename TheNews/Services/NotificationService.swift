@@ -57,6 +57,30 @@ final class NotificationService: NSObject {
         }
     }
 
+    /// Identifiant de la notification quotidienne de briefing (remplacée à chaque reprogrammation).
+    private static let briefingID = "daily-briefing"
+
+    /// (Re)programme la notification de briefing quotidien à `hour` (répétée chaque jour).
+    /// Sans effet — et annule l'existante — si l'autorisation manque ou `enabled` est faux.
+    func scheduleDailyBriefing(enabled: Bool, hour: Int) async {
+        center.removePendingNotificationRequests(withIdentifiers: [Self.briefingID])
+        guard enabled, isAuthorized else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = "TheNews"
+        content.body = AppLocale.identifier.hasPrefix("fr")
+            ? "Votre briefing du jour est prêt."
+            : "Your daily briefing is ready."
+        content.sound = .default
+
+        var components = DateComponents()
+        components.hour = min(max(hour, 0), 23)
+        components.minute = 0
+        let trigger = UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
+        let request = UNNotificationRequest(identifier: Self.briefingID, content: content, trigger: trigger)
+        try? await center.add(request)
+    }
+
     /// Notification de démonstration (bouton « tester » des réglages).
     func sendTest() async {
         guard isAuthorized else { return }

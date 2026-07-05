@@ -88,6 +88,17 @@ Le catalogue n'est plus figé : `Feed.catalog = builtInCatalog + customCatalog`.
 Validé sur cas réels : « Crédit Agricole / Banco BPM » (Les Echos ↔ Le Monde) → score 0.27, regroupé ;
 « Crédit Agricole ↔ incendies » → 0.0, écarté. Affiché en bas de `ArticleDetailView`.
 
+### Briefing quotidien (« résumé du jour »)
+
+`BriefingEngine.today(context:)` (`@MainActor`) produit une sélection condensée : articles des
+dernières 24 h parmi les rubriques suivies, **priorité aux correspondances de veille**, puis
+**déduplication cross-source** (réutilise `RelatedArticlesEngine.similarity` avec un seuil élevé pour
+ne garder qu'un article par sujet). Exposé comme portée `FeedSelection.briefing` (entrée « Briefing »
+en tête de sidebar), rendu par la liste standard. Une **notification quotidienne** répétée est
+programmée par `NotificationService.scheduleDailyBriefing(enabled:hour:)`
+(`UNCalendarNotificationTrigger`), pilotée par les réglages persistés `briefingEnabled` / `briefingHour`
+(reprogrammée au démarrage et à chaque changement de réglage).
+
 ## Flux RSS (couche métier)
 
 - `RSSService.fetch(Feed)` télécharge le flux (`URLSession`, hors `MainActor`).

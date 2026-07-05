@@ -31,6 +31,23 @@ struct SettingsView: View {
             }
             .task { await notifications.refreshStatus() }
 
+            Section {
+                Toggle(settings.t("briefing_enable"), isOn: $settings.briefingEnabled)
+                if settings.briefingEnabled {
+                    Picker(settings.t("briefing_hour"), selection: $settings.briefingHour) {
+                        ForEach(0..<24, id: \.self) { h in
+                            Text(String(format: "%02d:00", h)).tag(h)
+                        }
+                    }
+                }
+            } header: {
+                Text(settings.t("briefing_section"))
+            } footer: {
+                Text(settings.t("briefing_footer"))
+            }
+            .onChange(of: settings.briefingEnabled) { _, _ in rescheduleBriefing() }
+            .onChange(of: settings.briefingHour) { _, _ in rescheduleBriefing() }
+
             Section(settings.t("settings_appearance")) {
                 Picker(settings.t("settings_appearance"), selection: $settings.appearanceRaw) {
                     ForEach(AppearanceMode.allCases) { mode in
@@ -61,5 +78,15 @@ struct SettingsView: View {
         #if os(macOS)
         .frame(width: 460, height: 420)
         #endif
+    }
+
+    /// (Re)programme le briefing quotidien selon les réglages courants.
+    private func rescheduleBriefing() {
+        Task {
+            await notifications.scheduleDailyBriefing(
+                enabled: settings.briefingEnabled,
+                hour: settings.briefingHour
+            )
+        }
     }
 }

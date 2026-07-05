@@ -30,16 +30,21 @@ struct ArticleDetailView: View {
                 }
 
                 VStack(alignment: .leading, spacing: 6) {
-                    if let feed = article.feed {
-                        Text(feed.title.uppercased())
-                            .font(.caption.bold())
-                            .foregroundStyle(Color.accentColor)
-                    }
                     Text(article.title)
                         .font(.largeTitle.bold())
-                    Text(article.dateFormatted)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 5) {
+                        if let feed = article.feed {
+                            Text(feed.title.uppercased())
+                                .font(.subheadline.bold())
+                                .foregroundStyle(Color.accentColor)
+                            Text("·")
+                                .font(.subheadline)
+                                .foregroundStyle(.tertiary)
+                        }
+                        Text(article.dateFormatted)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 Divider()
@@ -66,6 +71,11 @@ struct ArticleDetailView: View {
                             settings.t(article.isFavorite ? "unfavorite" : "favorite"),
                             systemImage: article.isFavorite ? "star.fill" : "star"
                         )
+                    }
+                    .buttonStyle(.bordered)
+
+                    ShareLink(item: article.link) {
+                        Label(settings.t("share"), systemImage: "square.and.arrow.up")
                     }
                     .buttonStyle(.bordered)
                 }

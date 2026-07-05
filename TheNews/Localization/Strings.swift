@@ -19,6 +19,7 @@ enum Strings {
             "read_article": "Lire l'article",
             "favorite": "Favori",
             "unfavorite": "Retirer",
+            "share": "Partager",
             "also_covered": "Aussi couvert par…",
 
             // Rubriques
@@ -123,6 +124,7 @@ enum Strings {
             "also_covered": "Also covered by…",
             "favorite": "Favorite",
             "unfavorite": "Remove",
+            "share": "Share",
 
             // Sections
             "all_feeds": "All articles",

@@ -40,11 +40,13 @@ La plupart des applications d'actualité te lient à **un seul média** ou envoi
 | 🗞️ | **Sources RSS personnalisées** | Ajoute n'importe quel flux (validé à l'ajout). Le catalogue est **dynamique** : tes sources rejoignent le tien comme un journal de plus. |
 | 🔗 | **Regroupement cross-source** | En bas d'un article, « **Aussi couvert par…** » : le même événement vu par d'autres sources, détecté **on-device** (similarité de Jaccard sur les titres/chapôs). |
 | ☀️ | **Briefing quotidien** | Un « résumé du jour » condensé : les sujets marquants des dernières 24 h, **doublons cross-source retirés**, avec notification à l'heure que tu choisis. |
-| 📱 | **Widget & iCloud** | Widget d'écran d'accueil (WidgetKit, 3 tailles) + **sync iCloud** (CloudKit) de tes abonnements, favoris, sujets de veille et flux perso entre tes appareils. |
+| ✨ | **Synthèse IA on-device** | Depuis une liste, dégage les grands thèmes de l'actu via **Apple Intelligence** (Foundation Models), **100 % sur l'appareil**. Longueur, format, ton et nombre d'articles **configurables**. |
+| 📱 | **Widget & iCloud** | Widget d'écran d'accueil (WidgetKit, 3 tailles) **sur iOS et macOS** + **sync iCloud** (CloudKit) de tes abonnements, favoris, sujets de veille et flux perso entre tes appareils. |
+| ⌚ | **App Apple Watch** | App compagnon watchOS autonome : les gros titres du Monde et des Echos, chargés en direct sur ta montre. |
 
-Plus le socle classique : veille par mots-clés, alertes locales, favoris, 3 colonnes (rubriques ·
-articles · détail), swipe entre articles sur iOS (**mode « tous » ou « non lus »**), apparence &
-langue (fr/en).
+Plus le socle classique : veille par mots-clés, alertes locales, favoris, partage natif, 3 colonnes
+(rubriques · articles · détail), swipe entre articles sur iOS (**mode « tous » ou « non lus »**),
+apparence & langue (fr/en).
 
 ## Fonctionnalités par plateforme
 
@@ -55,8 +57,10 @@ langue (fr/en).
 | Regroupement cross-source « Aussi couvert par… » | ✅ | ✅ |
 | Briefing quotidien + notification programmée | ✅ | ✅ |
 | Sujets de veille par mots-clés + alertes locales | ✅ | ✅ |
+| **Synthèse IA on-device (configurable)** | ✅ | ✅ |
 | Rafraîchissement en tâche de fond | 30 min | `BGAppRefreshTask` |
-| Widget d'écran d'accueil | — | ✅ |
+| Widget d'écran d'accueil | ✅ | ✅ |
+| **App compagnon Apple Watch** | — | ✅ |
 | Sync iCloud (SwiftData + CloudKit) | ✅ | ✅ |
 
 > Le flux RSS ne fournit que titre, chapô et image ; l'article complet s'ouvre dans le navigateur.

@@ -73,6 +73,13 @@ enum Strings {
             "briefing_hour": "Heure d'envoi",
             "briefing_footer": "Une notification récapitulative chaque jour. Le briefing condense les sujets marquants des dernières 24 h (doublons cross-source retirés).",
 
+            // Navigation par swipe (iOS)
+            "swipe_section": "Navigation par swipe",
+            "swipe_mode": "Au swipe",
+            "swipe_all": "Article suivant",
+            "swipe_unread": "Suivant non lu",
+            "swipe_footer": "En balayant un article, passer au suivant dans la liste, ou seulement au prochain article non lu.",
+
             // Groupes de dates
             "group_today": "Aujourd'hui",
             "group_week": "Cette semaine",
@@ -168,6 +175,13 @@ enum Strings {
             "briefing_enable": "Daily briefing",
             "briefing_hour": "Delivery time",
             "briefing_footer": "A daily recap notification. The briefing condenses the key stories of the last 24 h (cross-source duplicates removed).",
+
+            // Swipe navigation (iOS)
+            "swipe_section": "Swipe navigation",
+            "swipe_mode": "On swipe",
+            "swipe_all": "Next article",
+            "swipe_unread": "Next unread",
+            "swipe_footer": "When swiping an article, go to the next one in the list, or only to the next unread article.",
 
             "group_today": "Today",
             "group_week": "This week",

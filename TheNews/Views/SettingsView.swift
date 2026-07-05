@@ -48,6 +48,21 @@ struct SettingsView: View {
             .onChange(of: settings.briefingEnabled) { _, _ in rescheduleBriefing() }
             .onChange(of: settings.briefingHour) { _, _ in rescheduleBriefing() }
 
+            #if os(iOS)
+            Section {
+                Picker(settings.t("swipe_mode"), selection: $settings.swipeModeRaw) {
+                    ForEach(ArticleSwipeMode.allCases) { mode in
+                        Text(settings.t(mode.titleKey)).tag(mode.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+            } header: {
+                Text(settings.t("swipe_section"))
+            } footer: {
+                Text(settings.t("swipe_footer"))
+            }
+            #endif
+
             Section(settings.t("settings_appearance")) {
                 Picker(settings.t("settings_appearance"), selection: $settings.appearanceRaw) {
                     ForEach(AppearanceMode.allCases) { mode in

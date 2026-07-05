@@ -40,7 +40,8 @@ La plupart des applications d'actualité te lient à **un seul média** ou envoi
 | 📱 | **Widget & iCloud** | Widget d'écran d'accueil (WidgetKit, 3 tailles) + **sync iCloud** (CloudKit) de tes abonnements, favoris, sujets de veille et flux perso entre tes appareils. |
 
 Plus le socle classique : veille par mots-clés, alertes locales, favoris, 3 colonnes (rubriques ·
-articles · détail), swipe entre articles (iOS), apparence & langue (fr/en).
+articles · détail), swipe entre articles sur iOS (**mode « tous » ou « non lus »**), apparence &
+langue (fr/en).
 
 ## Fonctionnalités par plateforme
 

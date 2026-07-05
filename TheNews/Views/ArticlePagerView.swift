@@ -5,11 +5,15 @@ import SwiftUI
 /// horizontalement, dans l'ordre de la liste courante. Chaque page est un
 /// `ArticleDetailView`. Sur macOS, `ContentView` affiche directement le détail.
 struct ArticlePagerView: View {
+    @Environment(AppSettings.self) private var settings
     @Bindable var vm: FeedViewModel
+
+    /// Séquence de pages selon le mode de swipe choisi (tous / non lus).
+    private var sequence: [Article] { vm.pagerSequence(mode: settings.swipeMode) }
 
     var body: some View {
         TabView(selection: selectionBinding) {
-            ForEach(vm.orderedArticles) { article in
+            ForEach(sequence) { article in
                 ArticleDetailView(article: article)
                     .tag(article.id)
             }
@@ -23,7 +27,7 @@ struct ArticlePagerView: View {
         Binding(
             get: { vm.selectedArticle?.id ?? "" },
             set: { id in
-                if let article = vm.orderedArticles.first(where: { $0.id == id }) {
+                if let article = sequence.first(where: { $0.id == id }) {
                     vm.select(article)
                 }
             }

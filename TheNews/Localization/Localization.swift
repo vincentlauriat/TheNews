@@ -38,6 +38,23 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Navigation par swipe (iOS)
+
+/// Mode de navigation par swipe entre articles (détail iOS).
+enum ArticleSwipeMode: String, CaseIterable, Identifiable {
+    /// Passe à l'article suivant dans la liste (tous articles).
+    case all
+    /// Passe au prochain article **non lu** de la liste.
+    case unread
+    var id: String { rawValue }
+    var titleKey: String {
+        switch self {
+        case .all:    return "swipe_all"
+        case .unread: return "swipe_unread"
+        }
+    }
+}
+
 /// Identifiant de locale courant, lu par les modèles (formatage de dates)
 /// sans dépendance directe à l'environnement SwiftUI.
 enum AppLocale {
@@ -76,12 +93,19 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(briefingHour, forKey: "briefingHour") }
     }
 
+    /// Mode de navigation par swipe entre articles (iOS).
+    var swipeModeRaw: String {
+        didSet { UserDefaults.standard.set(swipeModeRaw, forKey: "swipeMode") }
+    }
+    var swipeMode: ArticleSwipeMode { ArticleSwipeMode(rawValue: swipeModeRaw) ?? .all }
+
     init() {
         appearanceRaw = UserDefaults.standard.string(forKey: "appearance") ?? AppearanceMode.system.rawValue
         languageRaw = UserDefaults.standard.string(forKey: "language") ?? AppLanguage.system.rawValue
         apiKey = Keychain.get(account: "api-key") ?? ""
         briefingEnabled = UserDefaults.standard.bool(forKey: "briefingEnabled")
         briefingHour = UserDefaults.standard.object(forKey: "briefingHour") as? Int ?? 8
+        swipeModeRaw = UserDefaults.standard.string(forKey: "swipeMode") ?? ArticleSwipeMode.all.rawValue
         AppLocale.identifier = localeIdentifier
     }
 

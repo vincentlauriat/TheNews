@@ -69,6 +69,20 @@ final class FeedViewModel {
     /// Sert de séquence de navigation au pager iOS (swipe entre articles).
     var orderedArticles: [Article] { grouped.flatMap(\.items) }
 
+    /// Séquence de navigation du pager iOS selon le mode de swipe.
+    /// En mode « non lu », ne garde que les articles non lus **plus** l'article
+    /// courant (qui vient d'être marqué lu à l'ouverture) pour rester affichable :
+    /// le swipe amène alors au prochain non lu.
+    func pagerSequence(mode: ArticleSwipeMode) -> [Article] {
+        switch mode {
+        case .all:
+            return orderedArticles
+        case .unread:
+            let currentID = selectedArticle?.id
+            return orderedArticles.filter { !$0.isRead || $0.id == currentID }
+        }
+    }
+
     // MARK: - Chargement
 
     /// Premier chargement : recharge les flux perso, seed des abonnements par défaut,

@@ -19,6 +19,12 @@ schemes:
         TheNewsiOS: all
     run:
       config: Debug
+  TheNewsWatch:
+    build:
+      targets:
+        TheNewsWatch: all
+    run:
+      config: Debug
 
 targets:
   # ---------------------------------------------------------------------------

@@ -12,6 +12,9 @@ automatiquement les articles qui parlent du même sujet, et te livre un briefing
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-SwiftData%20%7C%20WidgetKit%20%7C%20CloudKit-4B9CD3)
 ![Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
+![Release](https://img.shields.io/github/v/release/vincentlauriat/TheNews)
+
+**[⬇️ Télécharger pour macOS](https://github.com/vincentlauriat/TheNews/releases/latest)** · signé Developer ID + notarisé
 
 </div>
 

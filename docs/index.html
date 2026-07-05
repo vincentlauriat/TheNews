@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TheNews — Multi-source news watch for macOS &amp; iOS</title>
+<meta name="description" content="TheNews aggregates Le Monde, Les Echos and any RSS feed into one macOS & iOS app — cross-source grouping, daily briefing, home-screen widget and iCloud sync. Serverless, on-device, zero-dependency.">
+<meta property="og:title" content="TheNews — Multi-source news watch for macOS & iOS">
+<meta property="og:description" content="Aggregate Le Monde, Les Echos and any RSS feed in one app. Cross-source grouping, daily briefing, widget & iCloud. Serverless, on-device.">
+<meta property="og:type" content="website">
+<style>
+  :root{
+    --bg:#0b1020; --bg2:#0f1630; --card:#141c38; --line:#243056;
+    --accent:#4b9cff; --accent2:#7ad0ff; --salmon:#ffcaa6;
+    --text:#eaf0ff; --muted:#9fb0d4; --radius:18px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:radial-gradient(1200px 700px at 50% -200px,var(--bg2),var(--bg)) fixed;
+    color:var(--text);line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{width:min(1080px,92%);margin:0 auto}
+  a{color:inherit}
+  /* nav */
+  nav{position:sticky;top:0;z-index:10;backdrop-filter:blur(10px);
+    background:rgba(11,16,32,.7);border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;align-items:center;gap:14px;height:60px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.05rem}
+  .logo{width:30px;height:30px;border-radius:8px;
+    background:linear-gradient(160deg,#1b2a5a,#0b132c);display:flex;align-items:center;justify-content:center;
+    font-family:Georgia,serif;font-weight:700;color:#fff;font-size:.8rem;border:1px solid var(--line);position:relative;overflow:hidden}
+  .logo::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--salmon)}
+  .spacer{flex:1}
+  .langtog button{background:transparent;border:1px solid var(--line);color:var(--muted);
+    border-radius:8px;padding:4px 9px;cursor:pointer;font-weight:700;font-size:.8rem}
+  .langtog button.on{color:var(--text);border-color:var(--accent)}
+  .ghlink{font-weight:700;font-size:.9rem;color:var(--accent);text-decoration:none}
+  /* header */
+  header{padding:72px 0 44px;text-align:center}
+  .tag-pill{display:inline-block;font-size:.8rem;font-weight:700;color:var(--accent2);
+    border:1px solid var(--line);border-radius:999px;padding:5px 14px;margin-bottom:20px}
+  h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.1;letter-spacing:-.02em;margin-bottom:18px}
+  .grad{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+  .lead{font-size:1.15rem;color:var(--muted);max-width:660px;margin:0 auto 28px}
+  .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;text-decoration:none;
+    border-radius:12px;padding:12px 20px;border:1px solid var(--line);transition:.2s}
+  .btn.primary{background:linear-gradient(160deg,var(--accent),#2f6fd6);border-color:transparent;color:#fff}
+  .btn:hover{transform:translateY(-2px);border-color:var(--accent)}
+  .badges{margin-top:26px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .badge{font-size:.76rem;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:4px 10px;background:rgba(255,255,255,.02)}
+  /* sections */
+  section{padding:46px 0}
+  h2{font-size:1.7rem;letter-spacing:-.01em;margin-bottom:6px;text-align:center}
+  .sub{color:var(--muted);text-align:center;margin-bottom:34px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;transition:.2s}
+  .card:hover{transform:translateY(-4px);border-color:var(--accent)}
+  .card .emoji{font-size:1.6rem;width:46px;height:46px;display:flex;align-items:center;justify-content:center;
+    border-radius:12px;background:rgba(75,156,255,.12);margin-bottom:14px}
+  .card h3{font-size:1.12rem;margin-bottom:8px}
+  .card p{color:var(--muted);font-size:.94rem}
+  /* under the hood */
+  .hood{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:30px}
+  .hood ul{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+  .hood li{padding-left:26px;position:relative;color:var(--muted)}
+  .hood li::before{content:"›";position:absolute;left:6px;color:var(--accent);font-weight:800}
+  .hood b{color:var(--text)}
+  /* platform table */
+  .plat{max-width:560px;margin:0 auto;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden}
+  .plat .row{display:grid;grid-template-columns:1fr 70px 70px;gap:0;border-top:1px solid var(--line);font-size:.92rem}
+  .plat .row:first-child{border-top:0;color:var(--muted);font-weight:700;background:rgba(255,255,255,.02)}
+  .plat .row>div{padding:11px 14px}
+  .plat .c{text-align:center}
+  footer{padding:48px 0 60px;text-align:center;color:var(--muted);border-top:1px solid var(--line);margin-top:20px}
+  footer a{color:var(--accent);text-decoration:none}
+  .fr{display:none}
+  body.lang-fr .fr{display:inline}
+  body.lang-fr .en{display:none}
+  .block.fr{display:none}
+  body.lang-fr .block.fr{display:block}
+  body.lang-fr .block.en{display:none}
+</style>
+</head>
+<body class="lang-en">
+
+<nav><div class="wrap">
+  <div class="brand"><span class="logo">TN</span> TheNews</div>
+  <div class="spacer"></div>
+  <div class="langtog">
+    <button id="l-en" class="on" onclick="setLang('en')">EN</button>
+    <button id="l-fr" onclick="setLang('fr')">FR</button>
+  </div>
+  <a class="ghlink" href="https://github.com/vincentlauriat/TheNews" target="_blank" rel="noopener">GitHub ↗</a>
+</div></nav>
+
+<header><div class="wrap">
+  <span class="tag-pill"><span class="en">macOS · iOS · iPadOS</span><span class="fr">macOS · iOS · iPadOS</span></span>
+  <h1><span class="en">Your news, <span class="grad">from every source</span>, in one app</span>
+      <span class="fr">Ton actu, <span class="grad">de toutes les sources</span>, dans une seule app</span></h1>
+  <p class="lead">
+    <span class="en">TheNews aggregates <b>Le Monde</b>, <b>Les Echos</b> and <b>any RSS feed</b> into a single macOS &amp; iOS app — groups articles covering the same story, and delivers a daily briefing. Serverless, on-device, zero-dependency.</span>
+    <span class="fr">TheNews agrège <b>Le Monde</b>, <b>Les Echos</b> et <b>n'importe quel flux RSS</b> dans une seule app macOS &amp; iOS — regroupe les articles qui traitent du même sujet, et livre un briefing quotidien. Sans serveur, sur l'appareil, zéro dépendance.</span>
+  </p>
+  <div class="cta-row">
+    <a class="btn primary" href="https://github.com/vincentlauriat/TheNews" target="_blank" rel="noopener">
+      <span class="en">View on GitHub</span><span class="fr">Voir sur GitHub</span> →</a>
+    <a class="btn" href="https://github.com/vincentlauriat/TheNews#build" target="_blank" rel="noopener">
+      <span class="en">Build it</span><span class="fr">Compiler</span></a>
+  </div>
+  <div class="badges">
+    <span class="badge">SwiftUI</span>
+    <span class="badge">SwiftData · CloudKit</span>
+    <span class="badge">WidgetKit</span>
+    <span class="badge">Zero dependencies</span>
+    <span class="badge">MIT</span>
+  </div>
+</div></header>
+
+<section><div class="wrap">
+  <h2><span class="en">Four signature features</span><span class="fr">Quatre fonctionnalités inédites</span></h2>
+  <p class="sub"><span class="en">Built around one idea: many sources, one place, nothing leaves your device.</span>
+    <span class="fr">Autour d'une idée : plusieurs sources, un seul endroit, rien ne quitte l'appareil.</span></p>
+  <div class="grid">
+    <div class="card">
+      <div class="emoji">🗞️</div>
+      <h3><span class="en">Custom RSS sources</span><span class="fr">Sources RSS personnalisées</span></h3>
+      <p><span class="en">Add any RSS feed beyond Le Monde &amp; Les Echos. The catalog is dynamic — your feeds join in as another journal, grouped in the sidebar.</span>
+        <span class="fr">Ajoute n'importe quel flux au-delà du Monde &amp; des Echos. Le catalogue est dynamique — tes flux rejoignent l'app comme un journal de plus, groupés dans la sidebar.</span></p>
+    </div>
+    <div class="card">
+      <div class="emoji">🔗</div>
+      <h3><span class="en">Cross-source grouping</span><span class="fr">Regroupement cross-source</span></h3>
+      <p><span class="en">"Also covered by…": the same event seen through other sources, detected on-device with a Jaccard similarity on titles and summaries.</span>
+        <span class="fr">« Aussi couvert par… » : le même événement vu par d'autres sources, détecté sur l'appareil par similarité de Jaccard sur titres et chapôs.</span></p>
+    </div>
+    <div class="card">
+      <div class="emoji">☀️</div>
+      <h3><span class="en">Daily briefing</span><span class="fr">Briefing quotidien</span></h3>
+      <p><span class="en">A condensed digest of the last 24 h — watch-list first, cross-source duplicates removed — with a notification at the time you pick.</span>
+        <span class="fr">Un condensé des dernières 24 h — veille en priorité, doublons cross-source retirés — avec une notification à l'heure choisie.</span></p>
+    </div>
+    <div class="card">
+      <div class="emoji">📱</div>
+      <h3><span class="en">Widget &amp; iCloud</span><span class="fr">Widget &amp; iCloud</span></h3>
+      <p><span class="en">Home-screen widget (WidgetKit) plus iCloud sync of your subscriptions, favorites, watch topics and custom feeds across devices.</span>
+        <span class="fr">Widget d'écran d'accueil (WidgetKit) et sync iCloud de tes abonnements, favoris, sujets de veille et flux perso entre appareils.</span></p>
+    </div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2><span class="en">Works on both</span><span class="fr">Sur les deux plateformes</span></h2>
+  <p class="sub"><span class="en">One shared SwiftUI codebase.</span><span class="fr">Un codebase SwiftUI partagé.</span></p>
+  <div class="plat">
+    <div class="row"><div><span class="en">Feature</span><span class="fr">Fonctionnalité</span></div><div class="c">macOS</div><div class="c">iOS</div></div>
+    <div class="row"><div><span class="en">Multi-source + custom RSS</span><span class="fr">Multi-source + RSS perso</span></div><div class="c">✅</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">Cross-source grouping</span><span class="fr">Regroupement cross-source</span></div><div class="c">✅</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">Daily briefing + alerts</span><span class="fr">Briefing + alertes</span></div><div class="c">✅</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">Home-screen widget</span><span class="fr">Widget d'accueil</span></div><div class="c">—</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">iCloud sync</span><span class="fr">Sync iCloud</span></div><div class="c">✅</div><div class="c">✅</div></div>
+  </div>
+</div></section>
+
+<section><div class="wrap">
+  <h2><span class="en">Under the hood</span><span class="fr">Sous le capot</span></h2>
+  <p class="sub"><span class="en">Native Apple frameworks, nothing else.</span><span class="fr">Que du natif Apple, rien d'autre.</span></p>
+  <div class="hood">
+    <ul>
+      <li><span class="en"><b>Serverless &amp; private</b> — parsing, watch, grouping and briefing all run on-device. No account, no telemetry.</span>
+        <span class="fr"><b>Sans serveur &amp; privé</b> — parsing, veille, regroupement et briefing tournent sur l'appareil. Aucun compte, aucune télémétrie.</span></li>
+      <li><span class="en"><b>Dynamic catalog</b> — built-in journals + your RSS feeds, `Feed.catalog = builtIn + custom`.</span>
+        <span class="fr"><b>Catalogue dynamique</b> — journaux fournis + tes flux RSS, `Feed.catalog = builtIn + custom`.</span></li>
+      <li><span class="en"><b>Zero dependency</b> — SwiftData, XMLParser, UserNotifications, WidgetKit, CloudKit.</span>
+        <span class="fr"><b>Zéro dépendance</b> — SwiftData, XMLParser, UserNotifications, WidgetKit, CloudKit.</span></li>
+      <li><span class="en"><b>Open source (MIT)</b> — one shared SwiftUI codebase for macOS &amp; iOS.</span>
+        <span class="fr"><b>Open source (MIT)</b> — un codebase SwiftUI partagé macOS &amp; iOS.</span></li>
+    </ul>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  <p>
+    <span class="en">Made by <a href="https://lauriat.fr" target="_blank" rel="noopener">Vincent Lauriat</a> · </span>
+    <span class="fr">Par <a href="https://lauriat.fr" target="_blank" rel="noopener">Vincent Lauriat</a> · </span>
+    <a href="https://github.com/vincentlauriat/TheNews" target="_blank" rel="noopener">GitHub</a> ·
+    <a href="https://vincentlauriat.github.io" target="_blank" rel="noopener"><span class="en">More apps</span><span class="fr">Autres apps</span></a>
+  </p>
+</div></footer>
+
+<script>
+  function setLang(l){
+    document.body.classList.remove('lang-en','lang-fr');
+    document.body.classList.add('lang-'+l);
+    document.documentElement.lang=l;
+    document.getElementById('l-en').classList.toggle('on',l==='en');
+    document.getElementById('l-fr').classList.toggle('on',l==='fr');
+    try{localStorage.setItem('vl-lang',l)}catch(e){}
+  }
+  (function(){
+    var saved;try{saved=localStorage.getItem('vl-lang')}catch(e){}
+    var l=saved||((navigator.language||'en').slice(0,2)==='fr'?'fr':'en');
+    setLang(l);
+  })();
+</script>
+</body>
+</html>

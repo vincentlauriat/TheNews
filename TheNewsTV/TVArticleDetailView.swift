@@ -65,7 +65,9 @@ struct TVArticleDetailView: View {
                 .focusable()
                 .focusEffectDisabled()
             }
-            .padding(60)
+            .padding(.top, 14)
+            .padding(.horizontal, 18)
+            .padding(.bottom, 30)
         }
         // Anime le contenu au changement d'article pour rendre le passage
         // suivant/précédent lisible malgré l'absence de transition de scène.

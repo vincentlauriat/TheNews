@@ -18,7 +18,7 @@ automatiquement les articles qui parlent du même sujet, et te livre un briefing
 
 </div>
 
-> **Capture d'écran à ajouter** — `docs/screenshot.png` (sidebar groupée par source · « Aussi couvert par… » · briefing).
+![Capture d'écran de TheNews sur macOS — sidebar groupée par source, article détaillé avec « Aussi couvert par… »](docs/screenshot.png)
 
 ---
 

@@ -73,6 +73,14 @@ codesign_ts() {
   return 1
 }
 echo "▶︎ codesign (Developer ID, Hardened Runtime)"
+# Sign nested code first (e.g. the WidgetKit extension) — codesign refuses to
+# seal a wrapping bundle whose embedded components aren't already signed.
+if [ -d "$STAGING/Contents/PlugIns" ]; then
+  while IFS= read -r -d '' appex; do
+    echo "  … signing $(basename "$appex")"
+    codesign_ts "$appex"
+  done < <(find "$STAGING/Contents/PlugIns" -maxdepth 1 -name "*.appex" -print0)
+fi
 codesign_ts "$STAGING"
 codesign --verify --strict --deep --verbose=1 "$STAGING"
 

@@ -7,6 +7,7 @@ enum Strings {
     static let table: [String: [String: String]] = [
         "fr": [
             "app_name": "TheNews",
+            "check_for_updates": "Rechercher les mises à jour…",
 
             // Sidebar / liste
             "search_placeholder": "Rechercher…",
@@ -128,6 +129,7 @@ enum Strings {
         ],
         "en": [
             "app_name": "TheNews",
+            "check_for_updates": "Check for Updates…",
 
             "search_placeholder": "Search…",
             "refresh": "Refresh",

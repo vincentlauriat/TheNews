@@ -24,5 +24,15 @@
 	<string>14.0</string>
 	<key>NSHumanReadableCopyright</key>
 	<string></string>
+	<key>SUAutomaticallyUpdate</key>
+	<false/>
+	<key>SUEnableAutomaticChecks</key>
+	<true/>
+	<key>SUFeedURL</key>
+	<string>https://raw.githubusercontent.com/vincentlauriat/TheNews/main/appcast.xml</string>
+	<key>SUPublicEDKey</key>
+	<string>j665v9PJTV2rJXq9JJay5Ze4bUp46VIknS1itkuJu0w=</string>
+	<key>SUScheduledCheckInterval</key>
+	<integer>86400</integer>
 </dict>
 </plist>

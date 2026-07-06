@@ -194,6 +194,18 @@ perso). Les réglages d'interface (`UserDefaults`) ne sont pas synchronisés.
 - **Localisation maison** : dictionnaire `[lang: [clé: valeur]]` (`Strings.swift`) avec repli `en`, résolu par `settings.t("clé")`.
 - **Build** : projet Xcode **généré** par XcodeGen (`project.yml`) — le `.xcodeproj` n'est pas versionné. Régénérer avec `xcodegen generate`.
 - **Signature/notarisation** : gérées manuellement dans `release.sh` (Developer ID + Hardened Runtime + timestamp avec retry).
+- **Auto-update macOS (Sparkle)** : seule dépendance externe du projet (package SPM, cible `TheNews`
+  macOS uniquement — jamais liée sur iOS/watchOS/tvOS). `SparkleUpdater` (`Services/`) enveloppe
+  `SPUStandardUpdaterController`, instancié au lancement (`.task` dans `TheNewsApp`) pour démarrer
+  la vérification automatique quotidienne (`SUScheduledCheckInterval`), plus un item de menu
+  « Rechercher les mises à jour… » pour une vérification manuelle. `SUAutomaticallyUpdate: false` —
+  notifie mais n'installe jamais silencieusement. Fonctionne dans le **sandbox** de l'app (requis
+  pour CloudKit) sans entitlement supplémentaire : les XPC Services de Sparkle 2 (`Downloader.xpc`,
+  `Installer.xpc`) sont embarqués dans le bundle et conçus pour ça nativement. Clé de signature
+  EdDSA dans le trousseau de connexion sous le compte « TheNews » (voir l'avertissement en tête de
+  `Scripts/release.sh` — ne jamais la régénérer, ça casserait l'auto-update pour tous les
+  utilisateurs déjà installés). Le flux (`appcast.xml`, à la racine du repo, servi via
+  `raw.githubusercontent.com`) est régénéré et signé à chaque release par `release.sh`.
 
 ## Ajouter une source de presse
 

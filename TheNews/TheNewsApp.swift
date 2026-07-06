@@ -32,6 +32,9 @@ struct TheNewsApp: App {
                 .environment(settings)
                 .preferredColorScheme(settings.appearance.colorScheme)
                 .task { NotificationService.shared.configureDelegate() }
+                #if os(macOS)
+                .task { _ = SparkleUpdater.shared }
+                #endif
         }
         .modelContainer(modelContainer)
         #if os(macOS)
@@ -40,6 +43,9 @@ struct TheNewsApp: App {
         .defaultSize(width: 960, height: 640)
         .commands {
             CommandGroup(replacing: .newItem) {}
+            CommandGroup(after: .appInfo) {
+                Button(settings.t("check_for_updates")) { SparkleUpdater.shared.checkForUpdates() }
+            }
         }
         #endif
         #if os(iOS)

@@ -5,6 +5,13 @@ options:
     macOS: "14.0"
     iOS: "17.0"
 
+# Sparkle : auto-update macOS uniquement (iOS/watchOS/tvOS restent hors de son
+# périmètre — pas de distribution directe hors App Store sur ces plateformes).
+packages:
+  Sparkle:
+    url: https://github.com/sparkle-project/Sparkle
+    from: "2.9.1"
+
 # Schemes explicites (sinon xcodegen n'en génère pas → schemes perdus à chaque régénération).
 schemes:
   TheNews:
@@ -64,12 +71,20 @@ targets:
     dependencies:
       - target: TheNewsWidgetMac
         embed: true
+      - package: Sparkle
     info:
       path: TheNews/Info.plist
       properties:
         CFBundleName: TheNews
         CFBundleDisplayName: TheNews
         CFBundleIdentifier: fr.vincentlauriat.thenews
+        # Sparkle (auto-update). Clé publique du compte trousseau "TheNews" —
+        # NE JAMAIS régénérer (voir l'avertissement en tête de Scripts/release.sh).
+        SUFeedURL: "https://raw.githubusercontent.com/vincentlauriat/TheNews/main/appcast.xml"
+        SUPublicEDKey: "j665v9PJTV2rJXq9JJay5Ze4bUp46VIknS1itkuJu0w="
+        SUEnableAutomaticChecks: true
+        SUScheduledCheckInterval: 86400
+        SUAutomaticallyUpdate: false
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         LSMinimumSystemVersion: "14.0"

@@ -1,9 +1,9 @@
 #!/usr/bin/env swift
 // Génère le jeu d'icônes de TheNews dans AppIcon.appiconset.
-// Design : carré arrondi bleu nuit profond avec halo satiné, monogramme « TN »
-// en Baskerville gras et dégradé or (champagne → bronze), filet doré rehaussé
-// d'un losange en pied — registre éditorial haut de gamme, à mi-chemin entre
-// masthead de presse et plaque gravée. Usage : ./Scripts/make-thenews-icon.swift
+// Design : carré arrondi bleu nuit profond avec halo satiné, bec de plume
+// (stylographe) doré à fente et trou d'air découpés en réserve, filet doré
+// rehaussé d'un losange en pied — symbole intemporel de l'écriture/presse,
+// registre papeterie de luxe, sans texte. Usage : ./Scripts/make-thenews-icon.swift
 import AppKit
 
 let scriptDir = URL(fileURLWithPath: CommandLine.arguments[0]).deletingLastPathComponent()
@@ -19,9 +19,54 @@ guard let assets = try? fm.contentsOfDirectory(at: root, includingPropertiesForK
 let goldLight = (r: 0.97, g: 0.86, b: 0.58)
 let goldDark = (r: 0.66, g: 0.48, b: 0.16)
 
-// Rend le monogramme dans un masque niveaux de gris (blanc = visible) afin de
-// pouvoir le remplir ensuite avec un dégradé or via CGContext.clip(to:mask:).
-func textMask(size: CGFloat, text: String, font: NSFont) -> CGImage {
+// Silhouette du bec de plume, pointe vers le bas, fente et trou d'air en
+// réserve (winding rule even-odd → ces sous-tracés deviennent des trous).
+func nibPath(size s: CGFloat) -> NSBezierPath {
+    let cx = s / 2
+    let halfWidth = s * 0.17
+    let shoulderY = s * 0.585
+    let domePeakY = s * 0.72
+    let tipY = s * 0.295
+
+    let path = NSBezierPath()
+    path.windingRule = .evenOdd
+
+    let leftShoulder = NSPoint(x: cx - halfWidth, y: shoulderY)
+    let rightShoulder = NSPoint(x: cx + halfWidth, y: shoulderY)
+    let tip = NSPoint(x: cx, y: tipY)
+
+    path.move(to: leftShoulder)
+    path.curve(to: rightShoulder,
+               controlPoint1: NSPoint(x: cx - halfWidth * 0.55, y: domePeakY),
+               controlPoint2: NSPoint(x: cx + halfWidth * 0.55, y: domePeakY))
+    path.curve(to: tip,
+               controlPoint1: NSPoint(x: cx + halfWidth * 0.92, y: shoulderY - (shoulderY - tipY) * 0.35),
+               controlPoint2: NSPoint(x: cx + halfWidth * 0.05, y: tipY + (shoulderY - tipY) * 0.22))
+    path.curve(to: leftShoulder,
+               controlPoint1: NSPoint(x: cx - halfWidth * 0.05, y: tipY + (shoulderY - tipY) * 0.22),
+               controlPoint2: NSPoint(x: cx - halfWidth * 0.92, y: shoulderY - (shoulderY - tipY) * 0.35))
+    path.close()
+
+    // Fente d'encre : fin triangle du voisinage de la pointe jusqu'au trou d'air.
+    let slitHalf = s * 0.009
+    let slitTopY = s * 0.505
+    let slitTipY = tipY + s * 0.02
+    path.move(to: NSPoint(x: cx, y: slitTipY))
+    path.line(to: NSPoint(x: cx - slitHalf, y: slitTopY))
+    path.line(to: NSPoint(x: cx + slitHalf, y: slitTopY))
+    path.close()
+
+    // Trou d'air.
+    let holeCenter = NSPoint(x: cx, y: slitTopY + s * 0.032)
+    let holeRadius = s * 0.021
+    path.appendOval(in: NSRect(x: holeCenter.x - holeRadius, y: holeCenter.y - holeRadius,
+                                width: holeRadius * 2, height: holeRadius * 2))
+    return path
+}
+
+// Rend un NSBezierPath dans un masque niveaux de gris (blanc = visible) afin
+// de le remplir ensuite avec un dégradé or via CGContext.clip(to:mask:).
+func pathMask(size: CGFloat, path: NSBezierPath) -> CGImage {
     let px = Int(size)
     let rep = NSBitmapImageRep(
         bitmapDataPlanes: nil, pixelsWide: px, pixelsHigh: px,
@@ -33,15 +78,8 @@ func textMask(size: CGFloat, text: String, font: NSFont) -> CGImage {
     NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: rep)
     NSColor.black.setFill()
     NSRect(x: 0, y: 0, width: size, height: size).fill()
-
-    let para = NSMutableParagraphStyle(); para.alignment = .center
-    let attrs: [NSAttributedString.Key: Any] = [
-        .font: font, .foregroundColor: NSColor.white, .paragraphStyle: para,
-    ]
-    let ns = text as NSString
-    let tsize = ns.size(withAttributes: attrs)
-    let ty = (size - tsize.height) / 2 + size * 0.05
-    ns.draw(at: NSPoint(x: (size - tsize.width) / 2, y: ty), withAttributes: attrs)
+    NSColor.white.setFill()
+    path.fill()
     NSGraphicsContext.restoreGraphicsState()
     return rep.cgImage!
 }
@@ -63,7 +101,7 @@ func render(_ size: Int) -> Data {
     let clip = NSBezierPath(roundedRect: rect, xRadius: radius, yRadius: radius)
     clip.addClip()
 
-    // Fond dégradé bleu nuit profond (plus riche/contrasté que la v1).
+    // Fond dégradé bleu nuit profond.
     let bg = NSGradient(colors: [
         NSColor(calibratedRed: 0.11, green: 0.19, blue: 0.40, alpha: 1),
         NSColor(calibratedRed: 0.03, green: 0.05, blue: 0.11, alpha: 1),
@@ -78,12 +116,8 @@ func render(_ size: Int) -> Data {
     ])!
     gloss.draw(in: glossPath, relativeCenterPosition: NSPoint(x: 0, y: 0.55))
 
-    // Monogramme « TN » : dégradé or appliqué via masque de texte.
-    let fontSize = s * 0.42
-    let font = NSFont(name: "Baskerville-Bold", size: fontSize)
-        ?? NSFont(name: "Georgia-Bold", size: fontSize)
-        ?? NSFont.systemFont(ofSize: fontSize, weight: .bold)
-    let mask = textMask(size: s, text: "TN", font: font)
+    // Bec de plume : dégradé or appliqué via masque (fente + trou en réserve).
+    let mask = pathMask(size: s, path: nibPath(size: s))
     ctx.saveGState()
     ctx.clip(to: rect, mask: mask)
     let goldGradient = CGGradient(
@@ -93,11 +127,11 @@ func render(_ size: Int) -> Data {
             CGColor(red: goldDark.r, green: goldDark.g, blue: goldDark.b, alpha: 1),
         ] as CFArray,
         locations: [0, 1])!
-    ctx.drawLinearGradient(goldGradient, start: CGPoint(x: 0, y: rect.height), end: CGPoint(x: 0, y: 0), options: [])
+    ctx.drawLinearGradient(goldGradient, start: CGPoint(x: 0, y: s * 0.72), end: CGPoint(x: 0, y: s * 0.28), options: [])
     ctx.restoreGState()
 
     // Filet doré en pied, rompu par un losange — clin d'œil au masthead de presse.
-    let lineY = s * 0.225
+    let lineY = s * 0.155
     let lineH = s * 0.012
     let gapHalf = s * 0.032
     let lineHalfWidth = s * 0.155

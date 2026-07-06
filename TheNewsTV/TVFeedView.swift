@@ -1,10 +1,32 @@
 import SwiftUI
 
-/// Pousse soit l'agrégat de tout le catalogue (« Tous les articles »), soit une
-/// seule rubrique — les deux affichés par la même `TVArticleListView`.
+/// Pousse soit le Briefing, soit l'agrégat de tout le catalogue (« Tous les
+/// articles »), soit une seule rubrique. Les trois passent par la même
+/// navigation **par valeur** (`navigationDestination(for:)`) — mélanger un
+/// `NavigationLink(destination:)` classique pour le Briefing avec les autres
+/// liens par valeur cassait la résolution de `navigationDestination(for:
+/// TVArticleSelection.self)` une fois dedans (ouvrir un article y refermait
+/// aussitôt l'écran, un bug propre à tvOS/NavigationStack absent des écrans
+/// atteints par valeur).
 private enum TVFeedSelection: Hashable {
+    case briefing
     case all
     case feed(Feed)
+}
+
+/// Ligne icône + nom d'une rubrique, avec un espacement généreux entre les
+/// deux (le `Label` par défaut est trop serré pour une lecture à distance).
+private struct TVFeedRow: View {
+    let title: String
+    let symbol: String
+
+    var body: some View {
+        HStack(spacing: 22) {
+            Image(systemName: symbol)
+                .frame(width: 32)
+            Text(title)
+        }
+    }
 }
 
 /// Écran racine tvOS : Briefing + Tous les articles en tête, puis les rubriques
@@ -16,20 +38,18 @@ struct TVFeedView: View {
         NavigationStack {
             List {
                 Section {
-                    NavigationLink {
-                        TVBriefingView()
-                    } label: {
-                        Label("Briefing", systemImage: "sun.max")
+                    NavigationLink(value: TVFeedSelection.briefing) {
+                        TVFeedRow(title: "Briefing", symbol: "sun.max")
                     }
                     NavigationLink(value: TVFeedSelection.all) {
-                        Label("Tous les articles", systemImage: "tray.full")
+                        TVFeedRow(title: "Tous les articles", symbol: "tray.full")
                     }
                 }
                 ForEach(Feed.bySource, id: \.source.id) { group in
                     Section(group.source.name) {
                         ForEach(group.feeds) { feed in
                             NavigationLink(value: TVFeedSelection.feed(feed)) {
-                                Label(feed.title, systemImage: feed.symbol)
+                                TVFeedRow(title: feed.title, symbol: feed.symbol)
                             }
                         }
                     }
@@ -38,6 +58,8 @@ struct TVFeedView: View {
             .navigationTitle("TheNews")
             .navigationDestination(for: TVFeedSelection.self) { selection in
                 switch selection {
+                case .briefing:
+                    TVBriefingView()
                 case .all:
                     TVArticleListView(title: "Tous les articles", feeds: Feed.builtInCatalog)
                 case .feed(let feed):

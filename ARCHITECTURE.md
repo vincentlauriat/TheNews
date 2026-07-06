@@ -1,6 +1,6 @@
 # Architecture
 
-Application SwiftUI **à codebase unique partagé** entre deux cibles (macOS + iOS/iPadOS). Les différences de plateforme sont gérées par des blocs `#if os(macOS)` / `#if os(iOS)`, jamais par duplication de fichiers. TheNews est **multi-sources** : il agrège plusieurs journaux (Le Monde, Les Echos) dans une même interface.
+Application SwiftUI **à codebase unique partagé** entre les cibles macOS et iOS/iPadOS. Les différences de plateforme sont gérées par des blocs `#if os(macOS)` / `#if os(iOS)`, jamais par duplication de fichiers. TheNews est **multi-sources** : il agrège plusieurs journaux (Le Monde, Les Echos) dans une même interface. Deux compagnons **autonomes** (watchOS, tvOS) réutilisent une partie de ce codebase (`Source`/`Feed`/`RSSService`/`RSSParser`) sans SwiftData ni CloudKit — voir leurs sections dédiées plus bas.
 
 ## Vue d'ensemble
 
@@ -113,6 +113,39 @@ Cible d'extension `TheNewsWidgetExtension` séparée, reliée à l'app par un **
   tailles small/medium/large.
 - Le build **simulateur non signé** n'applique pas l'entitlement App Group (write = no-op) ; le build
   **signé** (device) provisionne l'App Group automatiquement — vérifié sur l'appareil.
+
+### App compagnon Apple TV (tvOS, autonome — E1 « lite »)
+
+Cible `TheNewsTV`, **sans SwiftData ni CloudKit** (contrairement à macOS/iOS) : réutilise tel quel
+`Source`/`Feed`/`RSSService`/`RSSParser`, comme la cible watchOS. Choix assumé (Vincent) : une version
+« lite » d'abord (E1), une bascule vers la sync iCloud complète plus tard (E2, mêmes modèles que
+Mac/iPhone) — voir `PLAN.md` Phase E.
+
+- **Écran d'accueil** : Briefing + Tous les articles en tête, puis les rubriques groupées par source
+  (réutilise `Feed.bySource`) — la TV a la place d'exposer tout le catalogue, contrairement aux 2 flux
+  fixes de la Watch.
+- **`TVArticle`** enrichit `ParsedArticle` du nom de sa source (que le flux RSS ne porte pas) ;
+  `TVArticleSelection` porte la liste + l'index courant pour naviguer au suivant/précédent en détail
+  sans re-fetch ni repousser d'écran.
+- **Briefing « lite »** (`TVBriefingView`) : agrège tout `Feed.builtInCatalog` en direct, garde les
+  dernières 24 h (repli sur tout si rien de récent), déduplique via une **réimplémentation minimale**
+  (tokens + Jaccard) de `RelatedArticlesEngine`/`BriefingEngine` plutôt que de les réutiliser — ceux-ci
+  dépendent de `ModelContext`/`Article` (SwiftData), hors périmètre de la version lite.
+- **Lu/non-lu** (`TVReadStore`, `@Observable`) : suivi **en mémoire pour la session uniquement** (pas
+  de `Article.isRead` persisté comme macOS/iOS) — mêmes codes visuels (pastille + titre en gras).
+  ⚠️ Marquer un article lu **mute un état observé par l'écran-liste encore vivant sous la pile de
+  navigation** (ses lignes lisent `TVReadStore`) ; le faire de façon synchrone dans `onAppear`, pendant
+  l'animation de poussée d'écran, faisait **rebondir immédiatement** vers la liste sur tvOS. Fix :
+  `.task(id:)` + court délai, pour ne toucher l'état partagé qu'une fois la transition terminée.
+- **Navigation télécommande** dans le détail (`TVArticleDetailView`) : gauche/droite = article
+  suivant/précédent (`onMoveCommand`), haut/bas = défilement du contenu. ⚠️ tvOS pilote le scroll
+  **par le focus**, comme une `List` : un unique bloc `.focusable()` pour tout l'écran fait que
+  haut/bas n'ont rien « en dessous » vers quoi déplacer le focus, donc tombent (comme gauche/droite)
+  dans `onMoveCommand` — sans gestion explicite, ils ne font rien. Fix : **3 blocs focusables**
+  distincts (image / texte / pied), focus effect désactivé (`.focusEffectDisabled()`, ce ne sont pas
+  des boutons) — le focus engine déplace nativement le focus (et le scroll) entre eux, et
+  gauche/droite, qu'aucun bloc ne gère (empilés verticalement), remonte à `onMoveCommand`.
+- Pas d'icône layered/Top Shelf (chantier de polish séparé, non bloquant).
 
 ### Sync iCloud (SwiftData + CloudKit)
 

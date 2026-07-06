@@ -5,9 +5,12 @@ import SwiftUI
 /// Watch). Navigation à la télécommande via le focus engine natif SwiftUI.
 @main
 struct TheNewsTVApp: App {
+    @State private var readStore = TVReadStore()
+
     var body: some Scene {
         WindowGroup {
             TVFeedView()
+                .environment(readStore)
         }
     }
 }

@@ -1,13 +1,19 @@
 import SwiftUI
 
-/// Liste des articles d'une rubrique, récupérée en direct (pas de cache
-/// persistant). Sélectionner un article pousse son détail.
+/// Liste des articles d'une ou plusieurs rubriques (rubrique unique, ou tout le
+/// catalogue pour « Tous les articles »), récupérée en direct — pas de cache
+/// persistant. Sélectionner un article pousse son détail.
 struct TVArticleListView: View {
-    let feed: Feed
+    let title: String
+    let feeds: [Feed]
 
-    @State private var articles: [ParsedArticle] = []
+    @State private var articles: [TVArticle] = []
     @State private var loading = true
     @State private var errorMessage: String?
+
+    /// Borne le nombre d'articles affichés quand plusieurs flux sont agrégés
+    /// (évite une liste démesurée sur « Tous les articles »).
+    private static let displayLimit = 80
 
     var body: some View {
         Group {
@@ -19,26 +25,14 @@ struct TVArticleListView: View {
             } else if articles.isEmpty {
                 ContentUnavailableView("Aucun article", systemImage: "tray")
             } else {
-                List(articles, id: \.id) { article in
-                    NavigationLink(value: article) {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text(article.title).font(.headline)
-                            if !article.summary.isEmpty {
-                                Text(article.summary)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-                        }
-                        .padding(.vertical, 6)
+                List(Array(articles.enumerated()), id: \.element.id) { index, article in
+                    NavigationLink(value: TVArticleSelection(articles: articles, index: index)) {
+                        TVArticleRow(article: article)
                     }
                 }
             }
         }
-        .navigationTitle(feed.title)
-        .navigationDestination(for: ParsedArticle.self) { article in
-            TVArticleDetailView(article: article, sourceName: feed.source?.name ?? "")
-        }
+        .navigationTitle(title)
         .task { await load() }
         .refreshable { await load() }
     }
@@ -46,11 +40,9 @@ struct TVArticleListView: View {
     private func load() async {
         loading = true
         errorMessage = nil
-        do {
-            articles = try await RSSService().fetch(feed)
-        } catch {
-            errorMessage = error.localizedDescription
-        }
+        let fetched = await TVArticle.fetch(from: feeds)
+        articles = Array(fetched.prefix(Self.displayLimit))
+        if articles.isEmpty { errorMessage = "Impossible de charger le(s) flux." }
         loading = false
     }
 }

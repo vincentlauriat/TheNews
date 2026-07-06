@@ -25,6 +25,12 @@ schemes:
         TheNewsWatch: all
     run:
       config: Debug
+  TheNewsTV:
+    build:
+      targets:
+        TheNewsTV: all
+    run:
+      config: Debug
 
 targets:
   # ---------------------------------------------------------------------------
@@ -228,4 +234,35 @@ targets:
         CFBundleDisplayName: TheNews
         WKApplication: true
         WKCompanionAppBundleIdentifier: fr.vincentlauriat.thenews
+        UILaunchScreen: {}
+
+  # ---------------------------------------------------------------------------
+  # Apple TV — app tvOS autonome (lite : fetch RSS direct, pas de sync iCloud ;
+  # cf. PLAN.md Phase E1/E2). Pas d'icône layered/Top Shelf pour l'instant
+  # (chantier de polish séparé, non bloquant pour le build).
+  # ---------------------------------------------------------------------------
+  TheNewsTV:
+    type: application
+    platform: tvOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: TheNewsTV
+      - path: TheNews/Models/Source.swift       # partagés (catalogue + RSS)
+      - path: TheNews/Models/Feed.swift
+      - path: TheNews/Services/RSSService.swift
+      - path: TheNews/Services/RSSParser.swift
+    settings:
+      base:
+        PRODUCT_NAME: TheNewsTV
+        PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.tvos
+        SWIFT_VERSION: "5.9"
+        MARKETING_VERSION: "1.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        TVOS_DEPLOYMENT_TARGET: "17.0"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: KFLACS69T9
+    info:
+      path: TheNewsTV/Info.plist
+      properties:
+        CFBundleDisplayName: TheNews
         UILaunchScreen: {}

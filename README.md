@@ -7,7 +7,7 @@
 Agrège *Le Monde*, *Les Echos* et **n'importe quel flux RSS** dans une seule app, regroupe
 automatiquement les articles qui parlent du même sujet, et te livre un briefing quotidien condensé.
 
-![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20iOS%20%7C%20iPadOS-blue)
+![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20iOS%20%7C%20iPadOS%20%7C%20watchOS%20%7C%20tvOS-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-SwiftData%20%7C%20WidgetKit%20%7C%20CloudKit-4B9CD3)
 ![Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)
@@ -43,6 +43,7 @@ La plupart des applications d'actualité te lient à **un seul média** ou envoi
 | ✨ | **Synthèse IA on-device** | Depuis une liste, dégage les grands thèmes de l'actu via **Apple Intelligence** (Foundation Models), **100 % sur l'appareil**. Longueur, format, ton et nombre d'articles **configurables**. |
 | 📱 | **Widget & iCloud** | Widget d'écran d'accueil (WidgetKit, 3 tailles) **sur iOS et macOS** + **sync iCloud** (CloudKit) de tes abonnements, favoris, sujets de veille et flux perso entre tes appareils. |
 | ⌚ | **App Apple Watch** | App compagnon watchOS autonome : les gros titres du Monde et des Echos, chargés en direct sur ta montre. |
+| 📺 | **App Apple TV** | App compagnon tvOS autonome : Briefing, Tous les articles et toutes les rubriques sur grand écran, miniatures, détail image + chapô, navigation complète à la télécommande. |
 
 Plus le socle classique : veille par mots-clés, alertes locales, favoris, partage natif, 3 colonnes
 (rubriques · articles · détail), swipe entre articles sur iOS (**mode « tous » ou « non lus »**),
@@ -111,7 +112,9 @@ TheNews/
 │                               # NotificationService, RefreshEngine, WidgetPublisher
 ├── Shared/                     # WidgetSnapshot (App Group, partagé avec le widget)
 └── Localization/               # AppSettings + tables fr/en
-TheNewsWidget/                  # extension WidgetKit (iOS)
+TheNewsWidget/                   # extension WidgetKit (iOS + macOS)
+TheNewsWatch/                    # app compagnon watchOS autonome (fetch RSS direct)
+TheNewsTV/                       # app compagnon tvOS autonome (fetch RSS direct, sans SwiftData)
 Scripts/                        # release.sh, make-thenews-icon.swift
 ```
 

@@ -26,6 +26,9 @@ dmg-staging/
 .build/
 .swiftpm/
 
+# ── Sparkle CLI tools (downloaded by Scripts/release.sh, not versioned) ─
+.sparkle-tools/
+
 # ── Tooling / local state (not for publication) ────────
 .omc/
 .claude/

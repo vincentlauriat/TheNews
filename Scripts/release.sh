@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Build → sign (Developer ID + Hardened Runtime) → DMG → notarize → staple.
-# Generic macOS release pipeline (no Sparkle auto-update).
+# Build → sign (Developer ID + Hardened Runtime) → DMG → notarize → staple →
+# Sparkle-sign + appcast. macOS-only (iOS/watchOS/tvOS ship via Xcode/TestFlight).
 #
 # Usage:   ./Scripts/release.sh <version>
 # Example: ./Scripts/release.sh 1.0.0
@@ -11,6 +11,21 @@
 # If you ever need to recreate the profile:
 #   xcrun notarytool store-credentials "AppliMacVincentGithub" \
 #     --apple-id "vincent@lauriat.fr" --team-id "KFLACS69T9"
+#
+# ┌──────────────────────────────────────────────────────────────────────────┐
+# │ SPARKLE SIGNING KEY — DO NOT REGENERATE                                    │
+# │                                                                            │
+# │ Updates are EdDSA-signed with the private key in the login keychain under  │
+# │ account "TheNews" (used by sign_update below). Its public half is         │
+# │ embedded as SUPublicEDKey in project.yml:                                  │
+# │     j665v9PJTV2rJXq9JJay5Ze4bUp46VIknS1itkuJu0w=                          │
+# │                                                                            │
+# │ NEVER run `generate_keys` again or import a new key into this account, and │
+# │ NEVER change SUPublicEDKey — every already-installed app would reject all  │
+# │ future auto-updates (this bit MarkdownViewer once; see its release.sh).   │
+# │ Back this key up (`generate_keys -x backup.txt --account TheNews`)         │
+# │ somewhere safe so it can never be lost.                                   │
+# └──────────────────────────────────────────────────────────────────────────┘
 #
 # Overridable via env: APP_NAME, SCHEME, PROJECT, SIGNING_IDENTITY, NOTARY_PROFILE
 set -euo pipefail
@@ -73,8 +88,19 @@ codesign_ts() {
   return 1
 }
 echo "▶︎ codesign (Developer ID, Hardened Runtime)"
-# Sign nested code first (e.g. the WidgetKit extension) — codesign refuses to
-# seal a wrapping bundle whose embedded components aren't already signed.
+# Sign nested code first — codesign refuses to seal a wrapping bundle whose
+# embedded components aren't already signed. Deepest first: Sparkle's own
+# nested binaries, then the WidgetKit extension, then the app itself.
+SPARKLE_FW="$STAGING/Contents/Frameworks/Sparkle.framework"
+if [ -d "$SPARKLE_FW" ]; then
+  echo "  … signing Sparkle.framework nested binaries"
+  SPARKLE_VER="$SPARKLE_FW/Versions/B"
+  codesign_ts "$SPARKLE_VER/Autoupdate"
+  codesign_ts "$SPARKLE_VER/XPCServices/Downloader.xpc"
+  codesign_ts "$SPARKLE_VER/XPCServices/Installer.xpc"
+  codesign_ts "$SPARKLE_VER/Updater.app"
+  codesign_ts "$SPARKLE_FW"
+fi
 if [ -d "$STAGING/Contents/PlugIns" ]; then
   while IFS= read -r -d '' appex; do
     echo "  … signing $(basename "$appex")"
@@ -138,9 +164,53 @@ echo "▶︎ staple"
 xcrun stapler staple "$DMG"
 xcrun stapler validate "$DMG"
 
+# 7. Sign the DMG with the Sparkle EdDSA key and write appcast.xml so the
+# in-app updater (Sparkle 2) can serve this version.
+SPARKLE_VERSION="2.9.1"
+SPARKLE_TOOLS="$ROOT/.sparkle-tools"
+if [ ! -x "$SPARKLE_TOOLS/bin/sign_update" ]; then
+  echo "▶︎ fetching Sparkle $SPARKLE_VERSION tools (one-time setup)"
+  mkdir -p "$SPARKLE_TOOLS"
+  curl -fsSL "https://github.com/sparkle-project/Sparkle/releases/download/$SPARKLE_VERSION/Sparkle-$SPARKLE_VERSION.tar.xz" \
+    | tar -xJ -C "$SPARKLE_TOOLS"
+fi
+
+echo "▶︎ Sparkle-signing $DMG"
+# sign_update prints: sparkle:edSignature="..." length="<bytes>" — don't add
+# our own length= on <enclosure>, that would duplicate the attribute.
+SPARKLE_SIG_LINE="$("$SPARKLE_TOOLS/bin/sign_update" --account TheNews "$DMG")"
+
+echo "▶︎ writing $ROOT/appcast.xml (sparkle:version=$BUILD_NUMBER)"
+PUB_DATE="$(date -R)"
+cat > "$ROOT/appcast.xml" <<APPCAST
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>TheNews</title>
+    <link>https://raw.githubusercontent.com/vincentlauriat/TheNews/main/appcast.xml</link>
+    <description>TheNews release feed</description>
+    <language>fr</language>
+    <item>
+      <title>v$VERSION</title>
+      <pubDate>$PUB_DATE</pubDate>
+      <sparkle:version>$BUILD_NUMBER</sparkle:version>
+      <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <sparkle:releaseNotesLink>https://github.com/vincentlauriat/TheNews/releases/tag/v$VERSION</sparkle:releaseNotesLink>
+      <enclosure
+        url="https://github.com/vincentlauriat/TheNews/releases/download/v$VERSION/$(basename "$DMG")"
+        type="application/octet-stream"
+        $SPARKLE_SIG_LINE />
+    </item>
+  </channel>
+</rss>
+APPCAST
+
 SIZE="$(du -h "$DMG" | cut -f1 | tr -d ' ')"
 echo
-echo "✅ Built, signed, notarized & stapled: $(basename "$DMG") ($SIZE)"
+echo "✅ Built, signed, notarized, stapled & Sparkle-signed: $(basename "$DMG") ($SIZE)"
+echo "✅ appcast.xml written for v$VERSION"
 echo
-echo "Publish on GitHub:"
+echo "Publish on GitHub, then push the appcast so existing installs see the update:"
 echo "  gh release create v$VERSION \"$DMG\" --title \"v$VERSION\" --generate-notes"
+echo "  git add appcast.xml && git commit -m 'docs: appcast for v$VERSION' && git push"

@@ -10,7 +10,7 @@ automatiquement les articles qui parlent du même sujet, et te livre un briefing
 ![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20iOS%20%7C%20iPadOS%20%7C%20watchOS%20%7C%20tvOS-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange)
 ![SwiftUI](https://img.shields.io/badge/SwiftUI-SwiftData%20%7C%20WidgetKit%20%7C%20CloudKit-4B9CD3)
-![Dependencies](https://img.shields.io/badge/dependencies-zero-brightgreen)
+![Dependencies](https://img.shields.io/badge/dependencies-Sparkle%20only-brightgreen)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 ![Release](https://img.shields.io/github/v/release/vincentlauriat/TheNews)
 
@@ -30,8 +30,9 @@ La plupart des applications d'actualité te lient à **un seul média** ou envoi
 - **Multi-sources** — tes journaux et tes flux, réunis dans une interface unique, groupés par source.
 - **Sans serveur** — tout le traitement (parsing, veille, regroupement, résumé) se fait **sur l'appareil**.
   Aucune télémétrie, aucun compte.
-- **Zéro dépendance** — que du natif Apple : SwiftData, XMLParser, UserNotifications, BackgroundTasks,
-  WidgetKit, CloudKit.
+- **Quasi zéro dépendance** — que du natif Apple : SwiftData, XMLParser, UserNotifications,
+  BackgroundTasks, WidgetKit, CloudKit. Seule exception : [Sparkle](https://sparkle-project.org)
+  pour l'auto-update macOS (hors App Store).
 
 ## Fonctionnalités inédites
 
@@ -84,6 +85,8 @@ Application SwiftUI **à codebase unique partagé** entre macOS et iOS (`#if os(
   un `Feed` quelconque.
 - **On-device, sans serveur** : regroupement cross-source et briefing sont de simples algorithmes
   locaux (tokenisation normalisée + similarité de Jaccard).
+- **Auto-update macOS** : [Sparkle](https://sparkle-project.org) vérifie une fois par jour
+  (`« Rechercher les mises à jour… »` dans le menu app), signature EdDSA, hors App Store.
 
 Détails et diagrammes dans [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
@@ -97,7 +100,8 @@ open TheNews.xcodeproj        # macOS : scheme TheNews — iOS : scheme TheNewsi
 ```
 
 Projet Xcode **généré** (le `.xcodeproj` n'est pas versionné). Release macOS :
-`./Scripts/release.sh 1.0.0` (build → sign Developer ID → DMG → notarize → staple).
+`./Scripts/release.sh 1.2.0` (build → sign Developer ID → DMG → notarize → staple → Sparkle-sign →
+appcast).
 
 ## Structure
 

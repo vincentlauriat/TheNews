@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>TheNews</title>
+    <link>https://raw.githubusercontent.com/vincentlauriat/TheNews/main/appcast.xml</link>
+    <description>TheNews release feed</description>
+    <language>fr</language>
+    <item>
+      <title>v1.2.1</title>
+      <pubDate>Mon, 06 Jul 2026 15:53:08 +0200</pubDate>
+      <sparkle:version>47</sparkle:version>
+      <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
+      <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
+      <sparkle:releaseNotesLink>https://github.com/vincentlauriat/TheNews/releases/tag/v1.2.1</sparkle:releaseNotesLink>
+      <enclosure
+        url="https://github.com/vincentlauriat/TheNews/releases/download/v1.2.1/TheNews-1.2.1.dmg"
+        type="application/octet-stream"
+        sparkle:edSignature="TB1k9PxjN9o7WT0IIgM/vciDgLNFhX3A/CB3aRFSO77GWmjOHpjbpt65tltm1WMKy/76M43HAtW46Vdi8VnAAw==" length="2782238" />
+    </item>
+  </channel>
+</rss>

@@ -26,10 +26,7 @@
     background:rgba(11,16,32,.7);border-bottom:1px solid var(--line)}
   nav .wrap{display:flex;align-items:center;gap:14px;height:60px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.05rem}
-  .logo{width:30px;height:30px;border-radius:8px;
-    background:linear-gradient(160deg,#1b2a5a,#0b132c);display:flex;align-items:center;justify-content:center;
-    font-family:Georgia,serif;font-weight:700;color:#fff;font-size:.8rem;border:1px solid var(--line);position:relative;overflow:hidden}
-  .logo::after{content:"";position:absolute;left:0;right:0;bottom:0;height:5px;background:var(--salmon)}
+  .logo{width:30px;height:30px;border-radius:8px;display:block;border:1px solid var(--line)}
   .spacer{flex:1}
   .langtog button{background:transparent;border:1px solid var(--line);color:var(--muted);
     border-radius:8px;padding:4px 9px;cursor:pointer;font-weight:700;font-size:.8rem}
@@ -85,7 +82,7 @@
 <body class="lang-en">
 
 <nav><div class="wrap">
-  <div class="brand"><span class="logo">TN</span> TheNews</div>
+  <div class="brand"><img class="logo" src="icon.png" alt="TheNews icon"> TheNews</div>
   <div class="spacer"></div>
   <div class="langtog">
     <button id="l-en" class="on" onclick="setLang('en')">EN</button>
@@ -95,7 +92,7 @@
 </div></nav>
 
 <header><div class="wrap">
-  <span class="tag-pill"><span class="en">macOS · iOS · iPadOS</span><span class="fr">macOS · iOS · iPadOS</span></span>
+  <span class="tag-pill"><span class="en">macOS · iOS · iPadOS · watchOS · tvOS</span><span class="fr">macOS · iOS · iPadOS · watchOS · tvOS</span></span>
   <h1><span class="en">Your news, <span class="grad">from every source</span>, in one app</span>
       <span class="fr">Ton actu, <span class="grad">de toutes les sources</span>, dans une seule app</span></h1>
   <p class="lead">
@@ -158,6 +155,12 @@
       <p><span class="en">A standalone watchOS companion: the top headlines from Le Monde and Les Echos, loaded live on your wrist.</span>
         <span class="fr">Une app compagnon watchOS autonome : les gros titres du Monde et des Echos, chargés en direct à ton poignet.</span></p>
     </div>
+    <div class="card">
+      <div class="emoji">📺</div>
+      <h3><span class="en">Apple TV app</span><span class="fr">App Apple TV</span></h3>
+      <p><span class="en">A standalone tvOS companion: Briefing, all articles and every source's sections on the big screen, with thumbnails and full remote navigation.</span>
+        <span class="fr">Une app compagnon tvOS autonome : Briefing, tous les articles et les rubriques de chaque source sur grand écran, avec miniatures et navigation complète à la télécommande.</span></p>
+    </div>
   </div>
 </div></section>
 
@@ -172,8 +175,13 @@
     <div class="row"><div><span class="en">On-device AI digest</span><span class="fr">Synthèse IA on-device</span></div><div class="c">✅</div><div class="c">✅</div></div>
     <div class="row"><div><span class="en">Home-screen widget</span><span class="fr">Widget d'accueil</span></div><div class="c">✅</div><div class="c">✅</div></div>
     <div class="row"><div><span class="en">Apple Watch companion</span><span class="fr">App Apple Watch</span></div><div class="c">—</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">Apple TV companion</span><span class="fr">App Apple TV</span></div><div class="c">—</div><div class="c">—</div></div>
     <div class="row"><div><span class="en">iCloud sync</span><span class="fr">Sync iCloud</span></div><div class="c">✅</div><div class="c">✅</div></div>
   </div>
+  <p class="sub" style="margin-top:14px;font-size:.85rem">
+    <span class="en">Apple Watch &amp; Apple TV are separate standalone companion apps (not tied to macOS or iOS).</span>
+    <span class="fr">Apple Watch et Apple TV sont des apps compagnons autonomes séparées (indépendantes de macOS ou iOS).</span>
+  </p>
 </div></section>
 
 <section><div class="wrap">

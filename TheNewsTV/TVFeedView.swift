@@ -1,6 +1,7 @@
 import SwiftUI
+import SwiftData
 
-/// Pousse soit le Briefing, soit l'agrégat de tout le catalogue (« Tous les
+/// Pousse soit le Briefing, soit l'agrégat des rubriques abonnées (« Tous les
 /// articles »), soit une seule rubrique. Les trois passent par la même
 /// navigation **par valeur** (`navigationDestination(for:)`) — mélanger un
 /// `NavigationLink(destination:)` classique pour le Briefing avec les autres
@@ -11,7 +12,7 @@ import SwiftUI
 private enum TVFeedSelection: Hashable {
     case briefing
     case all
-    case feed(Feed)
+    case feed(String)   // Feed.id
 }
 
 /// Ligne icône + nom d'une rubrique, avec un espacement généreux entre les
@@ -30,10 +31,27 @@ private struct TVFeedRow: View {
 }
 
 /// Écran racine tvOS : Briefing + Tous les articles en tête, puis les rubriques
-/// groupées par source (réutilise `Feed.bySource`, le même catalogue que la
-/// sidebar macOS/iOS). La TV a la place d'exposer tout le catalogue,
-/// contrairement à la Watch qui se limite à 2 flux phares.
+/// **abonnées** groupées par source. Depuis la Phase E2, la liste des rubriques
+/// affichées reflète les vrais abonnements synchronisés via iCloud (mêmes
+/// `FeedSubscription` que macOS/iOS) — plus tout le catalogue intégré comme en
+/// E1.
 struct TVFeedView: View {
+    let container: ModelContainer
+
+    @Query(sort: \FeedSubscription.subscribedAt) private var subscriptions: [FeedSubscription]
+
+    private var subscribedBySource: [(source: Source, feeds: [Feed])] {
+        let ids = Set(subscriptions.map(\.feedID))
+        return Feed.bySource
+            .map { (source: $0.source, feeds: $0.feeds.filter { ids.contains($0.id) }) }
+            .filter { !$0.feeds.isEmpty }
+    }
+
+    private var subscribedFeedIDs: [String] {
+        let ids = Set(subscriptions.map(\.feedID))
+        return Feed.catalog.map(\.id).filter { ids.contains($0) }
+    }
+
     var body: some View {
         NavigationStack {
             List {
@@ -45,13 +63,20 @@ struct TVFeedView: View {
                         TVFeedRow(title: "Tous les articles", symbol: "tray.full")
                     }
                 }
-                ForEach(Feed.bySource, id: \.source.id) { group in
+                ForEach(subscribedBySource, id: \.source.id) { group in
                     Section(group.source.name) {
                         ForEach(group.feeds) { feed in
-                            NavigationLink(value: TVFeedSelection.feed(feed)) {
+                            NavigationLink(value: TVFeedSelection.feed(feed.id)) {
                                 TVFeedRow(title: feed.title, symbol: feed.symbol)
                             }
                         }
+                    }
+                }
+                if subscribedBySource.isEmpty {
+                    Section {
+                        Text("Aucune rubrique abonnée. Abonnez-vous depuis TheNews sur Mac ou iPhone — la synchronisation iCloud les affichera ici.")
+                            .font(.callout)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -59,11 +84,11 @@ struct TVFeedView: View {
             .navigationDestination(for: TVFeedSelection.self) { selection in
                 switch selection {
                 case .briefing:
-                    TVBriefingView()
+                    TVBriefingView(container: container)
                 case .all:
-                    TVArticleListView(title: "Tous les articles", feeds: Feed.builtInCatalog)
-                case .feed(let feed):
-                    TVArticleListView(title: feed.title, feeds: [feed])
+                    TVArticleListView(title: "Tous les articles", feedIDs: subscribedFeedIDs, container: container)
+                case .feed(let id):
+                    TVArticleListView(title: Feed.byID(id)?.title ?? "", feedIDs: [id], container: container)
                 }
             }
             .navigationDestination(for: TVArticleSelection.self) { selection in

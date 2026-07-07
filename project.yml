@@ -262,18 +262,35 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: TheNewsTV
-      - path: TheNews/Models/Source.swift       # partagés (catalogue + RSS)
+        excludes:
+          - "**/.omc/**"
+          - "**/*.entitlements"
+      - path: TheNews/Models/Source.swift       # partagés (catalogue + RSS + persistance)
       - path: TheNews/Models/Feed.swift
+      - path: TheNews/Models/Article.swift
+      - path: TheNews/Models/FeedSubscription.swift
+      - path: TheNews/Models/CustomFeed.swift
+      - path: TheNews/Models/WatchTopic.swift
       - path: TheNews/Services/RSSService.swift
       - path: TheNews/Services/RSSParser.swift
+      - path: TheNews/Services/FeedStore.swift
+      - path: TheNews/Services/SubscriptionStore.swift
+      - path: TheNews/Services/CustomFeedStore.swift
+      - path: TheNews/Services/BriefingEngine.swift
+      - path: TheNews/Services/RelatedArticlesEngine.swift
+      - path: TheNews/Services/MatchingEngine.swift
     settings:
       base:
         PRODUCT_NAME: TheNewsTV
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.tvos
+        ASSETCATALOG_COMPILER_APPICON_NAME: "App Icon & Top Shelf Image"
         SWIFT_VERSION: "5.9"
         MARKETING_VERSION: "1.2.1"
         CURRENT_PROJECT_VERSION: "1"
         TVOS_DEPLOYMENT_TARGET: "17.0"
+        CODE_SIGN_ENTITLEMENTS: TheNewsTV/TheNewsTV.entitlements
+        # Signature dev automatique (team KFLACS69T9) : requise pour activer CloudKit,
+        # comme sur macOS/iOS (Phase E2 — mêmes abonnements/favoris/flux perso).
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: KFLACS69T9
     info:

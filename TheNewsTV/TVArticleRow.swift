@@ -1,13 +1,11 @@
 import SwiftUI
 
 /// Ligne d'article avec miniature — partagée par la liste de rubrique, l'agrégat
-/// « Tous les articles » et le « Briefing ».
+/// « Tous les articles » et le « Briefing ». Depuis la Phase E2, `article` est
+/// l'`Article` SwiftData réel (partagé iCloud) : le statut lu/non-lu vient de
+/// `article.isRead`, persisté — plus de `TVReadStore` en mémoire.
 struct TVArticleRow: View {
-    let article: TVArticle
-
-    @Environment(TVReadStore.self) private var readStore
-
-    private var isRead: Bool { readStore.isRead(article.id) }
+    let article: Article
 
     var body: some View {
         HStack(alignment: .top, spacing: 20) {
@@ -22,11 +20,11 @@ struct TVArticleRow: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
 
             VStack(alignment: .leading, spacing: 6) {
-                Text(article.sourceName.uppercased())
+                Text((article.feed?.source?.name ?? "").uppercased())
                     .font(.caption).bold()
                     .foregroundStyle(.tint)
                 HStack(alignment: .top, spacing: 8) {
-                    if !isRead {
+                    if !article.isRead {
                         Circle()
                             .fill(Color.accentColor)
                             .frame(width: 10, height: 10)
@@ -34,8 +32,8 @@ struct TVArticleRow: View {
                     }
                     Text(article.title)
                         .font(.headline)
-                        .fontWeight(isRead ? .regular : .semibold)
-                        .foregroundStyle(isRead ? .secondary : .primary)
+                        .fontWeight(article.isRead ? .regular : .semibold)
+                        .foregroundStyle(article.isRead ? .secondary : .primary)
                         .lineLimit(2)
                 }
                 if !article.summary.isEmpty {

@@ -114,29 +114,47 @@ Cible d'extension `TheNewsWidgetExtension` séparée, reliée à l'app par un **
 - Le build **simulateur non signé** n'applique pas l'entitlement App Group (write = no-op) ; le build
   **signé** (device) provisionne l'App Group automatiquement — vérifié sur l'appareil.
 
-### App compagnon Apple TV (tvOS, autonome — E1 « lite »)
+### App compagnon Apple TV (tvOS, synchronisé iCloud — E2)
 
-Cible `TheNewsTV`, **sans SwiftData ni CloudKit** (contrairement à macOS/iOS) : réutilise tel quel
-`Source`/`Feed`/`RSSService`/`RSSParser`, comme la cible watchOS. Choix assumé (Vincent) : une version
-« lite » d'abord (E1), une bascule vers la sync iCloud complète plus tard (E2, mêmes modèles que
-Mac/iPhone) — voir `PLAN.md` Phase E.
+Cible `TheNewsTV`. Depuis la Phase E2 (2026-07-06), **mêmes modèles SwiftData + même sync CloudKit**
+que macOS/iOS (`iCloud.fr.vincentlauriat.thenews`) : mêmes abonnements, favoris et flux perso
+apparaissent sur la TV. Choix assumé (Vincent) : une version « lite » autonome d'abord (E1, fetch RSS
+direct, sans SwiftData), puis cette bascule complète (E2) — voir `PLAN.md` Phase E. Entitlement dédié
+`TheNewsTV/TheNewsTV.entitlements` (icloud-services + icloud-container-identifiers ; pas d'App Group,
+pas de widget sur TV).
 
-- **Écran d'accueil** : Briefing + Tous les articles en tête, puis les rubriques groupées par source
-  (réutilise `Feed.bySource`) — la TV a la place d'exposer tout le catalogue, contrairement aux 2 flux
-  fixes de la Watch.
-- **`TVArticle`** enrichit `ParsedArticle` du nom de sa source (que le flux RSS ne porte pas) ;
-  `TVArticleSelection` porte la liste + l'index courant pour naviguer au suivant/précédent en détail
-  sans re-fetch ni repousser d'écran.
-- **Briefing « lite »** (`TVBriefingView`) : agrège tout `Feed.builtInCatalog` en direct, garde les
-  dernières 24 h (repli sur tout si rien de récent), déduplique via une **réimplémentation minimale**
-  (tokens + Jaccard) de `RelatedArticlesEngine`/`BriefingEngine` plutôt que de les réutiliser — ceux-ci
-  dépendent de `ModelContext`/`Article` (SwiftData), hors périmètre de la version lite.
-- **Lu/non-lu** (`TVReadStore`, `@Observable`) : suivi **en mémoire pour la session uniquement** (pas
-  de `Article.isRead` persisté comme macOS/iOS) — mêmes codes visuels (pastille + titre en gras).
-  ⚠️ Marquer un article lu **mute un état observé par l'écran-liste encore vivant sous la pile de
-  navigation** (ses lignes lisent `TVReadStore`) ; le faire de façon synchrone dans `onAppear`, pendant
-  l'animation de poussée d'écran, faisait **rebondir immédiatement** vers la liste sur tvOS. Fix :
-  `.task(id:)` + court délai, pour ne toucher l'état partagé qu'une fois la transition terminée.
+- **Écran d'accueil** (`TVFeedView`) : Briefing + Tous les articles en tête, puis les rubriques
+  **abonnées** groupées par source (`@Query` sur `FeedSubscription` + `Feed.bySource`, même pattern
+  que `FeedsSidebarView` macOS/iOS). ⚠️ Changement de comportement assumé par rapport à l'E1 : la TV
+  n'affiche plus tout `Feed.bySource`/`builtInCatalog` mais uniquement ce qui est réellement abonné
+  ailleurs (Mac/iPhone) — reflète l'intention de PLAN.md (« mêmes abonnements »), au prix de ne rien
+  montrer tant qu'aucun abonnement n'a synchronisé (message explicite affiché dans ce cas).
+- **`TVRefreshEngine`** : version allégée de `RefreshEngine` (macOS/iOS) — ingère les rubriques
+  abonnées dans SwiftData via `FeedStore`/`SubscriptionStore`/`CustomFeedStore`, sans notifications
+  ni publication widget (non pertinentes sur tvOS). Déclenché au lancement de l'app et à chaque
+  `.task`/`.refreshable` d'écran (lecture du cache local immédiate, réseau en tâche de fond).
+- **`TVArticleSelection`** navigue par **identifiants** (`[String]` + index), pas par instances
+  `Article` SwiftData — reste `Hashable` simple pour la navigation par valeur, et cohérent avec le
+  pattern de sélection par id déjà utilisé côté macOS/iOS (`FeedsSidebarView`/`ArticleListView`,
+  `selection: $selectedId as String?`) plutôt que par objet.
+- **Briefing** (`TVBriefingView`) réutilise directement `BriefingEngine.today(context:)` — la même
+  logique de dédup cross-source par similarité de Jaccard que macOS/iOS, plus de réimplémentation
+  locale (existait en E1 faute de SwiftData sur cette cible).
+- **Lu/non-lu** : `article.isRead` **persisté** (SwiftData, synchronisé iCloud) — remplace
+  `TVReadStore` (en mémoire, supprimé). Mêmes codes visuels (pastille + titre en gras).
+  ⚠️ Le piège tvOS reste le même qu'en E1, indépendant de la source des données : marquer un article
+  lu **mute un état observé par l'écran-liste encore vivant sous la pile de navigation** ; le faire de
+  façon synchrone dans `onAppear`, pendant l'animation de poussée d'écran, fait **rebondir
+  immédiatement** vers la liste sur tvOS. Fix inchangé : `.task(id:)` + court délai, pour ne toucher
+  l'état partagé qu'une fois la transition terminée.
+- **`AppLocale`** : miroir minimal (`TVAppLocale.swift`, un seul `static var identifier`) plutôt que
+  d'embarquer tout `Localization/Localization.swift` — requis uniquement parce que `Article.
+  dateFormatted` (modèle partagé) le référence, non utilisé par l'UI tvOS qui formate ses dates
+  elle-même.
+- **Non testé côté agent** : la sync réelle nécessite un compte iCloud connecté (absent du
+  simulateur — confirmé sans crash, repli local, `CKAccountStatusNoAccount` dans les logs, exactement
+  le comportement documenté pour macOS/iOS sans entitlement actif). Validation sur Apple TV physique
+  avec le même compte iCloud que Mac/iPhone : à faire par Vincent.
 - **Navigation télécommande** dans le détail (`TVArticleDetailView`) : gauche/droite = article
   suivant/précédent (`onMoveCommand`), haut/bas = défilement du contenu. ⚠️ tvOS pilote le scroll
   **par le focus**, comme une `List` : un unique bloc `.focusable()` pour tout l'écran fait que
@@ -145,7 +163,17 @@ Mac/iPhone) — voir `PLAN.md` Phase E.
   distincts (image / texte / pied), focus effect désactivé (`.focusEffectDisabled()`, ce ne sont pas
   des boutons) — le focus engine déplace nativement le focus (et le scroll) entre eux, et
   gauche/droite, qu'aucun bloc ne gère (empilés verticalement), remonte à `onMoveCommand`.
-- Pas d'icône layered/Top Shelf (chantier de polish séparé, non bloquant).
+- **Icône layered + Top Shelf** (`App Icon & Top Shelf Image.brandassets`, généré par
+  `Scripts/make-thenewstv-icon.swift`, même rosace à 8 pointes facettée que macOS/iOS/watchOS depuis
+  le 2026-07-07) : 3 couches
+  parallaxe (Back/Middle/Front) pour l'App Icon, bannières Top Shelf + Top Shelf Wide, icône App
+  Store à plat (sans alpha). ⚠️ Sur ce toolchain (Xcode 26 beta / SDK tvOS 26), `actool` ignore
+  silencieusement un catalogue `.brandassets` classique si le `Contents.json` racine n'a pas de
+  tableau `"assets"` déclarant explicitement `role` (`primary-app-icon`, `top-shelf-image`,
+  `top-shelf-image-wide`) pour chaque item — sans erreur ni `CFBundleIcons` généré, juste des
+  warnings « unassigned item » et une icône absente à l'exécution. `App Icon - App Store.imageset`
+  reste signalé "unassigned" (aucun `role` documenté pour lui) — sans conséquence, il n'est utilisé
+  qu'à l'export App Store Connect.
 
 ### Sync iCloud (SwiftData + CloudKit)
 

@@ -1,0 +1,18 @@
+{
+  "images" : [
+    {
+      "idiom" : "tv",
+      "scale" : "1x",
+      "filename" : "icon-back-400x240.png"
+    },
+    {
+      "idiom" : "tv",
+      "scale" : "2x",
+      "filename" : "icon-back-800x480.png"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

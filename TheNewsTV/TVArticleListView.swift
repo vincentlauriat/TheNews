@@ -1,15 +1,17 @@
 import SwiftUI
+import SwiftData
 
-/// Liste des articles d'une ou plusieurs rubriques (rubrique unique, ou tout le
-/// catalogue pour « Tous les articles »), récupérée en direct — pas de cache
-/// persistant. Sélectionner un article pousse son détail.
+/// Liste des articles d'une ou plusieurs rubriques abonnées : lit le cache
+/// SwiftData local (partagé iCloud avec macOS/iOS), puis déclenche un
+/// rafraîchissement réseau qui réinsère les nouveautés dans ce même cache.
 struct TVArticleListView: View {
     let title: String
-    let feeds: [Feed]
+    let feedIDs: [String]
+    let container: ModelContainer
 
-    @State private var articles: [TVArticle] = []
+    @Environment(\.modelContext) private var modelContext
+    @State private var articles: [Article] = []
     @State private var loading = true
-    @State private var errorMessage: String?
 
     /// Borne le nombre d'articles affichés quand plusieurs flux sont agrégés
     /// (évite une liste démesurée sur « Tous les articles »).
@@ -19,14 +21,11 @@ struct TVArticleListView: View {
         Group {
             if loading && articles.isEmpty {
                 ProgressView("Chargement…")
-            } else if let errorMessage, articles.isEmpty {
-                ContentUnavailableView("Flux indisponible", systemImage: "wifi.slash",
-                                       description: Text(errorMessage))
             } else if articles.isEmpty {
                 ContentUnavailableView("Aucun article", systemImage: "tray")
             } else {
                 List(Array(articles.enumerated()), id: \.element.id) { index, article in
-                    NavigationLink(value: TVArticleSelection(articles: articles, index: index)) {
+                    NavigationLink(value: TVArticleSelection(articleIDs: articles.map(\.id), index: index)) {
                         TVArticleRow(article: article)
                     }
                 }
@@ -39,10 +38,14 @@ struct TVArticleListView: View {
 
     private func load() async {
         loading = true
-        errorMessage = nil
-        let fetched = await TVArticle.fetch(from: feeds)
-        articles = Array(fetched.prefix(Self.displayLimit))
-        if articles.isEmpty { errorMessage = "Impossible de charger le(s) flux." }
+        reload()
+        await TVRefreshEngine.run(container: container)
+        reload()
         loading = false
+    }
+
+    private func reload() {
+        let store = FeedStore(context: modelContext)
+        articles = Array(((try? store.articles(feedIDs: feedIDs)) ?? []).prefix(Self.displayLimit))
     }
 }

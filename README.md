@@ -41,7 +41,7 @@ La plupart des applications d'actualité te lient à **un seul média** ou envoi
 | 🗞️ | **Sources RSS personnalisées** | Ajoute n'importe quel flux (validé à l'ajout). Le catalogue est **dynamique** : tes sources rejoignent le tien comme un journal de plus. |
 | 🔗 | **Regroupement cross-source** | En bas d'un article, « **Aussi couvert par…** » : le même événement vu par d'autres sources, détecté **on-device** (similarité de Jaccard sur les titres/chapôs). |
 | ☀️ | **Briefing quotidien** | Un « résumé du jour » condensé : les sujets marquants des dernières 24 h, **doublons cross-source retirés**, avec notification à l'heure que tu choisis. |
-| ✨ | **Synthèse IA on-device** | Depuis une liste, dégage les grands thèmes de l'actu via **Apple Intelligence** (Foundation Models), **100 % sur l'appareil**. Longueur, format, ton et nombre d'articles **configurables**. |
+| ✨ | **IA on-device (Apple Intelligence)** | Synthèse des grands thèmes d'une liste (longueur/format/ton configurables), **matching sémantique** des sujets de veille (capte les reformulations, pas seulement les mots-clés exacts), **résumé auto** pour les flux sans chapô, et **recherche en langage naturel**. Le tout via **Foundation Models**, 100 % sur l'appareil, avec repli automatique sans IA si indisponible. |
 | 📱 | **Widget & iCloud** | Widget d'écran d'accueil (WidgetKit, 3 tailles) **sur iOS et macOS** + **sync iCloud** (CloudKit) de tes abonnements, favoris, sujets de veille et flux perso entre tes appareils. |
 | ⌚ | **App Apple Watch** | App compagnon watchOS autonome : les gros titres du Monde et des Echos, chargés en direct sur ta montre. |
 | 📺 | **App Apple TV** | App compagnon tvOS autonome : Briefing, Tous les articles et toutes les rubriques sur grand écran, miniatures, détail image + chapô, navigation complète à la télécommande. |
@@ -59,7 +59,7 @@ apparence & langue (fr/en).
 | Regroupement cross-source « Aussi couvert par… » | ✅ | ✅ |
 | Briefing quotidien + notification programmée | ✅ | ✅ |
 | Sujets de veille par mots-clés + alertes locales | ✅ | ✅ |
-| **Synthèse IA on-device (configurable)** | ✅ | ✅ |
+| **IA on-device** (synthèse, matching sémantique, résumé auto, recherche NL) | ✅ | ✅ |
 | Rafraîchissement en tâche de fond | 30 min | `BGAppRefreshTask` |
 | Widget d'écran d'accueil | ✅ | ✅ |
 | **App compagnon Apple Watch** | — | ✅ |

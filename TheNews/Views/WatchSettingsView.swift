@@ -130,12 +130,23 @@ struct WatchSettingsView: View {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
+            // `.onTapGesture` seul (ci-dessous) n'est pas activable par VoiceOver/Switch Control :
+            // pas de bouton réel possible ici (le `Toggle` voisin doit rester une cible tactile
+            // indépendante), donc on expose l'ouverture de l'éditeur comme action d'accessibilité
+            // explicite sur ce bloc label + mots-clés.
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityAction { editingTopic = topic }
             Spacer()
             if topic.notify {
-                Image(systemName: "bell.fill").font(.caption).foregroundStyle(.secondary)
+                Image(systemName: "bell.fill")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .accessibilityLabel(settings.t("topic_notify"))
             }
             Toggle("", isOn: enabledBinding(for: topic))
                 .labelsHidden()
+                .accessibilityLabel(topic.label)
         }
         .contentShape(Rectangle())
         .onTapGesture { editingTopic = topic }

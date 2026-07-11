@@ -64,7 +64,7 @@ struct BriefingEditorialView: View {
             }
             ToolbarItem(placement: .automatic) {
                 Button {
-                    Task { await vm.refresh(context: modelContext) }
+                    Task { await vm.refresh(context: modelContext, lang: settings.effectiveLang) }
                 } label: {
                     if vm.isLoading {
                         ProgressView().scaleEffect(0.65)
@@ -101,6 +101,7 @@ private struct BriefingLeadCard: View {
         VStack(alignment: .leading, spacing: 16) {
             Button(action: open) { heroImage }
                 .buttonStyle(.plain)
+                .accessibilityLabel(article.title)   // heroImage seul n'a aucun texte à énoncer
 
             VStack(alignment: .leading, spacing: 10) {
                 meta
@@ -220,6 +221,7 @@ private struct BriefingSecondaryCard: View {
                             Image(systemName: "star.fill")
                                 .font(.caption2)
                                 .foregroundStyle(.yellow)
+                                .accessibilityHidden(true)   // statut déjà porté par le bouton favori
                         }
                     }
                     Text(article.title)

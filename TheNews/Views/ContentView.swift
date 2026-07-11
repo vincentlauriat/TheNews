@@ -18,19 +18,19 @@ struct ContentView: View {
 
     var body: some View {
         splitView
-        .task { await vm.load(context: modelContext) }
+        .task { await vm.load(context: modelContext, lang: settings.effectiveLang) }
         .task { await requestNotificationsIfNeeded() }
         #if os(macOS)
         .task { await runPeriodicRefresh() }
         #endif
         .onChange(of: feedSelection) { _, sel in
-            Task { await vm.changeSelection(sel ?? .all, context: modelContext) }
+            Task { await vm.changeSelection(sel ?? .all, context: modelContext, lang: settings.effectiveLang) }
         }
         .onChange(of: customFeeds.map(\.id)) { _, _ in
             // Un flux perso a été ajouté/supprimé (localement ou par sync iCloud) :
             // recharge le catalogue en mémoire puis rafraîchit pour charger ses articles.
             CustomFeedStore(context: modelContext).reloadCatalog()
-            Task { await vm.refresh(context: modelContext) }
+            Task { await vm.refresh(context: modelContext, lang: settings.effectiveLang) }
         }
         .onChange(of: selectedId) { _, id in
             guard let id, let article = vm.articles.first(where: { $0.id == id }) else { return }
@@ -165,6 +165,7 @@ struct ContentView: View {
                     } label: {
                         Image(systemName: "gearshape")
                     }
+                    .accessibilityLabel(settings.t("settings_title"))
                 }
             }
             #endif
@@ -202,7 +203,7 @@ struct ContentView: View {
             try? await Task.sleep(for: .seconds(1800)) // 30 min
             guard !Task.isCancelled else { break }
             await RefreshEngine.run(container: modelContext.container, notify: true)
-            await vm.refresh(context: modelContext)
+            await vm.refresh(context: modelContext, lang: settings.effectiveLang)
         }
     }
     #endif

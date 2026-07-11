@@ -18,6 +18,7 @@ struct DigestDetailView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles").foregroundStyle(.tint)
+                        .accessibilityHidden(true)   // décoratif : redondant avec le texte à côté
                     Text(settings.t("digest_subtitle"))
                         .font(.caption)
                         .foregroundStyle(.secondary)
@@ -56,6 +57,7 @@ struct DigestDetailView: View {
             Text("A").font(.system(size: 12)).foregroundStyle(.secondary)
             Slider(value: $digestFontSize, in: 12...26, step: 1)
                 .frame(maxWidth: 160)
+                .accessibilityLabel(settings.t("digest_font_size"))
             Text("A").font(.system(size: 20)).foregroundStyle(.secondary)
         }
     }
@@ -88,6 +90,7 @@ struct DigestDetailView: View {
                             .font(.system(size: 6))
                             .foregroundStyle(.tint)
                             .padding(.top, 7)
+                            .accessibilityHidden(true)   // puce décorative, pas un contenu à énoncer
                         Text(markdown(item.text))
                             .font(.system(size: digestFontSize))
                             .textSelection(.enabled)

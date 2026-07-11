@@ -110,6 +110,7 @@ struct ArticleDetailView: View {
                         Image(systemName: rel.feed?.symbol ?? "newspaper")
                             .foregroundStyle(Color.accentColor)
                             .frame(width: 22)
+                            .accessibilityHidden(true)   // décoratif : la source est déjà lue en texte
                         VStack(alignment: .leading, spacing: 2) {
                             if let source = rel.feed?.source?.name {
                                 Text(source.uppercased())
@@ -124,6 +125,7 @@ struct ArticleDetailView: View {
                         Spacer(minLength: 0)
                         Image(systemName: "arrow.up.right.square")
                             .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)   // décoratif : le bouton est déjà lu (titre + source)
                     }
                     .contentShape(Rectangle())
                 }

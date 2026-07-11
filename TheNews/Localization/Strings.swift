@@ -132,6 +132,9 @@ enum Strings {
             // Divers
             "ok": "OK",
             "error_title": "Erreur",
+            "feeds_unreachable": "Rubriques indisponibles pour le moment : ",
+            "digest_font_size": "Taille du texte de la synthèse",
+            "unread_status": "non lu",
         ],
         "en": [
             "app_name": "TheNews",
@@ -255,6 +258,9 @@ enum Strings {
 
             "ok": "OK",
             "error_title": "Error",
+            "feeds_unreachable": "Some sections are unavailable right now: ",
+            "digest_font_size": "Digest text size",
+            "unread_status": "unread",
         ],
     ]
 }

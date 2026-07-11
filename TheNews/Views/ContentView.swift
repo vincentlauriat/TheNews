@@ -68,6 +68,24 @@ struct ContentView: View {
             #endif
         }
         #if os(iOS)
+        // Modale plutôt que la colonne détail du triptyque : en largeur compacte (iPhone), la
+        // NavigationSplitView décide seule de la colonne visible d'après `selectedId` — le bouton
+        // de synthèse remettait `selectedId = nil` pour désélectionner l'article, ce que le
+        // système reprenait comme un retour arrière et empêchait d'afficher le détail (bouton IA
+        // qui ne « faisait rien » sur iPhone). La modale est indépendante de cet état de colonne.
+        .sheet(isPresented: Binding(
+            get: { vm.showingDigest },
+            set: { if !$0 { vm.showingDigest = false } }
+        )) {
+            NavigationStack {
+                DigestDetailView(vm: vm)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button(settings.t("cancel")) { vm.showingDigest = false }
+                        }
+                    }
+            }
+        }
         .sheet(isPresented: $showingSettings) {
             NavigationStack {
                 SettingsView()
@@ -98,7 +116,11 @@ struct ContentView: View {
             NavigationSplitView {
                 sidebar
             } detail: {
-                BriefingEditorialView(vm: vm)
+                if vm.showingDigest {
+                    DigestDetailView(vm: vm)
+                } else {
+                    BriefingEditorialView(vm: vm)
+                }
             }
         } else {
             NavigationSplitView {
@@ -123,9 +145,7 @@ struct ContentView: View {
             ArticleListView(vm: vm, selectedId: $selectedId)
                 .navigationSplitViewColumnWidth(min: 280, ideal: 340, max: 460)
         } detail: {
-            if vm.showingDigest {
-                DigestDetailView(vm: vm)
-            } else if vm.selectedArticle != nil {
+            if vm.selectedArticle != nil {
                 ArticlePagerView(vm: vm)   // swipe horizontal entre articles
             } else {
                 EmptySelectionView()

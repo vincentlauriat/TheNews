@@ -41,12 +41,20 @@ enum ArticleSummarizer {
         if #available(iOS 26.0, macOS 26.0, *),
            SystemLanguageModel.default.availability == .available {
             let instructions = buildInstructions(fr: fr, length: length, format: format, tone: tone)
-            let prompt = (fr ? "Articles du moment (titre — chapô) :\n" : "Current articles (title — summary):\n") + headlines
+            // Le petit modèle on-device suit assez mal les consignes de mise en forme quand
+            // elles ne sont données qu'en `instructions` (system prompt) : on les répète dans le
+            // prompt utilisateur lui-même, ce qui améliore nettement l'adhérence en pratique.
+            let reminder = buildReminder(fr: fr, length: length, format: format)
+            let header = fr ? "Articles du moment (titre — chapô) :\n" : "Current articles (title — summary):\n"
+            let prompt = header + headlines + "\n\n" + reminder
             do {
                 let session = LanguageModelSession(instructions: instructions)
                 let response = try await session.respond(to: prompt)
                 let text = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !text.isEmpty { return text }
+                // Même avec le rappel ci-dessus, le modèle ne respecte pas toujours la forme
+                // demandée (puces vs paragraphe) ni le nombre de thèmes : on l'impose ensuite
+                // déterministiquement plutôt que de laisser ça au bon vouloir du modèle.
+                if !text.isEmpty { return normalize(text, length: length, format: format) }
             } catch {
                 // repli ci-dessous
             }
@@ -55,6 +63,56 @@ enum ArticleSummarizer {
         // Repli sans IA : les premiers titres en puces.
         let n = length == .concise ? 3 : 6
         return items.prefix(n).map { "- \($0.title)" }.joined(separator: "\n")
+    }
+
+    private static func buildReminder(fr: Bool, length: DigestLength, format: DigestFormat) -> String {
+        let count = length == .concise ? "3" : "5 à 6"
+        let countEn = length == .concise ? "3" : "5 to 6"
+        if fr {
+            return format == .bullets
+                ? "Réponds avec exactement \(count) puces, une ligne par thème, chaque ligne commençant par « - »."
+                : "Réponds en un seul paragraphe fluide (pas de puces), couvrant \(count) thèmes."
+        } else {
+            return format == .bullets
+                ? "Answer with exactly \(countEn) bullet points, one line per theme, each line starting with \"- \"."
+                : "Answer as a single flowing paragraph (no bullet points), covering \(countEn) themes."
+        }
+    }
+
+    /// Impose déterministiquement la forme (puces/paragraphe) et le nombre de thèmes demandés,
+    /// au cas où le modèle ne les aurait pas respectés malgré la consigne — plutôt que de
+    /// dépendre uniquement de l'adhérence du modèle aux instructions.
+    private static func normalize(_ text: String, length: DigestLength, format: DigestFormat) -> String {
+        let targetCount = length == .concise ? 3 : 6
+        let bulletMarkers = ["- ", "• ", "* ", "– ", "· "]
+        let lines = text.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        let looksBulleted = lines.count > 1 && lines.allSatisfy { line in bulletMarkers.contains { line.hasPrefix($0) } }
+
+        switch format {
+        case .bullets:
+            if looksBulleted {
+                return Array(lines.prefix(targetCount)).joined(separator: "\n")
+            }
+            return sentences(of: text).prefix(targetCount).map { "- \($0)" }.joined(separator: "\n")
+        case .paragraph:
+            if looksBulleted {
+                let stripped = lines.map { line -> String in
+                    var l = line
+                    for marker in bulletMarkers where l.hasPrefix(marker) { l = String(l.dropFirst(marker.count)) }
+                    return l
+                }
+                return stripped.joined(separator: " ")
+            }
+            return text
+        }
+    }
+
+    /// Découpage grossier en phrases (sur `.`/`!`/`?`/saut de ligne) — suffisant pour re-fabriquer
+    /// des puces à partir d'un paragraphe, sans dépendance à `NaturalLanguage`.
+    private static func sentences(of text: String) -> [String] {
+        text.split(whereSeparator: { ".!?\n".contains($0) })
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
     }
 
     /// Résumé court **à partir du titre seul** (le flux RSS ne fournit pas de corps d'article) —

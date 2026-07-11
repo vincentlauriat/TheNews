@@ -206,7 +206,7 @@ final class FeedViewModel {
             let ids = (try? SubscriptionStore(context: context).subscribedFeedIDs()) ?? []
             articles = (try? store.articles(feedIDs: ids)) ?? []
         case .briefing:
-            articles = BriefingEngine.today(context: context)
+            articles = BriefingEngine.today(context: context, limit: 13)
         case .alerts:
             let ids = (try? SubscriptionStore(context: context).subscribedFeedIDs()) ?? []
             let all = (try? store.articles(feedIDs: ids)) ?? []

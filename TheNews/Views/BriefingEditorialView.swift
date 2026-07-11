@@ -38,6 +38,23 @@ struct BriefingEditorialView: View {
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button {
+                    Task {
+                        await vm.generateDigest(
+                            lang: settings.effectiveLang,
+                            length: settings.digestLength,
+                            format: settings.digestFormat,
+                            tone: settings.digestTone,
+                            count: settings.digestCount
+                        )
+                    }
+                } label: {
+                    Label(settings.t("digest"), systemImage: "sparkles")
+                }
+                .disabled(vm.articles.isEmpty || vm.isGeneratingDigest)
+                .help(settings.t("digest"))
+            }
+            ToolbarItem(placement: .automatic) {
+                Button {
                     vm.markAllRead(context: modelContext)
                 } label: {
                     Label(settings.t("mark_all_read"), systemImage: "checkmark.circle")

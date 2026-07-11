@@ -20,10 +20,24 @@ enum FeedSelection: Hashable {
 final class FeedViewModel {
     var selection: FeedSelection = .all
     var articles: [Article] = []
-    var searchText: String = ""
+    var searchText: String = "" {
+        didSet { if oldValue != searchText { smartKeywords = nil } }
+    }
+    /// Mots-clés élargis par `SmartSearchEngine` à partir de `searchText` (recherche en langage
+    /// naturel, déclenchée en soumettant le champ de recherche). `nil` = recherche par sous-chaîne
+    /// classique sur `searchText`. Réinitialisé dès que `searchText` change (nouvelle frappe).
+    var smartKeywords: [String]?
     var isLoading = false
     var selectedArticle: Article?
     var errorMessage: String?
+
+    /// Synthèse IA de la liste courante — affichée dans la zone de détail
+    /// (`ContentView`) à la place de l'article sélectionné, pas dans une
+    /// fenêtre séparée. Sélectionner un article ailleurs referme la synthèse
+    /// (cf. `select(_:)`).
+    var digest: String?
+    var isGeneratingDigest = false
+    var showingDigest = false
 
     private let service = RSSService()
 
@@ -39,11 +53,26 @@ final class FeedViewModel {
     }
 
     var filtered: [Article] {
+        if let keywords = smartKeywords, !keywords.isEmpty {
+            return articles.filter { article in
+                keywords.contains {
+                    article.title.localizedCaseInsensitiveContains($0)
+                    || article.summary.localizedCaseInsensitiveContains($0)
+                }
+            }
+        }
         guard !searchText.isEmpty else { return articles }
         return articles.filter {
             $0.title.localizedCaseInsensitiveContains(searchText)
             || $0.summary.localizedCaseInsensitiveContains(searchText)
         }
+    }
+
+    /// Étend `searchText` en mots-clés via Foundation Models (recherche en langage naturel),
+    /// déclenché en soumettant le champ de recherche (touche Entrée) — la frappe normale continue
+    /// d'utiliser la recherche par sous-chaîne classique dans `filtered`, sans changement.
+    func smartSearch(lang: String) async {
+        smartKeywords = await SmartSearchEngine.expand(searchText, lang: lang)
     }
 
     /// Regroupe par ancienneté (aujourd'hui / cette semaine / plus tôt), du plus récent au plus ancien.
@@ -190,8 +219,51 @@ final class FeedViewModel {
         }
     }
 
+    /// 2ᵉ passe sémantique (Foundation Models) sur les sujets de veille, uniquement pour la portée
+    /// `.alerts` et seulement si l'utilisateur l'a activée dans les réglages (`smartAlertsEnabled`).
+    /// Complète `articles` avec les correspondances sémantiques sans redemander celles déjà
+    /// matchées lexicalement (cf. `SemanticMatchingEngine.cache`). Borné aux articles récents (3 j)
+    /// pour limiter le coût : cf. `PLAN.md` Phase F1.
+    func refineAlertsIfNeeded(context: ModelContext, lang: String) async {
+        guard case .alerts = selection, SemanticMatchingEngine.available else { return }
+        let topics = activeTopics(context: context)
+        guard !topics.isEmpty else { return }
+        let store = FeedStore(context: context)
+        let ids = (try? SubscriptionStore(context: context).subscribedFeedIDs()) ?? []
+        let all = (try? store.articles(feedIDs: ids)) ?? []
+        let matchedIDs = Set(articles.map(\.id))
+        let cutoff = Calendar.current.date(byAdding: .day, value: -3, to: Date()) ?? .distantPast
+        let candidates = Array(
+            all.filter { !matchedIDs.contains($0.id) && $0.publishedAt >= cutoff }.prefix(40)
+        )
+        guard !candidates.isEmpty else { return }
+        let additional = await SemanticMatchingEngine.additionalMatches(
+            among: candidates, topics: topics, lang: lang
+        )
+        guard !additional.isEmpty else { return }
+        let extra = all.filter { additional.contains($0.id) }
+        articles = (articles + extra).sorted { $0.publishedAt > $1.publishedAt }
+    }
+
     func select(_ article: Article) {
         selectedArticle = article
+        showingDigest = false
         if !article.isRead { article.isRead = true }
+    }
+
+    /// Génère la synthèse IA de la liste courante et bascule la zone de détail
+    /// dessus (désélectionne l'article affiché, s'il y en avait un).
+    func generateDigest(
+        lang: String, length: DigestLength, format: DigestFormat, tone: DigestTone, count: Int
+    ) async {
+        selectedArticle = nil
+        showingDigest = true
+        isGeneratingDigest = true
+        digest = nil
+        let items = filtered.map { (title: $0.title, summary: $0.summary) }
+        digest = await ArticleSummarizer.digest(
+            articles: items, lang: lang, length: length, format: format, tone: tone, count: count
+        )
+        isGeneratingDigest = false
     }
 }

@@ -19,16 +19,21 @@ enum ArticleSummarizer {
         return false
     }
 
-    /// Synthèse des grands thèmes à partir d'une liste de titres, selon la config.
+    /// Synthèse des grands thèmes à partir d'une liste d'articles (titre + chapô —
+    /// le chapô donne au modèle bien plus de matière que le titre seul pour
+    /// dégager des thèmes pertinents), selon la config.
     static func digest(
-        titles: [String],
+        articles: [(title: String, summary: String)],
         lang: String,
         length: DigestLength,
         format: DigestFormat,
         tone: DigestTone,
         count: Int
     ) async -> String {
-        let headlines = titles.prefix(count).map { "- \($0)" }.joined(separator: "\n")
+        let items = Array(articles.prefix(count))
+        let headlines = items
+            .map { $0.summary.isEmpty ? "- \($0.title)" : "- \($0.title) — \($0.summary)" }
+            .joined(separator: "\n")
         guard !headlines.isEmpty else { return "" }
         let fr = lang.hasPrefix("fr")
 
@@ -36,7 +41,7 @@ enum ArticleSummarizer {
         if #available(iOS 26.0, macOS 26.0, *),
            SystemLanguageModel.default.availability == .available {
             let instructions = buildInstructions(fr: fr, length: length, format: format, tone: tone)
-            let prompt = (fr ? "Titres du moment :\n" : "Current headlines:\n") + headlines
+            let prompt = (fr ? "Articles du moment (titre — chapô) :\n" : "Current articles (title — summary):\n") + headlines
             do {
                 let session = LanguageModelSession(instructions: instructions)
                 let response = try await session.respond(to: prompt)
@@ -49,7 +54,35 @@ enum ArticleSummarizer {
         #endif
         // Repli sans IA : les premiers titres en puces.
         let n = length == .concise ? 3 : 6
-        return titles.prefix(n).map { "- \($0)" }.joined(separator: "\n")
+        return items.prefix(n).map { "- \($0.title)" }.joined(separator: "\n")
+    }
+
+    /// Résumé court **à partir du titre seul** (le flux RSS ne fournit pas de corps d'article) —
+    /// utilisé pour combler les articles sans chapô (`Article.summary` vide). Volontairement moins
+    /// ambitieux qu'un vrai résumé éditorial : consigne explicite de ne pas inventer de faits
+    /// au-delà du titre. `nil` si Foundation Models est indisponible ou en cas d'échec.
+    static func oneLiner(title: String, lang: String) async -> String? {
+        #if canImport(FoundationModels)
+        guard #available(iOS 26.0, macOS 26.0, *), SystemLanguageModel.default.availability == .available else {
+            return nil
+        }
+        let fr = lang.hasPrefix("fr")
+        let instructions = fr
+            ? "Tu résumes un titre d'article de presse en une phrase courte et neutre, sans le "
+                + "recopier mot pour mot, sans inventer de fait qui ne soit pas déjà dans le titre."
+            : "You summarize a news headline into one short, neutral sentence, without repeating it "
+                + "verbatim, without inventing any fact not already present in the title."
+        do {
+            let session = LanguageModelSession(instructions: instructions)
+            let response = try await session.respond(to: title)
+            let text = response.content.trimmingCharacters(in: .whitespacesAndNewlines)
+            return text.isEmpty ? nil : text
+        } catch {
+            return nil
+        }
+        #else
+        return nil
+        #endif
     }
 
     /// Construit la consigne du modèle à partir de la configuration.

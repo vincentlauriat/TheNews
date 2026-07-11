@@ -16,6 +16,16 @@ struct WatchSettingsView: View {
 
     private var subscribedIDs: Set<String> { Set(subscriptions.map(\.feedID)) }
 
+    /// Sources intégrées uniquement (exclut la pseudo-source « Mes flux ») : les flux perso ont
+    /// déjà leur propre section dédiée plus bas, qui gère tout leur cycle de vie (ajout = abonnement
+    /// auto, suppression = désabonnement auto, cf. `CustomFeedStore`). Les inclure aussi ici via
+    /// `Feed.bySource` affichait « Mes flux » deux fois, et le toggle générique permettait de
+    /// désabonner un flux perso sans le supprimer — l'y laissant orphelin (aucune UI pour le
+    /// réabonner sans le recréer).
+    private var builtInGroups: [(source: Source, feeds: [Feed])] {
+        Feed.bySource.filter { $0.source.id != Source.custom.id }
+    }
+
     var body: some View {
         List {
             // MARK: Sujets de veille
@@ -40,8 +50,8 @@ struct WatchSettingsView: View {
                 Text(settings.t("watch_topics_footer"))
             }
 
-            // MARK: Rubriques — une section par source (multi-journaux)
-            ForEach(Array(Feed.bySource.enumerated()), id: \.element.source.id) { index, group in
+            // MARK: Rubriques — une section par source intégrée (multi-journaux)
+            ForEach(Array(builtInGroups.enumerated()), id: \.element.source.id) { index, group in
                 Section {
                     ForEach(group.feeds) { feed in
                         Toggle(isOn: binding(for: feed)) {
@@ -53,7 +63,7 @@ struct WatchSettingsView: View {
                 } footer: {
                     // Le rappel « ces rubriques alimentent la veille » ne s'affiche
                     // qu'une fois, sous la dernière source.
-                    if index == Feed.bySource.count - 1 {
+                    if index == builtInGroups.count - 1 {
                         Text(settings.t("sections_footer"))
                     }
                 }

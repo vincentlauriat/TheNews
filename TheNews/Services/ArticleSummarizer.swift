@@ -82,7 +82,8 @@ enum ArticleSummarizer {
     /// Impose déterministiquement la forme (puces/paragraphe) et le nombre de thèmes demandés,
     /// au cas où le modèle ne les aurait pas respectés malgré la consigne — plutôt que de
     /// dépendre uniquement de l'adhérence du modèle aux instructions.
-    private static func normalize(_ text: String, length: DigestLength, format: DigestFormat) -> String {
+    /// Accès `internal` (pas `private`) pour être testable via `@testable import` (`ArticleSummarizerTests`).
+    static func normalize(_ text: String, length: DigestLength, format: DigestFormat) -> String {
         let targetCount = length == .concise ? 3 : 6
         let bulletMarkers = ["- ", "• ", "* ", "– ", "· "]
         let lines = text.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
@@ -109,7 +110,7 @@ enum ArticleSummarizer {
 
     /// Découpage grossier en phrases (sur `.`/`!`/`?`/saut de ligne) — suffisant pour re-fabriquer
     /// des puces à partir d'un paragraphe, sans dépendance à `NaturalLanguage`.
-    private static func sentences(of text: String) -> [String] {
+    static func sentences(of text: String) -> [String] {
         text.split(whereSeparator: { ".!?\n".contains($0) })
             .map { $0.trimmingCharacters(in: .whitespaces) }
             .filter { !$0.isEmpty }

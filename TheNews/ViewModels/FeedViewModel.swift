@@ -116,35 +116,43 @@ final class FeedViewModel {
 
     /// Premier chargement : recharge les flux perso, seed des abonnements par défaut,
     /// cache local, puis réseau.
-    func load(context: ModelContext) async {
+    func load(context: ModelContext, lang: String = "fr") async {
         CustomFeedStore(context: context).reloadCatalog()
         try? SubscriptionStore(context: context).seedIfNeeded()
         try? FeedStore(context: context).pruneDuplicates()   // nettoie les doublons hérités de la sync
         reload(context: context)
-        await refresh(context: context)
+        await refresh(context: context, lang: lang)
     }
 
     /// Change la rubrique affichée : recharge le cache immédiatement puis rafraîchit.
-    func changeSelection(_ selection: FeedSelection, context: ModelContext) async {
+    func changeSelection(_ selection: FeedSelection, context: ModelContext, lang: String = "fr") async {
         self.selection = selection
         selectedArticle = nil
         reload(context: context)
-        await refresh(context: context)
+        await refresh(context: context, lang: lang)
     }
 
-    /// Rafraîchit les rubriques concernées par la portée courante (en parallèle).
-    func refresh(context: ModelContext) async {
+    /// Rafraîchit les rubriques concernées par la portée courante (en parallèle). Un flux en échec
+    /// n'empêche pas l'affichage des autres ; s'il y en a au moins un, `errorMessage` le signale
+    /// (message non bloquant, écrasé au prochain refresh réussi) plutôt que de disparaître sans un
+    /// mot comme avant. Lève seulement si **tous** les flux de la portée échouent.
+    func refresh(context: ModelContext, lang: String = "fr") async {
         isLoading = true
         errorMessage = nil
         let feeds = feedsInScope(context: context)
         do {
-            let results = try await fetchAll(feeds)
+            let result = try await fetchAll(feeds)
             let store = FeedStore(context: context)
-            for (feedID, parsed) in results {
+            for (feedID, parsed) in result.succeeded {
                 try store.ingest(parsed, feedID: feedID)
             }
             reload(context: context)
             WidgetPublisher.publish(context: context)
+            if !result.failedFeedTitles.isEmpty {
+                let prefix = Strings.table[lang]?["feeds_unreachable"]
+                    ?? Strings.table["en"]?["feeds_unreachable"] ?? ""
+                errorMessage = prefix + result.failedFeedTitles.joined(separator: ", ")
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
@@ -175,26 +183,36 @@ final class FeedViewModel {
         return (try? context.fetch(descriptor)) ?? []
     }
 
-    /// Télécharge et parse plusieurs flux en parallèle. Ignore silencieusement les
-    /// rubriques en erreur pour ne pas bloquer l'ensemble ; lève seulement si toutes échouent.
-    private func fetchAll(_ feeds: [Feed]) async throws -> [(String, [ParsedArticle])] {
-        guard !feeds.isEmpty else { return [] }
-        return try await withThrowingTaskGroup(of: (String, [ParsedArticle])?.self) { group in
+    /// Résultat de `fetchAll` : les rubriques rafraîchies avec succès, et les titres de celles en
+    /// échec — pour pouvoir signaler un échec partiel à l'utilisateur (cf. `refresh`) sans perdre
+    /// l'affichage des rubriques qui ont réussi.
+    private struct FetchResult {
+        let succeeded: [(String, [ParsedArticle])]
+        let failedFeedTitles: [String]
+    }
+
+    /// Télécharge et parse plusieurs flux en parallèle. Un flux en échec n'empêche pas les autres
+    /// d'être rafraîchis (son titre est renvoyé dans `failedFeedTitles`) ; lève seulement si tous
+    /// échouent, auquel cas rien n'a pu être rafraîchi.
+    private func fetchAll(_ feeds: [Feed]) async throws -> FetchResult {
+        guard !feeds.isEmpty else { return FetchResult(succeeded: [], failedFeedTitles: []) }
+        return try await withThrowingTaskGroup(of: (Feed, [ParsedArticle]?).self) { group in
             let service = self.service
             for feed in feeds {
                 group.addTask {
-                    guard let parsed = try? await service.fetch(feed) else { return nil }
-                    return (feed.id, parsed)
+                    (feed, try? await service.fetch(feed))
                 }
             }
-            var out: [(String, [ParsedArticle])] = []
-            for try await result in group {
-                if let result { out.append(result) }
+            var succeeded: [(String, [ParsedArticle])] = []
+            var failedFeedTitles: [String] = []
+            for try await (feed, parsed) in group {
+                if let parsed { succeeded.append((feed.id, parsed)) }
+                else { failedFeedTitles.append(feed.title) }
             }
-            if out.isEmpty && !feeds.isEmpty {
+            if succeeded.isEmpty && !feeds.isEmpty {
                 throw RSSService.FeedError.empty
             }
-            return out
+            return FetchResult(succeeded: succeeded, failedFeedTitles: failedFeedTitles)
         }
     }
 

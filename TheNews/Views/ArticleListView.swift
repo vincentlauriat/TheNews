@@ -63,7 +63,7 @@ struct ArticleListView: View {
             }
             ToolbarItem(placement: .automatic) {
                 Button {
-                    Task { await vm.refresh(context: modelContext) }
+                    Task { await vm.refresh(context: modelContext, lang: settings.effectiveLang) }
                 } label: {
                     if vm.isLoading {
                         ProgressView().scaleEffect(0.65)

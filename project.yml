@@ -18,6 +18,9 @@ schemes:
     build:
       targets:
         TheNews: all
+    test:
+      targets:
+        - TheNewsTests
     run:
       config: Debug
   TheNewsiOS:
@@ -93,6 +96,33 @@ targets:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         LSMinimumSystemVersion: "14.0"
         NSHumanReadableCopyright: ""
+
+  # ---------------------------------------------------------------------------
+  # Tests unitaires — hébergés dans l'app macOS (`@testable import TheNews`).
+  # Ciblent les fonctions pures à risque de régression silencieuse (parsing RSS,
+  # matching de mots-clés, dédup cross-source, post-traitement déterministe du
+  # digest IA) plutôt que de l'UI testing. Cf. `PLAN.md` § Corrections & dette
+  # technique (2026-07-11).
+  # ---------------------------------------------------------------------------
+  TheNewsTests:
+    type: bundle.unit-test
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: TheNewsTests
+    settings:
+      base:
+        PRODUCT_NAME: TheNewsTests
+        PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.tests
+        SWIFT_VERSION: "5.9"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: KFLACS69T9
+        TEST_HOST: "$(BUILT_PRODUCTS_DIR)/TheNews.app/Contents/MacOS/TheNews"
+        BUNDLE_LOADER: "$(TEST_HOST)"
+    dependencies:
+      - target: TheNews
 
   # ---------------------------------------------------------------------------
   # iOS / iPadOS — codebase partagé avec la cible macOS

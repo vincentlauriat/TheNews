@@ -1,0 +1,36 @@
+name: Build & Test
+
+# Vérification minimale sur PR/push : build macOS + iOS (simulateur, non signés) et
+# tests unitaires macOS (`TheNewsTests`, hébergés). Ne couvre pas Watch/TV/ScreenSaver
+# (hors scope de cette 1ʳᵉ CI — cf. TODOS.md § « Suggestions Claude », 2026-07-11).
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build macOS
+        run: >
+          xcodebuild build -scheme TheNews -destination 'platform=macOS'
+          CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+      - name: Run unit tests (macOS)
+        run: >
+          xcodebuild test -scheme TheNews -destination 'platform=macOS'
+          CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO
+
+      - name: Build iOS (simulateur)
+        run: >
+          xcodebuild build -scheme TheNewsiOS -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO

@@ -3,7 +3,20 @@ import SwiftUI
 /// Ligne d'article dans la sidebar : vignette, titre, source/heure et pastille
 /// « non lu ». Adaptée de `ItemRowView` du template.
 struct ArticleRowView: View {
+    @Environment(AppSettings.self) private var settings
     let article: Article
+
+    /// Résumé lu par VoiceOver en un seul élément (titre, source, date, statuts non
+    /// lu/favori) — les icônes qui portent ces mêmes statuts visuellement sont
+    /// décoratives et masquées à l'accessibilité (cf. `.accessibilityHidden`).
+    private var accessibilitySummary: String {
+        var parts = [article.title]
+        if let name = article.feed?.title { parts.append(name) }
+        parts.append(article.dateFormatted)
+        if !article.isRead { parts.append(settings.t("unread_status")) }
+        if article.isFavorite { parts.append(settings.t("favorite")) }
+        return parts.joined(separator: ", ")
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -12,6 +25,7 @@ struct ArticleRowView: View {
                     .fill(Color.accentColor)
                     .frame(width: 7, height: 7)
                     .padding(.top, 6)
+                    .accessibilityHidden(true)   // état « non lu » repris dans accessibilityLabel ci-dessous
             }
 
             VStack(alignment: .leading, spacing: 3) {
@@ -36,6 +50,7 @@ struct ArticleRowView: View {
                         Image(systemName: "star.fill")
                             .font(.caption2)
                             .foregroundStyle(.yellow)
+                            .accessibilityHidden(true)   // statut repris dans accessibilityLabel
                     }
                 }
             }
@@ -45,6 +60,8 @@ struct ArticleRowView: View {
             thumbnail
         }
         .padding(.vertical, 2)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilitySummary)
     }
 
     @ViewBuilder

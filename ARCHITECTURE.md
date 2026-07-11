@@ -235,6 +235,27 @@ perso). Les réglages d'interface (`UserDefaults`) ne sont pas synchronisés.
   utilisateurs déjà installés). Le flux (`appcast.xml`, à la racine du repo, servi via
   `raw.githubusercontent.com`) est régénéré et signé à chaque release par `release.sh`.
 
+- **Écran de veille macOS (`TheNewsScreenSaver`, bundle `.saver`) — autonome, comme watchOS/tvOS
+  E1** : fetch RSS direct (`AutonomousBriefing.swift`, réimplémente en local une version allégée de
+  `BriefingEngine`/`RelatedArticlesEngine` sans SwiftData), affiche un hero éditorial plein écran en
+  rotation (même principe que `TVBriefingHeroView` côté tvOS). **Pas d'App Group avec l'app
+  principale** — contrairement au widget, volontairement : cf. gotcha ci-dessous.
+
+> ⚠️ **`legacyScreenSaver` et App Group — mur découvert le 2026-07-07.** Depuis macOS Sequoia,
+> les `.saver` tiers sont hébergés dans `legacyScreenSaver.appex` (ExtensionKit/PlugInKit), un
+> process Apple dont le profil sandbox est **fixe** et ignore les entitlements du bundle chargé.
+> `FileManager.containerURL(forSecurityApplicationGroupIdentifier:)` résout le chemin sans erreur,
+> mais la lecture du fichier échoue systématiquement (`NSFileReadNoPermissionError`, 257) : la
+> nouvelle « App Group Container Protection » de Sequoia exigerait un prompt système que ce host
+> non interactif ne peut pas afficher/valider. Le réseau (`URLSession`), lui, fonctionne bien
+> depuis ce host (confirmé par l'écran de veille tiers Aerial). Conclusion : un `.saver` legacy ne
+> peut **pas** lire un App Group partagé avec l'app principale, mais peut faire ses propres
+> requêtes réseau — d'où le choix autonome ci-dessus plutôt qu'un partage via App Group comme le
+> widget. Diagnostic fait via logs unifiés (`log show --predicate 'subsystem == "..."'`), pas de
+> prompt caché observé. Piste non testée : renommer l'App Group au format `<TeamID>.xxx` (parfois
+> cité comme contournement Sequoia pour des paires app+extension classiques, non vérifié pour ce
+> host précis).
+
 ## Ajouter une source de presse
 
 1. Ajoute une instance dans `Source.all` (`Models/Source.swift`).

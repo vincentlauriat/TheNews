@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Écran de veille : sandbox (obligatoire, hébergé par legacyScreenSaver) +
+         accès réseau, pour le fetch RSS autonome et le chargement des images des
+         articles (repli en dégradé sinon). Pas d'App Group : le host
+         legacyScreenSaver (macOS Sequoia+) bloque silencieusement les App Group
+         tiers, cf. commentaire du target dans project.yml. -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+    <key>com.apple.security.network.client</key>
+    <true/>
+</dict>
+</plist>

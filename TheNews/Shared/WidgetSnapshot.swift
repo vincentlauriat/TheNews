@@ -39,6 +39,11 @@ enum WidgetSnapshotStore {
     static func write(_ snapshot: WidgetSnapshot) {
         guard let url, let data = try? JSONEncoder.iso.encode(snapshot) else { return }
         try? data.write(to: url, options: .atomic)
+        // L'écriture atomique passe par un fichier temporaire créé avec des
+        // permissions restrictives (lecture au seul propriétaire) : sans ce
+        // chmod explicite, les autres membres de l'App Group (widget, écran de
+        // veille) ne peuvent pas relire le fichier malgré l'accès au container.
+        try? FileManager.default.setAttributes([.posixPermissions: 0o644], ofItemAtPath: url.path)
     }
 
     static func read() -> WidgetSnapshot {
@@ -49,9 +54,9 @@ enum WidgetSnapshotStore {
     }
 }
 
-private extension JSONEncoder {
+extension JSONEncoder {
     static var iso: JSONEncoder { let e = JSONEncoder(); e.dateEncodingStrategy = .iso8601; return e }
 }
-private extension JSONDecoder {
+extension JSONDecoder {
     static var iso: JSONDecoder { let d = JSONDecoder(); d.dateDecodingStrategy = .iso8601; return d }
 }

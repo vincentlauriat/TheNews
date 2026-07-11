@@ -17,34 +17,7 @@ struct ContentView: View {
     #endif
 
     var body: some View {
-        NavigationSplitView {
-            FeedsSidebarView(selection: $feedSelection, showingManage: $showingManage)
-                .navigationSplitViewColumnWidth(min: 200, ideal: 230, max: 300)
-                #if os(iOS)
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            showingSettings = true
-                        } label: {
-                            Image(systemName: "gearshape")
-                        }
-                    }
-                }
-                #endif
-        } content: {
-            ArticleListView(vm: vm, selectedId: $selectedId)
-                .navigationSplitViewColumnWidth(min: 280, ideal: 340, max: 460)
-        } detail: {
-            if let article = vm.selectedArticle {
-                #if os(iOS)
-                ArticlePagerView(vm: vm)   // swipe horizontal entre articles
-                #else
-                ArticleDetailView(article: article)
-                #endif
-            } else {
-                EmptySelectionView()
-            }
-        }
+        splitView
         .task { await vm.load(context: modelContext) }
         .task { await requestNotificationsIfNeeded() }
         #if os(macOS)
@@ -111,6 +84,72 @@ struct ContentView: View {
         #endif
     }
 
+    // MARK: - Disposition
+
+    /// Sur macOS, le Briefing remplace le panneau liste + détail par un écran
+    /// éditorial en pleine largeur (`BriefingEditorialView`) — la sidebar reste
+    /// affichée, mais il n'y a plus de sélection d'article à faire, donc plus
+    /// de colonne « content » à 3 volets. Les autres rubriques (et iOS, où le
+    /// Briefing reste une liste comme les autres) gardent le triptyque habituel.
+    @ViewBuilder
+    private var splitView: some View {
+        #if os(macOS)
+        if feedSelection == .briefing {
+            NavigationSplitView {
+                sidebar
+            } detail: {
+                BriefingEditorialView(vm: vm)
+            }
+        } else {
+            NavigationSplitView {
+                sidebar
+            } content: {
+                ArticleListView(vm: vm, selectedId: $selectedId)
+                    .navigationSplitViewColumnWidth(min: 280, ideal: 340, max: 460)
+            } detail: {
+                if vm.showingDigest {
+                    DigestDetailView(vm: vm)
+                } else if let article = vm.selectedArticle {
+                    ArticleDetailView(article: article)
+                } else {
+                    EmptySelectionView()
+                }
+            }
+        }
+        #else
+        NavigationSplitView {
+            sidebar
+        } content: {
+            ArticleListView(vm: vm, selectedId: $selectedId)
+                .navigationSplitViewColumnWidth(min: 280, ideal: 340, max: 460)
+        } detail: {
+            if vm.showingDigest {
+                DigestDetailView(vm: vm)
+            } else if vm.selectedArticle != nil {
+                ArticlePagerView(vm: vm)   // swipe horizontal entre articles
+            } else {
+                EmptySelectionView()
+            }
+        }
+        #endif
+    }
+
+    private var sidebar: some View {
+        FeedsSidebarView(selection: $feedSelection, showingManage: $showingManage)
+            .navigationSplitViewColumnWidth(min: 200, ideal: 230, max: 300)
+            #if os(iOS)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingSettings = true
+                    } label: {
+                        Image(systemName: "gearshape")
+                    }
+                }
+            }
+            #endif
+    }
+
     // MARK: - Notifications & rafraîchissement
 
     /// Demande l'autorisation de notifier au premier lancement (si indéterminée).
@@ -131,6 +170,7 @@ struct ContentView: View {
         let descriptor = FetchDescriptor<Article>(predicate: #Predicate { $0.id == id })
         guard let article = try? modelContext.fetch(descriptor).first else { return }
         vm.selectedArticle = article
+        vm.showingDigest = false
         if !article.isRead { article.isRead = true }
     }
 

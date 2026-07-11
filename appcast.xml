@@ -6,16 +6,16 @@
     <description>TheNews release feed</description>
     <language>fr</language>
     <item>
-      <title>v1.2.1</title>
-      <pubDate>Mon, 06 Jul 2026 15:53:08 +0200</pubDate>
-      <sparkle:version>47</sparkle:version>
-      <sparkle:shortVersionString>1.2.1</sparkle:shortVersionString>
+      <title>v1.3.0</title>
+      <pubDate>Sat, 11 Jul 2026 13:07:04 +0200</pubDate>
+      <sparkle:version>57</sparkle:version>
+      <sparkle:shortVersionString>1.3.0</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>14.0</sparkle:minimumSystemVersion>
-      <sparkle:releaseNotesLink>https://github.com/vincentlauriat/TheNews/releases/tag/v1.2.1</sparkle:releaseNotesLink>
+      <sparkle:releaseNotesLink>https://github.com/vincentlauriat/TheNews/releases/tag/v1.3.0</sparkle:releaseNotesLink>
       <enclosure
-        url="https://github.com/vincentlauriat/TheNews/releases/download/v1.2.1/TheNews-1.2.1.dmg"
+        url="https://github.com/vincentlauriat/TheNews/releases/download/v1.3.0/TheNews-1.3.0.dmg"
         type="application/octet-stream"
-        sparkle:edSignature="TB1k9PxjN9o7WT0IIgM/vciDgLNFhX3A/CB3aRFSO77GWmjOHpjbpt65tltm1WMKy/76M43HAtW46Vdi8VnAAw==" length="2782238" />
+        sparkle:edSignature="GrqXzIowOZ+oTc+HP7du0k49W3+p/UicCKxqmoyxTsetC7Mt6yWxaH3H2a0ohgZO25Z+rkV/vQOSel7DTqb/DQ==" length="3084242" />
     </item>
   </channel>
 </rss>

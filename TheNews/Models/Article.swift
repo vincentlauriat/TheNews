@@ -24,6 +24,11 @@ final class Article: Identifiable {
     var fetchedAt: Date = Date()
     var isRead: Bool = false
     var isFavorite: Bool = false
+    /// Résumé généré on-device (Foundation Models) quand le flux RSS ne fournit pas de chapô
+    /// (`summary` vide) — à partir du **titre seul** (le RSS n'a pas le corps de l'article), donc
+    /// moins riche qu'un vrai chapô éditorial. Champ séparé de `summary` pour ne jamais laisser
+    /// croire que c'est le chapô du journal ; cf. `displaySummary`/`summaryIsGenerated`.
+    var aiSummary: String?
 
     init(
         id: String,
@@ -35,7 +40,8 @@ final class Article: Identifiable {
         publishedAt: Date,
         fetchedAt: Date,
         isRead: Bool = false,
-        isFavorite: Bool = false
+        isFavorite: Bool = false,
+        aiSummary: String? = nil
     ) {
         self.id = id
         self.feedID = feedID
@@ -47,9 +53,17 @@ final class Article: Identifiable {
         self.fetchedAt = fetchedAt
         self.isRead = isRead
         self.isFavorite = isFavorite
+        self.aiSummary = aiSummary
     }
 
     var feed: Feed? { Feed.byID(feedID) }
+
+    /// Chapô à afficher : celui du flux s'il existe, sinon le résumé généré (peut être nil si pas
+    /// encore généré, ou si le flux avait déjà un vrai chapô).
+    var displaySummary: String? { summary.isEmpty ? aiSummary : summary }
+
+    /// Le chapô affiché est-il généré par IA (à distinguer visuellement du vrai chapô éditorial) ?
+    var summaryIsGenerated: Bool { summary.isEmpty && aiSummary != nil }
 
     var dateFormatted: String {
         let df = DateFormatter()

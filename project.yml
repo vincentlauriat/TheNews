@@ -38,6 +38,10 @@ schemes:
         TheNewsTV: all
     run:
       config: Debug
+  TheNewsScreenSaver:
+    build:
+      targets:
+        TheNewsScreenSaver: all
 
 targets:
   # ---------------------------------------------------------------------------
@@ -60,7 +64,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.2.1"
+        MARKETING_VERSION: "1.3.0"
         CURRENT_PROJECT_VERSION: "1"
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         CODE_SIGN_ENTITLEMENTS: TheNews/TheNews.entitlements
@@ -110,7 +114,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.2.1"
+        MARKETING_VERSION: "1.3.0"
         CURRENT_PROJECT_VERSION: "1"
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -168,7 +172,7 @@ targets:
         PRODUCT_NAME: TheNewsWidget
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.widget
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.2.1"
+        MARKETING_VERSION: "1.3.0"
         CURRENT_PROJECT_VERSION: "1"
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -202,7 +206,7 @@ targets:
         PRODUCT_NAME: TheNewsWidgetMac
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.macwidget
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.2.1"
+        MARKETING_VERSION: "1.3.0"
         CURRENT_PROJECT_VERSION: "1"
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         CODE_SIGN_STYLE: Automatic
@@ -237,7 +241,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.watchkitapp
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.2.1"
+        MARKETING_VERSION: "1.3.0"
         CURRENT_PROJECT_VERSION: "1"
         WATCHOS_DEPLOYMENT_TARGET: "10.0"
         TARGETED_DEVICE_FAMILY: "4"
@@ -285,7 +289,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.tvos
         ASSETCATALOG_COMPILER_APPICON_NAME: "App Icon & Top Shelf Image"
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.2.1"
+        MARKETING_VERSION: "1.3.0"
         CURRENT_PROJECT_VERSION: "1"
         TVOS_DEPLOYMENT_TARGET: "17.0"
         CODE_SIGN_ENTITLEMENTS: TheNewsTV/TheNewsTV.entitlements
@@ -298,3 +302,52 @@ targets:
       properties:
         CFBundleDisplayName: TheNews
         UILaunchScreen: {}
+
+  # ---------------------------------------------------------------------------
+  # Écran de veille macOS — bundle .saver, hors app principale (installation
+  # manuelle dans ~/Library/Screen Savers). Autonome : fetch RSS direct comme
+  # TheNewsWatch/TV, pas d'accès à SwiftData/CloudKit ni à l'App Group de l'app —
+  # le host système `legacyScreenSaver` (macOS Sequoia+) bloque silencieusement
+  # les App Group tiers (« App Group Container Protection », host non interactif
+  # qui ne peut pas répondre au prompt système que ça exigerait). Constaté par
+  # diagnostic (logs unifiés) le 2026-07-07 ; cf. CHANGES.md.
+  # ---------------------------------------------------------------------------
+  TheNewsScreenSaver:
+    type: bundle
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: TheNewsScreenSaver
+        excludes:
+          - "**/*.entitlements"
+          - "Info.plist"
+      - path: TheNews/Shared/WidgetSnapshot.swift   # AppGroup.id inutilisé ici, mais JSONEncoder/Decoder.iso
+      - path: TheNews/Shared/BriefingSnapshot.swift  # BriefingSnapshotArticle : modèle d'affichage réutilisé
+      - path: TheNews/Models/Source.swift
+      - path: TheNews/Models/Feed.swift
+      - path: TheNews/Services/RSSService.swift
+      - path: TheNews/Services/RSSParser.swift
+    settings:
+      base:
+        PRODUCT_NAME: TheNewsBriefing
+        PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.screensaver
+        WRAPPER_EXTENSION: saver
+        SWIFT_VERSION: "5.9"
+        MARKETING_VERSION: "1.3.0"
+        CURRENT_PROJECT_VERSION: "1"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: KFLACS69T9
+        CODE_SIGN_ENTITLEMENTS: TheNewsScreenSaver/TheNewsScreenSaver.entitlements
+        SKIP_INSTALL: NO
+    info:
+      path: TheNewsScreenSaver/Info.plist
+      properties:
+        CFBundleExecutable: "$(EXECUTABLE_NAME)"
+        CFBundleName: TheNews Briefing
+        CFBundleDisplayName: TheNews Briefing
+        CFBundlePackageType: BNDL
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSPrincipalClass: NewsScreenSaverView
+        NSHumanReadableCopyright: ""

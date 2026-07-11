@@ -48,6 +48,16 @@ struct SettingsView: View {
             .onChange(of: settings.briefingEnabled) { _, _ in rescheduleBriefing() }
             .onChange(of: settings.briefingHour) { _, _ in rescheduleBriefing() }
 
+            if ArticleSummarizer.aiAvailable {
+                Section {
+                    Toggle(settings.t("smart_alerts"), isOn: $settings.smartAlertsEnabled)
+                } header: {
+                    Text(settings.t("smart_alerts_section"))
+                } footer: {
+                    Text(settings.t("smart_alerts_footer"))
+                }
+            }
+
             #if os(iOS)
             Section {
                 Picker(settings.t("swipe_mode"), selection: $settings.swipeModeRaw) {

@@ -125,6 +125,13 @@ final class AppSettings {
     }
     var swipeMode: ArticleSwipeMode { ArticleSwipeMode(rawValue: swipeModeRaw) ?? .all }
 
+    /// Correspondance sémantique des sujets de veille (Foundation Models), en complément du
+    /// matching lexical — off par défaut le temps de valider la pertinence perçue vs. le coût
+    /// de latence (cf. `SemanticMatchingEngine`, `PLAN.md` Phase F1).
+    var smartAlertsEnabled: Bool {
+        didSet { UserDefaults.standard.set(smartAlertsEnabled, forKey: "smartAlertsEnabled") }
+    }
+
     // MARK: Synthèse IA (configurable)
     var digestLengthRaw: String { didSet { UserDefaults.standard.set(digestLengthRaw, forKey: "digestLength") } }
     var digestFormatRaw: String { didSet { UserDefaults.standard.set(digestFormatRaw, forKey: "digestFormat") } }
@@ -142,6 +149,7 @@ final class AppSettings {
         briefingEnabled = UserDefaults.standard.bool(forKey: "briefingEnabled")
         briefingHour = UserDefaults.standard.object(forKey: "briefingHour") as? Int ?? 8
         swipeModeRaw = UserDefaults.standard.string(forKey: "swipeMode") ?? ArticleSwipeMode.all.rawValue
+        smartAlertsEnabled = UserDefaults.standard.bool(forKey: "smartAlertsEnabled")
         digestLengthRaw = UserDefaults.standard.string(forKey: "digestLength") ?? DigestLength.concise.rawValue
         digestFormatRaw = UserDefaults.standard.string(forKey: "digestFormat") ?? DigestFormat.bullets.rawValue
         digestToneRaw = UserDefaults.standard.string(forKey: "digestTone") ?? DigestTone.neutral.rawValue

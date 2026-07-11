@@ -99,6 +99,59 @@ programmée par `NotificationService.scheduleDailyBriefing(enabled:hour:)`
 (`UNCalendarNotificationTrigger`), pilotée par les réglages persistés `briefingEnabled` / `briefingHour`
 (reprogrammée au démarrage et à chaque changement de réglage).
 
+### Intelligence artificielle on-device (Foundation Models)
+
+Quatre fonctionnalités s'appuient sur **Apple Intelligence** (`FoundationModels`, iOS 26/macOS 26+),
+toutes selon le même patron : `#if canImport(FoundationModels)` + `#available(iOS 26.0, macOS
+26.0, *)` + `SystemLanguageModel.default.availability == .available`, avec un **repli sans IA**
+systématique si le framework ou le modèle n'est pas disponible (device non compatible, Apple
+Intelligence désactivé, région non supportée…) — zéro dépendance dure, l'app reste utilisable
+partout.
+
+- **Synthèse de liste** (`ArticleSummarizer.digest`) — dégage les grands thèmes d'une liste
+  d'articles affichés (titre + chapô), selon longueur/format/ton/nombre d'articles configurables
+  (réglages). Repli sans IA : les premiers titres en puces.
+  ⚠️ Le petit modèle on-device suit assez mal les consignes de mise en forme quand elles ne sont
+  données qu'en `instructions` (system prompt) — comportement classique des petits modèles
+  embarqués. `digest` répète donc la consigne dans le **prompt utilisateur** lui-même, et surtout
+  **impose déterministiquement** en Swift (`normalize`) la forme (puces/paragraphe) et le nombre
+  de thèmes après génération, plutôt que de dépendre de l'adhérence du modèle. Le **ton**
+  (neutre/explicatif/dépêche) reste best-effort — trop subjectif pour un post-traitement fiable.
+- **Matching sémantique des sujets de veille** (`SemanticMatchingEngine`) — 2ᵉ passe, en
+  complément du matching lexical de `MatchingEngine` (substring), sur les articles **non
+  matchés** par mots-clés : capte les paraphrases/synonymes (« réchauffement climatique » pour un
+  sujet « écologie »). Sortie structurée (`@Generable`) plutôt que texte libre à parser. Portée à
+  `.alerts` uniquement, articles récents (3 j, borné à 40 candidats), **cache mémoire** par id
+  d'article (jamais réévalué deux fois dans la session). Réglage `smartAlertsEnabled` (off par
+  défaut), visible uniquement si `ArticleSummarizer.aiAvailable`.
+- **Résumé auto pour flux sans chapô** (`ArticleSummarizer.oneLiner` + `Article.aiSummary`) — le
+  flux RSS ne fournit parfois aucune `<description>` ; génère un résumé court **à partir du titre
+  seul** (le RSS n'a pas le corps de l'article), à la demande (`.task` à l'affichage de la carte),
+  dans `BriefingEditorialView` (macOS). Stocké dans un champ SwiftData **séparé** de `summary`
+  (`Article.displaySummary`/`summaryIsGenerated`) pour ne jamais laisser croire que c'est le chapô
+  du journal — affiché avec la mention « Résumé généré par IA ».
+- **Recherche en langage naturel** (`SmartSearchEngine.expand`) — soumettre le champ de recherche
+  (Entrée) étend la requête en mots-clés (`@Generable`, **pas** de tool-calling : le modèle n'a
+  jamais accès à la liste réelle des articles, donc aucun risque d'halluciner un article
+  inexistant) ; le filtrage réel reste un test de sous-chaîne classique côté Swift
+  (`FeedViewModel.filtered`). La frappe normale garde le comportement substring inchangé.
+
+`MatchingEngine`/`RelatedArticlesEngine` restent volontairement **lexicaux** (Jaccard, aucune
+dépendance à `FoundationModels`) : ils sont partagés tels quels avec les cibles Watch/TV/
+ScreenSaver, qui n'ont pas ce framework.
+
+⚠️ **Bouton de synthèse cassé sur iPhone (compact width)** — `NavigationSplitView`, en largeur
+compacte, décide seule de la colonne visible d'après la sélection (`selectedId`) de la `List` du
+triptyque. Le bouton de synthèse désélectionnait l'article courant (`selectedId = nil`) pour
+afficher le détail sur la synthèse plutôt que sur l'article — le système interprétait ça comme un
+retour arrière plutôt qu'une avancée vers le détail, et le bouton ne « faisait rien » à l'œil. Un
+premier essai (`preferredCompactColumn` piloté manuellement) n'a pas suffi : le système semblait
+reprendre la main dès que `selectedId` restait `nil`. Fix retenu : sur iOS, la synthèse s'ouvre en
+**modale** (`.sheet` sur `vm.showingDigest`), complètement indépendante de l'état des colonnes du
+triptyque. Sur macOS (largeur régulière, colonnes toujours visibles), la colonne détail suffit —
+`BriefingEditorialView` (écran Briefing plein écran, sans colonne liste séparée) bascule vers
+`DigestDetailView` à la place d'elle-même quand une synthèse est active.
+
 ### Widget d'écran d'accueil (WidgetKit, iOS)
 
 Cible d'extension `TheNewsWidgetExtension` séparée, reliée à l'app par un **App Group**
@@ -234,6 +287,27 @@ perso). Les réglages d'interface (`UserDefaults`) ne sont pas synchronisés.
   `Scripts/release.sh` — ne jamais la régénérer, ça casserait l'auto-update pour tous les
   utilisateurs déjà installés). Le flux (`appcast.xml`, à la racine du repo, servi via
   `raw.githubusercontent.com`) est régénéré et signé à chaque release par `release.sh`.
+
+- **Écran de veille macOS (`TheNewsScreenSaver`, bundle `.saver`) — autonome, comme watchOS/tvOS
+  E1** : fetch RSS direct (`AutonomousBriefing.swift`, réimplémente en local une version allégée de
+  `BriefingEngine`/`RelatedArticlesEngine` sans SwiftData), affiche un hero éditorial plein écran en
+  rotation (même principe que `TVBriefingHeroView` côté tvOS). **Pas d'App Group avec l'app
+  principale** — contrairement au widget, volontairement : cf. gotcha ci-dessous.
+
+> ⚠️ **`legacyScreenSaver` et App Group — mur découvert le 2026-07-07.** Depuis macOS Sequoia,
+> les `.saver` tiers sont hébergés dans `legacyScreenSaver.appex` (ExtensionKit/PlugInKit), un
+> process Apple dont le profil sandbox est **fixe** et ignore les entitlements du bundle chargé.
+> `FileManager.containerURL(forSecurityApplicationGroupIdentifier:)` résout le chemin sans erreur,
+> mais la lecture du fichier échoue systématiquement (`NSFileReadNoPermissionError`, 257) : la
+> nouvelle « App Group Container Protection » de Sequoia exigerait un prompt système que ce host
+> non interactif ne peut pas afficher/valider. Le réseau (`URLSession`), lui, fonctionne bien
+> depuis ce host (confirmé par l'écran de veille tiers Aerial). Conclusion : un `.saver` legacy ne
+> peut **pas** lire un App Group partagé avec l'app principale, mais peut faire ses propres
+> requêtes réseau — d'où le choix autonome ci-dessus plutôt qu'un partage via App Group comme le
+> widget. Diagnostic fait via logs unifiés (`log show --predicate 'subsystem == "..."'`), pas de
+> prompt caché observé. Piste non testée : renommer l'App Group au format `<TeamID>.xxx` (parfois
+> cité comme contournement Sequoia pour des paires app+extension classiques, non vérifié pour ce
+> host précis).
 
 ## Ajouter une source de presse
 

@@ -38,7 +38,9 @@ private struct TVFeedRow: View {
 struct TVFeedView: View {
     let container: ModelContainer
 
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \FeedSubscription.subscribedAt) private var subscriptions: [FeedSubscription]
+    @State private var briefingArticles: [Article] = []
 
     private var subscribedBySource: [(source: Source, feeds: [Feed])] {
         let ids = Set(subscriptions.map(\.feedID))
@@ -55,6 +57,11 @@ struct TVFeedView: View {
     var body: some View {
         NavigationStack {
             List {
+                if !briefingArticles.isEmpty {
+                    Section {
+                        TVBriefingHeroView(articles: briefingArticles)
+                    }
+                }
                 Section {
                     NavigationLink(value: TVFeedSelection.briefing) {
                         TVFeedRow(title: "Briefing", symbol: "sun.max")
@@ -94,6 +101,12 @@ struct TVFeedView: View {
             .navigationDestination(for: TVArticleSelection.self) { selection in
                 TVArticleDetailView(selection: selection)
             }
+            .task { await loadBriefing() }
         }
+    }
+
+    private func loadBriefing() async {
+        await TVRefreshEngine.run(container: container)
+        briefingArticles = BriefingEngine.today(context: modelContext)
     }
 }

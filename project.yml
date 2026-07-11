@@ -64,7 +64,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.3.0"
+        MARKETING_VERSION: "1.3.1"
         CURRENT_PROJECT_VERSION: "1"
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         CODE_SIGN_ENTITLEMENTS: TheNews/TheNews.entitlements
@@ -114,7 +114,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.3.0"
+        MARKETING_VERSION: "1.3.1"
         CURRENT_PROJECT_VERSION: "1"
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -172,7 +172,7 @@ targets:
         PRODUCT_NAME: TheNewsWidget
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.widget
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.3.0"
+        MARKETING_VERSION: "1.3.1"
         CURRENT_PROJECT_VERSION: "1"
         IPHONEOS_DEPLOYMENT_TARGET: "17.0"
         TARGETED_DEVICE_FAMILY: "1,2"
@@ -206,7 +206,7 @@ targets:
         PRODUCT_NAME: TheNewsWidgetMac
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.macwidget
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.3.0"
+        MARKETING_VERSION: "1.3.1"
         CURRENT_PROJECT_VERSION: "1"
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         CODE_SIGN_STYLE: Automatic
@@ -241,7 +241,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.watchkitapp
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.3.0"
+        MARKETING_VERSION: "1.3.1"
         CURRENT_PROJECT_VERSION: "1"
         WATCHOS_DEPLOYMENT_TARGET: "10.0"
         TARGETED_DEVICE_FAMILY: "4"
@@ -289,7 +289,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.tvos
         ASSETCATALOG_COMPILER_APPICON_NAME: "App Icon & Top Shelf Image"
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.3.0"
+        MARKETING_VERSION: "1.3.1"
         CURRENT_PROJECT_VERSION: "1"
         TVOS_DEPLOYMENT_TARGET: "17.0"
         CODE_SIGN_ENTITLEMENTS: TheNewsTV/TheNewsTV.entitlements
@@ -333,7 +333,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: fr.vincentlauriat.thenews.screensaver
         WRAPPER_EXTENSION: saver
         SWIFT_VERSION: "5.9"
-        MARKETING_VERSION: "1.3.0"
+        MARKETING_VERSION: "1.3.1"
         CURRENT_PROJECT_VERSION: "1"
         MACOSX_DEPLOYMENT_TARGET: "14.0"
         CODE_SIGN_STYLE: Automatic

@@ -7,7 +7,8 @@ import SwiftUI
 /// alternative visuelle à la liste, pas un écran autonome sans sélection.
 struct ArticleCardView: View {
     @Environment(AppSettings.self) private var settings
-    let article: Article
+    @Environment(\.openURL) private var openURL
+    @Bindable var article: Article
     let isSelected: Bool
 
     private var accessibilitySummary: String {
@@ -46,16 +47,18 @@ struct ArticleCardView: View {
                 .fixedSize(horizontal: false, vertical: true)
             if let text = article.displaySummary, !text.isEmpty {
                 Text(text)
-                    .font(.caption)
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .lineLimit(2)
+                    .lineLimit(5)
             }
             Text(article.dateFormatted)
                 .font(.caption2)
                 .foregroundStyle(.tertiary)
+            Spacer(minLength: 0)
+            actions
         }
         .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 12, style: .continuous)
@@ -65,6 +68,45 @@ struct ArticleCardView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilitySummary)
         .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
+
+    /// Mêmes actions que `ArticleRowView`/`BriefingSecondaryCard` (lire / favori / partager),
+    /// affichées en permanence — le tap sur le reste de la carte est géré par l'appelant
+    /// (`ArticleListView.handleCardTap`, différent selon la plateforme).
+    private var actions: some View {
+        HStack(spacing: 10) {
+            Button(action: open) {
+                Label(settings.t("read_article"), systemImage: "safari")
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Button {
+                article.isFavorite.toggle()
+            } label: {
+                Label(
+                    settings.t(article.isFavorite ? "unfavorite" : "favorite"),
+                    systemImage: article.isFavorite ? "star.fill" : "star"
+                )
+                .labelStyle(.iconOnly)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            ShareLink(item: article.link) {
+                Label(settings.t("share"), systemImage: "square.and.arrow.up")
+                    .labelStyle(.iconOnly)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+        }
+        .font(.caption)
+        .padding(.top, 2)
+    }
+
+    private func open() {
+        openURL(article.link)
+        article.isRead = true
     }
 
     @ViewBuilder
@@ -77,7 +119,7 @@ struct ArticleCardView: View {
                     Rectangle().fill(.secondary.opacity(0.12))
                 }
             }
-            .frame(height: 120)
+            .frame(height: 90)
             .frame(maxWidth: .infinity)
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         }

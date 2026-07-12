@@ -34,6 +34,7 @@ struct TheNewsApp: App {
                 .task { NotificationService.shared.configureDelegate() }
                 #if os(macOS)
                 .task { _ = SparkleUpdater.shared }
+                .task { ScreenSaverInstaller.installOrUpdateIfNeeded() }
                 #endif
         }
         .modelContainer(modelContainer)

@@ -92,6 +92,16 @@ struct SettingsView: View {
                 Text(settings.t("digest_section_footer"))
             }
 
+            Section(settings.t("display_mode_section")) {
+                Picker(settings.t("display_mode_section"), selection: $settings.articleDisplayModeRaw) {
+                    ForEach(ArticleDisplayMode.allCases) { mode in
+                        Text(settings.t(mode.titleKey)).tag(mode.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+            }
+
             Section(settings.t("settings_appearance")) {
                 Picker(settings.t("settings_appearance"), selection: $settings.appearanceRaw) {
                     ForEach(AppearanceMode.allCases) { mode in

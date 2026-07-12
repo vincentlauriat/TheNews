@@ -55,6 +55,18 @@ enum ArticleSwipeMode: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Affichage des listes d'articles
+
+/// Mode d'affichage des listes d'articles (rubriques classiques, hors écran Briefing
+/// éditorial macOS qui a son propre agencement) : liste compacte historique, ou cartes
+/// façon Briefing (image, chapô, méta) — au choix, réglage global à toute l'app.
+enum ArticleDisplayMode: String, CaseIterable, Identifiable {
+    case list, card
+    var id: String { rawValue }
+    var titleKey: String { self == .list ? "display_mode_list" : "display_mode_card" }
+    var icon: String { self == .list ? "list.bullet" : "square.grid.2x2" }
+}
+
 // MARK: - Configuration de la synthèse IA
 
 enum DigestLength: String, CaseIterable, Identifiable {
@@ -132,6 +144,12 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(smartAlertsEnabled, forKey: "smartAlertsEnabled") }
     }
 
+    /// Affichage des listes d'articles (rubriques classiques) : liste ou cartes.
+    var articleDisplayModeRaw: String {
+        didSet { UserDefaults.standard.set(articleDisplayModeRaw, forKey: "articleDisplayMode") }
+    }
+    var articleDisplayMode: ArticleDisplayMode { ArticleDisplayMode(rawValue: articleDisplayModeRaw) ?? .list }
+
     // MARK: Synthèse IA (configurable)
     var digestLengthRaw: String { didSet { UserDefaults.standard.set(digestLengthRaw, forKey: "digestLength") } }
     var digestFormatRaw: String { didSet { UserDefaults.standard.set(digestFormatRaw, forKey: "digestFormat") } }
@@ -150,6 +168,7 @@ final class AppSettings {
         briefingHour = UserDefaults.standard.object(forKey: "briefingHour") as? Int ?? 8
         swipeModeRaw = UserDefaults.standard.string(forKey: "swipeMode") ?? ArticleSwipeMode.all.rawValue
         smartAlertsEnabled = UserDefaults.standard.bool(forKey: "smartAlertsEnabled")
+        articleDisplayModeRaw = UserDefaults.standard.string(forKey: "articleDisplayMode") ?? ArticleDisplayMode.list.rawValue
         digestLengthRaw = UserDefaults.standard.string(forKey: "digestLength") ?? DigestLength.concise.rawValue
         digestFormatRaw = UserDefaults.standard.string(forKey: "digestFormat") ?? DigestFormat.bullets.rawValue
         digestToneRaw = UserDefaults.standard.string(forKey: "digestTone") ?? DigestTone.neutral.rawValue

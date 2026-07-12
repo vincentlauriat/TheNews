@@ -78,7 +78,23 @@ targets:
     dependencies:
       - target: TheNewsWidgetMac
         embed: true
+      - target: TheNewsScreenSaver
+        embed: false
+        link: false
       - package: Sparkle
+    # Le screensaver voyage avec l'app (cf. PLAN.md § Phase G) : la dépendance ci-dessus force
+    # xcodegen à builder TheNewsScreenSaver avant TheNews, ce script copie ensuite le .saver
+    # construit dans les Resources de l'app. ScreenSaverInstaller (au runtime) se charge de
+    # l'installer/mettre à jour dans ~/Library/Screen Savers/ au lancement.
+    postbuildScripts:
+      - name: "Embarquer le screensaver dans Resources"
+        script: |
+          set -e
+          SAVER_NAME="TheNewsBriefing.saver"
+          SRC="${BUILT_PRODUCTS_DIR}/${SAVER_NAME}"
+          DST="${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Contents/Resources/${SAVER_NAME}"
+          rm -rf "${DST}"
+          ditto "${SRC}" "${DST}"
     info:
       path: TheNews/Info.plist
       properties:

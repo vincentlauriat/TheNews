@@ -18,5 +18,12 @@
 	</array>
 	<key>com.apple.security.network.client</key>
 	<true/>
+	<!-- Écriture directe dans ~/Library/Screen Savers/ pour installer/mettre à jour le
+	     screensaver embarqué (cf. ScreenSaverInstaller.swift, PLAN.md § Phase G) — hors
+	     conteneur sandbox, sans passer par un NSOpenPanel. -->
+	<key>com.apple.security.temporary-exception.files.home-relative-path.read-write</key>
+	<array>
+		<string>/Library/Screen Savers/</string>
+	</array>
 </dict>
 </plist>

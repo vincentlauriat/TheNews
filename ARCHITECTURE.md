@@ -294,6 +294,28 @@ perso). Les réglages d'interface (`UserDefaults`) ne sont pas synchronisés.
   rotation (même principe que `TVBriefingHeroView` côté tvOS). **Pas d'App Group avec l'app
   principale** — contrairement au widget, volontairement : cf. gotcha ci-dessous.
 
+- **Distribution + auto-update du screensaver — embarqués dans `TheNews.app`** (2026-07-12) : le
+  `.saver` voyage avec l'app plutôt que d'avoir son propre canal de release/Sparkle. `project.yml`
+  déclare `TheNewsScreenSaver` comme dépendance de build de `TheNews` (`embed: false, link: false`,
+  juste pour l'ordre de build) + un `postbuildScripts` qui copie le `.saver` construit dans
+  `TheNews.app/Contents/Resources/`. Au lancement, `ScreenSaverInstaller.installOrUpdateIfNeeded()`
+  (appelé depuis `TheNewsApp.swift`, à côté de `SparkleUpdater.shared`) compare
+  `CFBundleShortVersionString` de l'embarqué à celui installé dans `~/Library/Screen Savers/` et
+  remplace si plus récent. Sparkle **rejeté** pour ce composant après recherche : tout install de
+  type `sparkle:installationType="package"` exige une authentification admin (root), y compris pour
+  un `.pkg` payload-free ciblant un dossier utilisateur — et les mainteneurs Sparkle déconseillent
+  un second `SPUStandardUpdaterController` dans le même process que l'app hôte (collision
+  `UserDefaults` sur `SULastCheckTime`/`SUEnableAutomaticChecks`, identifiés par bundle ID du host).
+  > ⚠️ **`homeDirectoryForCurrentUser` et sandbox — piège rencontré le 2026-07-12.**
+  > `FileManager.default.homeDirectoryForCurrentUser` renvoie le home **virtualisé du conteneur
+  > sandbox** (`~/Library/Containers/fr.vincentlauriat.thenews/Data/`), pas le vrai `~/` — même
+  > avec l'entitlement `com.apple.security.temporary-exception.files.home-relative-path.read-write`
+  > déclaré (`/Library/Screen Savers/`). Premier test : copie silencieusement « réussie » mais dans
+  > le conteneur, invisible et inutile. Fix : passer par l'appel POSIX `getpwuid(getuid()).pw_dir`
+  > pour obtenir le vrai chemin home, seul point d'entrée que l'exception sandbox rend effectivement
+  > accessible hors du conteneur. Vérifié en conditions réelles (remplacement d'un `.saver` 1.2.1
+  > déjà installé par la version 1.3.1 embarquée, au lancement de l'app).
+
 > ⚠️ **`legacyScreenSaver` et App Group — mur découvert le 2026-07-07.** Depuis macOS Sequoia,
 > les `.saver` tiers sont hébergés dans `legacyScreenSaver.appex` (ExtensionKit/PlugInKit), un
 > process Apple dont le profil sandbox est **fixe** et ignore les entitlements du bundle chargé.

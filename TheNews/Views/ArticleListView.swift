@@ -9,21 +9,8 @@ struct ArticleListView: View {
     @Binding var selectedId: String?
 
     var body: some View {
-        List(selection: $selectedId) {
-            ForEach(vm.grouped, id: \.key) { group in
-                Section(settings.t(group.key)) {
-                    ForEach(group.items) { article in
-                        ArticleRowView(article: article)
-                            .tag(article.id)
-                    }
-                }
-            }
-        }
-        #if os(macOS)
-        .listStyle(.inset)
-        #else
-        .listStyle(.plain)
-        #endif
+        @Bindable var settings = settings
+        content
         .searchable(text: $vm.searchText, prompt: settings.t("search_placeholder"))
         .onSubmit(of: .search) {
             Task { await vm.smartSearch(lang: settings.effectiveLang) }
@@ -74,6 +61,17 @@ struct ArticleListView: View {
                 .disabled(vm.isLoading)
                 .help(settings.t("refresh_help"))
             }
+            ToolbarItem(placement: .automatic) {
+                Picker(settings.t("display_mode_list"), selection: $settings.articleDisplayModeRaw) {
+                    ForEach(ArticleDisplayMode.allCases) { mode in
+                        Label(settings.t(mode.titleKey), systemImage: mode.icon)
+                            .tag(mode.rawValue)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .labelsHidden()
+                .fixedSize()
+            }
         }
         .overlay {
             if vm.articles.isEmpty && !vm.isLoading {
@@ -82,6 +80,51 @@ struct ArticleListView: View {
                     systemImage: "newspaper",
                     description: Text(settings.t("no_items_desc"))
                 )
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        switch settings.articleDisplayMode {
+        case .list:
+            List(selection: $selectedId) {
+                ForEach(vm.grouped, id: \.key) { group in
+                    Section(settings.t(group.key)) {
+                        ForEach(group.items) { article in
+                            ArticleRowView(article: article)
+                                .tag(article.id)
+                        }
+                    }
+                }
+            }
+            #if os(macOS)
+            .listStyle(.inset)
+            #else
+            .listStyle(.plain)
+            #endif
+        case .card:
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 20) {
+                    ForEach(vm.grouped, id: \.key) { group in
+                        Section {
+                            LazyVGrid(
+                                columns: [GridItem(.adaptive(minimum: 260, maximum: 340), spacing: 14)],
+                                spacing: 14
+                            ) {
+                                ForEach(group.items) { article in
+                                    ArticleCardView(article: article, isSelected: selectedId == article.id)
+                                        .onTapGesture { selectedId = article.id }
+                                }
+                            }
+                        } header: {
+                            Text(settings.t(group.key))
+                                .font(.headline)
+                                .padding(.top, 4)
+                        }
+                    }
+                }
+                .padding(14)
             }
         }
     }

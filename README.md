@@ -45,10 +45,11 @@ La plupart des applications d'actualité te lient à **un seul média** ou envoi
 | 📱 | **Widget & iCloud** | Widget d'écran d'accueil (WidgetKit, 3 tailles) **sur iOS et macOS** + **sync iCloud** (CloudKit) de tes abonnements, favoris, sujets de veille et flux perso entre tes appareils. |
 | ⌚ | **App Apple Watch** | App compagnon watchOS autonome : les gros titres du Monde et des Echos, chargés en direct sur ta montre. |
 | 📺 | **App Apple TV** | App compagnon tvOS autonome : Briefing, Tous les articles et toutes les rubriques sur grand écran, miniatures, détail image + chapô, navigation complète à la télécommande. |
+| 🌙 | **Écran de veille macOS** | Briefing éditorial en rotation, **embarqué dans l'app** — installé et mis à jour automatiquement à chaque update de TheNews, sans téléchargement séparé. |
 
 Plus le socle classique : veille par mots-clés, alertes locales, favoris, partage natif, 3 colonnes
-(rubriques · articles · détail), swipe entre articles sur iOS (**mode « tous » ou « non lus »**),
-apparence & langue (fr/en).
+(rubriques · articles · détail), affichage liste ou cartes au choix, swipe entre articles sur iOS
+(**mode « tous » ou « non lus »**), apparence & langue (fr/en).
 
 ## Fonctionnalités par plateforme
 
@@ -64,6 +65,7 @@ apparence & langue (fr/en).
 | Widget d'écran d'accueil | ✅ | ✅ |
 | **App compagnon Apple Watch** | — | ✅ |
 | Sync iCloud (SwiftData + CloudKit) | ✅ | ✅ |
+| Écran de veille (embarqué, auto-update) | ✅ | — |
 
 > Le flux RSS ne fournit que titre, chapô et image ; l'article complet s'ouvre dans le navigateur.
 > Sur macOS, la sync iCloud requiert une app signée avec App Sandbox (activés ici).
@@ -100,7 +102,7 @@ open TheNews.xcodeproj        # macOS : scheme TheNews — iOS : scheme TheNewsi
 ```
 
 Projet Xcode **généré** (le `.xcodeproj` n'est pas versionné). Release macOS :
-`./Scripts/release.sh 1.2.0` (build → sign Developer ID → DMG → notarize → staple → Sparkle-sign →
+`./Scripts/release.sh 1.4.0` (build → sign Developer ID → DMG → notarize → staple → Sparkle-sign →
 appcast).
 
 ## Structure
@@ -119,6 +121,7 @@ TheNews/
 TheNewsWidget/                   # extension WidgetKit (iOS + macOS)
 TheNewsWatch/                    # app compagnon watchOS autonome (fetch RSS direct)
 TheNewsTV/                       # app compagnon tvOS autonome (fetch RSS direct, sans SwiftData)
+TheNewsScreenSaver/               # .saver autonome, embarqué dans TheNews.app et auto-update
 Scripts/                        # release.sh, make-thenews-icon.swift
 ```
 

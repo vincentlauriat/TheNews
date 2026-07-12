@@ -76,9 +76,11 @@ ditto --norsrc --noextattr --noacl "$APP" "$STAGING"
 
 # 4. Codesign the app with Hardened Runtime + secure timestamp (retry: Apple TS is flaky)
 codesign_ts() {
-  local target="$1" i
+  local target="$1" entitlements="${2:-}" i
+  local args=(--force --options runtime --timestamp --sign "$SIGNING_IDENTITY")
+  [ -n "$entitlements" ] && args+=(--entitlements "$entitlements")
   for i in 1 2 3 4 5; do
-    if codesign --force --options runtime --timestamp --sign "$SIGNING_IDENTITY" "$target"; then
+    if codesign "${args[@]}" "$target"; then
       return 0
     fi
     echo "  …codesign retry $i/5 (timestamp server) in 5s" >&2
@@ -106,6 +108,14 @@ if [ -d "$STAGING/Contents/PlugIns" ]; then
     echo "  … signing $(basename "$appex")"
     codesign_ts "$appex"
   done < <(find "$STAGING/Contents/PlugIns" -maxdepth 1 -name "*.appex" -print0)
+fi
+# Embedded screensaver (cf. project.yml postbuildScripts) — a nested bundle in
+# Resources, not covered by the app's own codesign pass. Needs its own
+# entitlements (sandboxed .saver, distinct from the host app's).
+SCREENSAVER="$STAGING/Contents/Resources/TheNewsBriefing.saver"
+if [ -d "$SCREENSAVER" ]; then
+  echo "  … signing TheNewsBriefing.saver (embedded screensaver)"
+  codesign_ts "$SCREENSAVER" "$ROOT/TheNewsScreenSaver/TheNewsScreenSaver.entitlements"
 fi
 codesign_ts "$STAGING"
 codesign --verify --strict --deep --verbose=1 "$STAGING"

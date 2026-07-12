@@ -49,6 +49,16 @@ struct DigestDetailView: View {
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
+        #if os(macOS)
+        // Sur macOS, cet écran remplace parfois toute la zone de contenu (mode carte,
+        // Briefing) — pas seulement le panneau détail à côté d'une liste toujours visible.
+        // Sans ce bouton, rien ne permet d'en sortir dans ce cas.
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button(settings.t("cancel")) { vm.showingDigest = false }
+            }
+        }
+        #endif
         .onDisappear { narrator.stop() }
     }
 

@@ -5,6 +5,7 @@ import SwiftUI
 struct ArticleListView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.openURL) private var openURL
     @Bindable var vm: FeedViewModel
     @Binding var selectedId: String?
 
@@ -109,12 +110,12 @@ struct ArticleListView: View {
                     ForEach(vm.grouped, id: \.key) { group in
                         Section {
                             LazyVGrid(
-                                columns: [GridItem(.adaptive(minimum: 260, maximum: 340), spacing: 14)],
+                                columns: [GridItem(.adaptive(minimum: 300, maximum: 420), spacing: 14)],
                                 spacing: 14
                             ) {
                                 ForEach(group.items) { article in
                                     ArticleCardView(article: article, isSelected: selectedId == article.id)
-                                        .onTapGesture { selectedId = article.id }
+                                        .onTapGesture { handleCardTap(article) }
                                 }
                             }
                         } header: {
@@ -127,5 +128,18 @@ struct ArticleListView: View {
                 .padding(14)
             }
         }
+    }
+
+    /// En mode carte, le tap n'a pas la même destination selon la plateforme : sur macOS,
+    /// le mode carte masque le panneau de lecture (cf. `ContentView.splitView`), donc le tap
+    /// ouvre l'article directement (comme les cartes du Briefing) ; sur iOS, le panneau de
+    /// détail/pager existe toujours, donc le tap sélectionne l'article comme en mode liste.
+    private func handleCardTap(_ article: Article) {
+        #if os(macOS)
+        openURL(article.link)
+        article.isRead = true
+        #else
+        selectedId = article.id
+        #endif
     }
 }

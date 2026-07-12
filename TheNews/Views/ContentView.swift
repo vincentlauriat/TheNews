@@ -122,6 +122,19 @@ struct ContentView: View {
                     BriefingEditorialView(vm: vm)
                 }
             }
+        } else if settings.articleDisplayMode == .card {
+            // Mode carte : pas de panneau de lecture séparé — la grille de cartes
+            // occupe toute la largeur (comme le Briefing), le tap ouvre l'article
+            // directement au lieu de le sélectionner (cf. ArticleListView).
+            NavigationSplitView {
+                sidebar
+            } detail: {
+                if vm.showingDigest {
+                    DigestDetailView(vm: vm)
+                } else {
+                    ArticleListView(vm: vm, selectedId: $selectedId)
+                }
+            }
         } else {
             NavigationSplitView {
                 sidebar

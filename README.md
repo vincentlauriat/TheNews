@@ -102,7 +102,7 @@ open TheNews.xcodeproj        # macOS : scheme TheNews — iOS : scheme TheNewsi
 ```
 
 Projet Xcode **généré** (le `.xcodeproj` n'est pas versionné). Release macOS :
-`./Scripts/release.sh 1.4.0` (build → sign Developer ID → DMG → notarize → staple → Sparkle-sign →
+`./Scripts/release.sh 1.4.1` (build → sign Developer ID → DMG → notarize → staple → Sparkle-sign →
 appcast).
 
 ## Structure

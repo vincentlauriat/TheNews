@@ -1,4 +1,8 @@
 import SwiftUI
+#if os(iOS)
+import Photos
+import UIKit
+#endif
 
 /// Détail d'un article : image, chapô et bouton d'ouverture de l'article complet.
 /// Le corps intégral n'est pas dans le flux RSS Le Monde → on ouvre le lien dans
@@ -11,6 +15,11 @@ struct ArticleDetailView: View {
 
     /// Articles d'autres sources couvrant le même sujet (calculés on-device).
     @State private var related: [Article] = []
+
+    #if os(iOS)
+    @State private var confirmingImageSave = false
+    @State private var imageSaveFeedback: String?
+    #endif
 
     var body: some View {
         ScrollView {
@@ -27,6 +36,21 @@ struct ArticleDetailView: View {
                     }
                     .frame(maxWidth: .infinity)
                     .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                    #if os(iOS)
+                    .onLongPressGesture {
+                        confirmingImageSave = true
+                    }
+                    .confirmationDialog(
+                        settings.t("save_image_confirm_title"),
+                        isPresented: $confirmingImageSave,
+                        titleVisibility: .visible
+                    ) {
+                        Button(settings.t("save_image_action")) {
+                            Task { await saveImageToPhotos(url: url) }
+                        }
+                        Button(settings.t("cancel"), role: .cancel) {}
+                    }
+                    #endif
                 }
 
                 VStack(alignment: .leading, spacing: 6) {
@@ -93,9 +117,46 @@ struct ArticleDetailView: View {
         #endif
         // Recalcule le regroupement cross-source à chaque changement d'article.
         .task(id: article.id) {
-            related = RelatedArticlesEngine.related(to: article, context: modelContext)
+            related = await RelatedArticlesEngine.related(to: article, context: modelContext)
+        }
+        #if os(iOS)
+        .alert(
+            settings.t("error_title"),
+            isPresented: Binding(
+                get: { imageSaveFeedback != nil },
+                set: { if !$0 { imageSaveFeedback = nil } }
+            )
+        ) {
+            Button(settings.t("ok")) { imageSaveFeedback = nil }
+        } message: {
+            Text(imageSaveFeedback ?? "")
+        }
+        #endif
+    }
+
+    #if os(iOS)
+    /// Télécharge l'image de l'article et l'enregistre dans Photos (autorisation « ajout
+    /// seul », moins intrusive qu'un accès complet puisqu'on ne lit jamais la pellicule).
+    private func saveImageToPhotos(url: URL) async {
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard let image = UIImage(data: data) else {
+                imageSaveFeedback = settings.t("save_image_failure")
+                return
+            }
+            let status = await PHPhotoLibrary.requestAuthorization(for: .addOnly)
+            guard status == .authorized || status == .limited else {
+                imageSaveFeedback = settings.t("save_image_permission_denied")
+                return
+            }
+            try await PHPhotoLibrary.shared().performChanges {
+                PHAssetChangeRequest.creationRequestForAsset(from: image)
+            }
+        } catch {
+            imageSaveFeedback = settings.t("save_image_failure")
         }
     }
+    #endif
 
     /// « Aussi couvert par… » : mêmes faits vus par d'autres journaux/sources.
     private var relatedSection: some View {

@@ -23,12 +23,19 @@ struct FeedsSidebarView: View {
     /// Total des rubriques abonnées, toutes sources confondues.
     private var hasSubscriptions: Bool { subscriptions.contains { Feed.byID($0.feedID) != nil } }
 
-    /// Nombre d'articles non lus correspondant à un sujet de veille (parmi les rubriques suivies).
-    private var alertsUnreadCount: Int {
-        let active = topics.filter(\.isEnabled)
-        guard !active.isEmpty else { return 0 }
-        let subs = Set(subscriptions.map(\.feedID))
-        return unread.filter { subs.contains($0.feedID) && MatchingEngine.isMatch($0, topics: active) }.count
+    /// Nombre d'articles non lus correspondant à un sujet de veille (parmi les rubriques
+    /// suivies) — mis en cache, recalculé de façon asynchrone (cf. `.task(id:)` sur `body`)
+    /// plutôt qu'en propriété calculée synchrone. `unread` peut compter des centaines
+    /// d'articles ; passer chacun dans `MatchingEngine.isMatch` (normalisation + repli
+    /// diacritique par mot-clé) directement dans `body` coûtait assez cher pour geler
+    /// l'animation du pager iOS à chaque swipe (chaque article lu change `unread`, donc
+    /// redéclenche ce recalcul pendant que `ArticlePagerView` finalise la page).
+    @State private var alertsUnreadCount = 0
+
+    /// Signature bon marché (identifiants seulement, aucun traitement de chaîne) utilisée
+    /// pour ne redéclencher `recomputeAlertsUnreadCount()` que quand une de ces listes change.
+    private var matchSignature: [String] {
+        topics.map(\.id) + subscriptions.map(\.feedID) + unread.map(\.id)
     }
 
     var body: some View {
@@ -80,6 +87,9 @@ struct FeedsSidebarView: View {
         }
         .listStyle(.sidebar)
         .navigationTitle(settings.t("app_name"))
+        .task(id: matchSignature) {
+            await recomputeAlertsUnreadCount()
+        }
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button {
@@ -90,5 +100,12 @@ struct FeedsSidebarView: View {
                 .help(settings.t("manage_sections"))
             }
         }
+    }
+
+    private func recomputeAlertsUnreadCount() async {
+        let active = topics.filter(\.isEnabled)
+        guard !active.isEmpty else { alertsUnreadCount = 0; return }
+        let subs = Set(subscriptions.map(\.feedID))
+        alertsUnreadCount = unread.filter { subs.contains($0.feedID) && MatchingEngine.isMatch($0, topics: active) }.count
     }
 }

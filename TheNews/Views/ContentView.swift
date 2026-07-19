@@ -24,7 +24,12 @@ struct ContentView: View {
         .task { await runPeriodicRefresh() }
         #endif
         .onChange(of: feedSelection) { _, sel in
-            Task { await vm.changeSelection(sel ?? .all, context: modelContext, lang: settings.effectiveLang) }
+            let target = sel ?? .all
+            // Garde-fou : si `vm.selection` correspond déjà à la cible (ex. `openDeepLink`
+            // vient de la fixer de façon synchrone), ne relance pas `changeSelection` — ce
+            // `Task` async remettrait `selectedArticle` à `nil` juste après la sélection.
+            guard vm.selection != target else { return }
+            Task { await vm.changeSelection(target, context: modelContext, lang: settings.effectiveLang) }
         }
         .onChange(of: customFeeds.map(\.id)) { _, _ in
             // Un flux perso a été ajouté/supprimé (localement ou par sync iCloud) :
@@ -40,10 +45,10 @@ struct ContentView: View {
             // Le swipe (pager iOS) change l'article : garde la liste synchronisée.
             if selectedId != id { selectedId = id }
         }
-        .onChange(of: router.pendingArticleID) { _, id in
-            guard let id else { return }
-            openArticle(id: id)
-            router.pendingArticleID = nil
+        .onChange(of: router.pending) { _, destination in
+            guard let destination else { return }
+            handle(destination)
+            router.pending = nil
         }
         .alert(settings.t("error_title"), isPresented: Binding(
             get: { vm.errorMessage != nil },
@@ -122,6 +127,23 @@ struct ContentView: View {
                     BriefingEditorialView(vm: vm)
                 }
             }
+        } else if feedSelection == .alerts {
+            // Écran Alertes fusionné (liste + gestion des sujets de veille) : toujours en
+            // triptyque, indépendamment du mode carte (cf. `AlertsView`, décision assumée).
+            NavigationSplitView {
+                sidebar
+            } content: {
+                AlertsView(vm: vm, selectedId: $selectedId)
+                    .navigationSplitViewColumnWidth(min: 280, ideal: 340, max: 460)
+            } detail: {
+                if vm.showingDigest {
+                    DigestDetailView(vm: vm)
+                } else if let article = vm.selectedArticle {
+                    ArticleDetailView(article: article)
+                } else {
+                    EmptySelectionView()
+                }
+            }
         } else if settings.articleDisplayMode == .card {
             // Mode carte : pas de panneau de lecture séparé — la grille de cartes
             // occupe toute la largeur (comme le Briefing), le tap ouvre l'article
@@ -155,8 +177,13 @@ struct ContentView: View {
         NavigationSplitView {
             sidebar
         } content: {
-            ArticleListView(vm: vm, selectedId: $selectedId)
-                .navigationSplitViewColumnWidth(min: 280, ideal: 340, max: 460)
+            if feedSelection == .alerts {
+                AlertsView(vm: vm, selectedId: $selectedId)
+                    .navigationSplitViewColumnWidth(min: 280, ideal: 340, max: 460)
+            } else {
+                ArticleListView(vm: vm, selectedId: $selectedId)
+                    .navigationSplitViewColumnWidth(min: 280, ideal: 340, max: 460)
+            }
         } detail: {
             if vm.selectedArticle != nil {
                 ArticlePagerView(vm: vm)   // swipe horizontal entre articles
@@ -199,13 +226,26 @@ struct ContentView: View {
         )
     }
 
-    /// Ouvre l'article ciblé par un tap de notification (deep-link).
-    private func openArticle(id: String) {
-        let descriptor = FetchDescriptor<Article>(predicate: #Predicate { $0.id == id })
-        guard let article = try? modelContext.fetch(descriptor).first else { return }
-        vm.selectedArticle = article
-        vm.showingDigest = false
-        if !article.isRead { article.isRead = true }
+    /// Route un tap de notification vers sa destination (article précis ou écran Alertes).
+    private func handle(_ destination: NotificationDestination) {
+        switch destination {
+        case .article(let id):
+            vm.openDeepLink(articleID: id, context: modelContext)
+            // Aligne la sidebar sur la nouvelle portée. Sans risque de course : `vm.selection`
+            // est déjà `.all` (fixé de façon synchrone par `openDeepLink`), donc le garde-fou
+            // sur `.onChange(of: feedSelection)` empêche `changeSelection` de rejouer et
+            // d'écraser `selectedArticle`.
+            feedSelection = .all
+        case .alerts:
+            vm.showingDigest = false
+            if feedSelection == .alerts {
+                // Déjà sur l'écran Alertes : valeur inchangée, `.onChange` ne se déclenche
+                // pas — force explicitement un rechargement pour voir les nouveaux matches.
+                Task { await vm.changeSelection(.alerts, context: modelContext, lang: settings.effectiveLang) }
+            } else {
+                feedSelection = .alerts
+            }
+        }
     }
 
     #if os(macOS)

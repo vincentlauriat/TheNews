@@ -26,12 +26,19 @@ struct TheNewsApp: App {
         }
     }()
 
+    /// Assigné ici plutôt que dans un `.task` sur `ContentView` pour éliminer la fenêtre de
+    /// course au cold-start-via-notification (iOS) : `App.init()` s'exécute sur le main thread
+    /// avant la construction de la première scène, alors qu'un `.task` attend le premier rendu
+    /// de la vue, donc au moins un tour de run loop de plus.
+    init() {
+        NotificationService.shared.configureDelegate()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environment(settings)
                 .preferredColorScheme(settings.appearance.colorScheme)
-                .task { NotificationService.shared.configureDelegate() }
                 #if os(macOS)
                 .task { _ = SparkleUpdater.shared }
                 .task { ScreenSaverInstaller.installOrUpdateIfNeeded() }

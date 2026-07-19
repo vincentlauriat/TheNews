@@ -2,13 +2,21 @@ import Foundation
 import Observation
 import UserNotifications
 
-/// Achemine un tap de notification vers l'article concerné (deep-link intra-app).
+/// Destination visée par un tap de notification (deep-link intra-app) : soit un article
+/// précis, soit l'écran Alertes (notification de synthèse regroupant plusieurs articles,
+/// pour lesquels aucun article unique n'est privilégié).
+enum NotificationDestination: Equatable {
+    case article(id: String)
+    case alerts
+}
+
+/// Achemine un tap de notification vers sa destination.
 @Observable
 @MainActor
 final class NotificationRouter {
     static let shared = NotificationRouter()
-    /// Identifiant de l'article à ouvrir suite à un tap sur notification.
-    var pendingArticleID: String?
+    /// Destination à ouvrir suite à un tap sur notification.
+    var pending: NotificationDestination?
 }
 
 /// Gère les notifications locales : permission, statut, émission pour les articles
@@ -48,12 +56,16 @@ final class NotificationService: NSObject {
         guard isAuthorized, !articles.isEmpty else { return }
 
         if articles.count == 1, let a = articles.first {
-            await add(id: a.id, title: a.feed?.title ?? "TheNews", body: a.title, articleID: a.id)
+            await add(id: a.id, title: a.feed?.title ?? "TheNews", body: a.title,
+                      userInfo: ["articleID": a.id])
         } else {
             let title = "TheNews"
             let body = String(format: bodyFormat(articles.count), articles.count)
+            // Notif de synthèse : route vers l'écran Alertes plutôt qu'un seul article
+            // arbitraire — sinon les autres articles groupés seraient inaccessibles depuis
+            // la notification (l'ancien code ne référençait que `articles.first`).
             await add(id: "alerts-summary-\(articles.first?.id ?? "")", title: title, body: body,
-                      articleID: articles.first?.id)
+                      userInfo: ["destination": "alerts"])
         }
     }
 
@@ -88,8 +100,7 @@ final class NotificationService: NSObject {
                   title: "TheNews",
                   body: AppLocale.identifier.hasPrefix("fr")
                         ? "Ceci est une notification de test."
-                        : "This is a test notification.",
-                  articleID: nil)
+                        : "This is a test notification.")
     }
 
     // MARK: - Interne
@@ -100,12 +111,12 @@ final class NotificationService: NSObject {
             : "%d new articles match your watch topics."
     }
 
-    private func add(id: String, title: String, body: String, articleID: String?) async {
+    private func add(id: String, title: String, body: String, userInfo: [AnyHashable: Any] = [:]) async {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = .default
-        if let articleID { content.userInfo = ["articleID": articleID] }
+        content.userInfo = userInfo
         let request = UNNotificationRequest(identifier: id, content: content, trigger: nil)
         try? await center.add(request)
     }
@@ -122,14 +133,23 @@ extension NotificationService: UNUserNotificationCenterDelegate {
         [.banner, .sound]
     }
 
-    /// Tap sur une notification → deep-link vers l'article.
+    /// Tap sur une notification → deep-link vers sa destination (article ou écran Alertes).
+    /// Le briefing quotidien et la notif de test n'ont pas de `userInfo` de routage — pas de
+    /// deep-link pour elles, comportement voulu.
     nonisolated func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse
     ) async {
-        let articleID = response.notification.request.content.userInfo["articleID"] as? String
-        await MainActor.run {
-            if let articleID { NotificationRouter.shared.pendingArticleID = articleID }
+        let info = response.notification.request.content.userInfo
+        let destination: NotificationDestination?
+        if let articleID = info["articleID"] as? String {
+            destination = .article(id: articleID)
+        } else if info["destination"] as? String == "alerts" {
+            destination = .alerts
+        } else {
+            destination = nil
         }
+        guard let destination else { return }
+        await MainActor.run { NotificationRouter.shared.pending = destination }
     }
 }

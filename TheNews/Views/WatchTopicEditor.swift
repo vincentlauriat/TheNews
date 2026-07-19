@@ -11,18 +11,12 @@ struct WatchTopicEditor: View {
     var topic: WatchTopic?
 
     @State private var label = ""
-    @State private var keywordsText = ""
+    @State private var keywords: [String] = []
     @State private var notify = true
-
-    private var parsedKeywords: [String] {
-        keywordsText
-            .split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-    }
+    @State private var isEnabled = true
 
     private var canSave: Bool {
-        !label.trimmingCharacters(in: .whitespaces).isEmpty && !parsedKeywords.isEmpty
+        !label.trimmingCharacters(in: .whitespaces).isEmpty && !keywords.isEmpty
     }
 
     var body: some View {
@@ -34,8 +28,7 @@ struct WatchTopicEditor: View {
             }
 
             Section {
-                TextField(settings.t("topic_keywords"), text: $keywordsText, axis: .vertical)
-                    .lineLimit(1...4)
+                KeywordChipField(keywords: $keywords)
             } header: {
                 Text(settings.t("topic_keywords"))
             } footer: {
@@ -43,6 +36,7 @@ struct WatchTopicEditor: View {
             }
 
             Section {
+                Toggle(settings.t("topic_enabled"), isOn: $isEnabled)
                 Toggle(settings.t("topic_notify"), isOn: $notify)
             } footer: {
                 Text(settings.t("topic_notify_footer"))
@@ -64,8 +58,9 @@ struct WatchTopicEditor: View {
         .onAppear {
             if let topic {
                 label = topic.label
-                keywordsText = topic.keywordsText
+                keywords = topic.keywords
                 notify = topic.notify
+                isEnabled = topic.isEnabled
             }
         }
         #if os(macOS)
@@ -76,10 +71,11 @@ struct WatchTopicEditor: View {
     private func save() {
         if let topic {
             topic.label = label
-            topic.keywords = parsedKeywords
+            topic.keywords = keywords
             topic.notify = notify
+            topic.isEnabled = isEnabled
         } else {
-            modelContext.insert(WatchTopic(label: label, keywords: parsedKeywords, notify: notify))
+            modelContext.insert(WatchTopic(label: label, keywords: keywords, isEnabled: isEnabled, notify: notify))
         }
         try? modelContext.save()
         dismiss()

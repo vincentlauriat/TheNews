@@ -269,6 +269,30 @@ final class FeedViewModel {
         if !article.isRead { article.isRead = true }
     }
 
+    /// Ouvre un article ciblé par un deep-link (tap sur une notification), en garantissant
+    /// qu'il figure dans `articles` — donc dans la séquence du pager iOS (`pagerSequence`,
+    /// dérivée de `orderedArticles` → `articles`) — AVANT de le sélectionner. Sans cette
+    /// garantie, un article absent de la portée affichée (ex. l'utilisateur était sur
+    /// « Favoris ») laisse le pager iOS sans page correspondante : écran vide silencieux.
+    /// Bascule sur `.all` (portée la plus large) via `reload(context:)` — synchrone —, pas
+    /// `changeSelection(...)` (async, lancé en tâche depuis `ContentView`) : cette dernière
+    /// réinitialiserait `selectedArticle` à `nil` juste après qu'on vienne de l'assigner.
+    func openDeepLink(articleID: String, context: ModelContext) {
+        selection = .all
+        reload(context: context)
+        if let article = articles.first(where: { $0.id == articleID }) {
+            select(article)
+            return
+        }
+        // Filet de sécurité : l'article existe (il a déclenché la notification) mais une
+        // raison quelconque l'exclut de `.all` (ex. rubrique désabonnée entretemps) — on
+        // l'ajoute quand même en tête pour que le pager ait une page à montrer.
+        let descriptor = FetchDescriptor<Article>(predicate: #Predicate { $0.id == articleID })
+        guard let article = try? context.fetch(descriptor).first else { return }
+        articles.insert(article, at: 0)
+        select(article)
+    }
+
     /// Génère la synthèse IA de la liste courante et bascule la zone de détail
     /// dessus (désélectionne l'article affiché, s'il y en avait un).
     func generateDigest(

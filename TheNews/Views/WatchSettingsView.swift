@@ -1,17 +1,15 @@
 import SwiftUI
 import SwiftData
 
-/// Réglages de veille : abonnements aux rubriques (Le Monde + Les Echos) + sujets de veille
-/// (mots-clés) qui alimentent la section « Alertes » et les notifications.
+/// Réglages de veille : abonnements aux rubriques (Le Monde + Les Echos) + flux RSS perso.
+/// La gestion des sujets de veille (mots-clés) vit désormais dans `AlertsView`, directement
+/// sur l'écran « Alertes » qu'elle alimente.
 struct WatchSettingsView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(\.modelContext) private var modelContext
     @Query private var subscriptions: [FeedSubscription]
-    @Query(sort: \WatchTopic.createdAt) private var topics: [WatchTopic]
     @Query(sort: \CustomFeed.createdAt) private var customFeeds: [CustomFeed]
 
-    @State private var editingTopic: WatchTopic?
-    @State private var creatingTopic = false
     @State private var addingFeed = false
 
     private var subscribedIDs: Set<String> { Set(subscriptions.map(\.feedID)) }
@@ -28,28 +26,6 @@ struct WatchSettingsView: View {
 
     var body: some View {
         List {
-            // MARK: Sujets de veille
-            Section {
-                if topics.isEmpty {
-                    Text(settings.t("no_topics"))
-                        .foregroundStyle(.secondary)
-                }
-                ForEach(topics) { topic in
-                    topicRow(topic)
-                }
-                .onDelete(perform: deleteTopics)
-
-                Button {
-                    creatingTopic = true
-                } label: {
-                    Label(settings.t("topic_add"), systemImage: "plus.circle")
-                }
-            } header: {
-                Text(settings.t("watch_topics"))
-            } footer: {
-                Text(settings.t("watch_topics_footer"))
-            }
-
             // MARK: Rubriques — une section par source intégrée (multi-journaux)
             ForEach(Array(builtInGroups.enumerated()), id: \.element.source.id) { index, group in
                 Section {
@@ -103,12 +79,6 @@ struct WatchSettingsView: View {
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
-        .sheet(isPresented: $creatingTopic) {
-            NavigationStack { WatchTopicEditor(topic: nil).environment(settings) }
-        }
-        .sheet(item: $editingTopic) { topic in
-            NavigationStack { WatchTopicEditor(topic: topic).environment(settings) }
-        }
         .sheet(isPresented: $addingFeed) {
             NavigationStack { AddCustomFeedView().environment(settings) }
         }
@@ -119,39 +89,6 @@ struct WatchSettingsView: View {
         for index in offsets { try? store.remove(customFeeds[index]) }
     }
 
-    @ViewBuilder
-    private func topicRow(_ topic: WatchTopic) -> some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(topic.label)
-                    .fontWeight(.medium)
-                Text(topic.keywordsText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-            // `.onTapGesture` seul (ci-dessous) n'est pas activable par VoiceOver/Switch Control :
-            // pas de bouton réel possible ici (le `Toggle` voisin doit rester une cible tactile
-            // indépendante), donc on expose l'ouverture de l'éditeur comme action d'accessibilité
-            // explicite sur ce bloc label + mots-clés.
-            .accessibilityElement(children: .combine)
-            .accessibilityAddTraits(.isButton)
-            .accessibilityAction { editingTopic = topic }
-            Spacer()
-            if topic.notify {
-                Image(systemName: "bell.fill")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .accessibilityLabel(settings.t("topic_notify"))
-            }
-            Toggle("", isOn: enabledBinding(for: topic))
-                .labelsHidden()
-                .accessibilityLabel(topic.label)
-        }
-        .contentShape(Rectangle())
-        .onTapGesture { editingTopic = topic }
-    }
-
     // MARK: - Bindings & actions
 
     private func binding(for feed: Feed) -> Binding<Bool> {
@@ -159,17 +96,5 @@ struct WatchSettingsView: View {
             get: { subscribedIDs.contains(feed.id) },
             set: { _ in try? SubscriptionStore(context: modelContext).toggle(feed.id) }
         )
-    }
-
-    private func enabledBinding(for topic: WatchTopic) -> Binding<Bool> {
-        Binding(
-            get: { topic.isEnabled },
-            set: { topic.isEnabled = $0; try? modelContext.save() }
-        )
-    }
-
-    private func deleteTopics(_ offsets: IndexSet) {
-        for index in offsets { modelContext.delete(topics[index]) }
-        try? modelContext.save()
     }
 }

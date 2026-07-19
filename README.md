@@ -47,9 +47,11 @@ La plupart des applications d'actualité te lient à **un seul média** ou envoi
 | 📺 | **App Apple TV** | App compagnon tvOS autonome : Briefing, Tous les articles et toutes les rubriques sur grand écran, miniatures, détail image + chapô, navigation complète à la télécommande. |
 | 🌙 | **Écran de veille macOS** | Briefing éditorial en rotation, **embarqué dans l'app** — installé et mis à jour automatiquement à chaque update de TheNews, sans téléchargement séparé. |
 
-Plus le socle classique : veille par mots-clés, alertes locales, favoris, partage natif, 3 colonnes
-(rubriques · articles · détail), affichage liste ou cartes au choix, swipe entre articles sur iOS
-(**mode « tous » ou « non lus »**), apparence & langue (fr/en).
+Plus le socle classique : veille par mots-clés en jetons, écran Alertes tout-en-un (liste des
+articles correspondants + gestion des sujets), favoris, partage natif, enregistrement de l'image
+d'un article dans Photos (pression longue, iOS), 3 colonnes (rubriques · articles · détail),
+affichage liste ou cartes au choix, swipe entre articles sur iOS (**mode « tous » ou « non
+lus »**), apparence & langue (fr/en).
 
 ## Fonctionnalités par plateforme
 

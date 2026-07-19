@@ -8,6 +8,11 @@ struct ArticleListView: View {
     @Environment(\.openURL) private var openURL
     @Bindable var vm: FeedViewModel
     @Binding var selectedId: String?
+    /// Personnalise le message d'état vide (titre, description) affiché quand `vm.articles`
+    /// est vide — `nil` garde le message générique. Utilisé par `AlertsView` : le texte par
+    /// défaut ("Rafraîchis pour récupérer les derniers articles") est trompeur quand 0 article
+    /// ne correspond encore à des sujets de veille actifs (ce n'est pas un problème réseau).
+    var emptyOverride: (title: String, description: String)? = nil
 
     var body: some View {
         @Bindable var settings = settings
@@ -76,11 +81,8 @@ struct ArticleListView: View {
         }
         .overlay {
             if vm.articles.isEmpty && !vm.isLoading {
-                ContentUnavailableView(
-                    settings.t("no_items_title"),
-                    systemImage: "newspaper",
-                    description: Text(settings.t("no_items_desc"))
-                )
+                let (title, desc) = emptyOverride ?? (settings.t("no_items_title"), settings.t("no_items_desc"))
+                ContentUnavailableView(title, systemImage: "newspaper", description: Text(desc))
             }
         }
     }

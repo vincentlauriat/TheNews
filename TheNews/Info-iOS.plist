@@ -24,6 +24,8 @@
 	<string>$(MARKETING_VERSION)</string>
 	<key>CFBundleVersion</key>
 	<string>$(CURRENT_PROJECT_VERSION)</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>TheNews a besoin d'accéder à tes photos pour y enregistrer l'image de l'article.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

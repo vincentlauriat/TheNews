@@ -50,6 +50,20 @@
   .btn:hover{transform:translateY(-2px);border-color:var(--accent)}
   .badges{margin-top:26px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
   .badge{font-family:var(--font-mono);font-size:.72rem;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:4px 10px;background:rgba(255,255,255,.02)}
+
+  /* Démonstration : un même sujet, trois sources, une seule carte */
+  .demo{max-width:700px;margin:46px auto 0;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.5);text-align:left}
+  .demo .hd{display:flex;align-items:center;gap:11px;padding:13px 16px;
+    border-bottom:1px solid var(--line);background:var(--bg2)}
+  .demo .n{font-family:var(--font-mono);font-size:9.5px;font-weight:700;color:var(--on-accent);
+    background:var(--accent);padding:2px 8px;border-radius:5px;flex:none}
+  .demo .t{font-weight:800;font-size:.95rem;letter-spacing:-.01em}
+  .demo .src{display:flex;gap:11px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .demo .src:last-child{border-bottom:0}
+  .demo .lg{font-family:var(--font-mono);font-size:9px;font-weight:700;padding:3px 7px;border-radius:5px;
+    border:1px solid var(--line);color:var(--muted);white-space:nowrap;flex:none;margin-top:2px}
+  .demo .src p{font-size:.875rem;color:var(--muted);margin:0;line-height:1.45}
   /* sections */
   section{padding:46px 0}
   h2{font-size:1.7rem;letter-spacing:-.01em;margin-bottom:6px;text-align:center}
@@ -116,6 +130,28 @@
     <span class="badge">WidgetKit</span>
     <span class="badge">Sparkle-only dependency</span>
     <span class="badge">MIT</span>
+  </div>
+
+  <div class="demo" aria-hidden="true">
+    <div class="hd">
+      <span class="n"><span class="en">3 sources</span><span class="fr">3 sources</span></span>
+      <span class="t"><span class="en">The ECB raises its rates</span><span class="fr">La BCE relève ses taux</span></span>
+    </div>
+    <div class="src">
+      <span class="lg">Le Monde</span>
+      <p><span class="en">The European Central Bank tightens again to contain core inflation</span>
+         <span class="fr">La Banque centrale européenne resserre encore pour contenir l'inflation sous-jacente</span></p>
+    </div>
+    <div class="src">
+      <span class="lg">Les Echos</span>
+      <p><span class="en">Rates: the ECB opts for a further quarter-point hike</span>
+         <span class="fr">Taux : la BCE opte pour un quart de point supplémentaire</span></p>
+    </div>
+    <div class="src">
+      <span class="lg">RSS</span>
+      <p><span class="en">What the ECB decision changes for variable-rate borrowers</span>
+         <span class="fr">Ce que la décision de la BCE change pour les emprunteurs à taux variable</span></p>
+    </div>
   </div>
 </div></header>
 

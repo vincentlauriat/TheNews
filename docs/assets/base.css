@@ -1,0 +1,123 @@
+/* ==========================================================================
+   base.css — socle commun des landing pages
+   version 1.0.2 — 2026-07-26
+   --------------------------------------------------------------------------
+   Ce fichier pose le plancher : tokens, typographie, accessibilité.
+   Il ne dessine aucune mise en page — chaque page garde la sienne.
+
+   Pour l'utiliser dans un autre projet : copier ce fichier dans son docs/
+   et le référencer avant le <style> de la page. Le seul token à redéfinir
+   est --accent (et --accent-soft), qui porte l'identité du projet.
+
+   Si tu modifies ce fichier, incrémente la version ci-dessus : elle permet
+   de repérer les copies périmées dans les autres repos.
+   ========================================================================== */
+
+:root{
+  /* Surfaces — noir légèrement froid, pour laisser les accents ressortir */
+  --bg:        #0a0c12;
+  --bg-lift:   #0e1119;
+  --surface:   #12151f;
+  --surface-2: #171b28;
+  --line:      #232838;
+  --line-soft: #1a1e2b;
+
+  /* Texte */
+  --txt:   #e8ecf5;
+  --muted: #8b93a7;
+  --faint: #7a8399;
+
+  /* Accent — redéfini par chaque projet */
+  --accent:      #5b8bff;
+  --accent-soft: rgba(91,139,255,.14);
+
+  /* Couleur du texte POSÉ SUR l'accent (bouton plein, pastille, skip link).
+     Les accents du corpus sont choisis pour être lisibles *en texte* sur fond
+     sombre : ils sont donc tous clairs, et du blanc dessus tombe entre 1.8:1
+     et 3.9:1 — illisible sur les 14 projets sans exception. Cette encre sombre
+     donne au pire 5.08:1 (TheNews, l'accent le plus foncé). Ne jamais écrire
+     `color:#fff` sur un fond d'accent : utiliser ce token. */
+  --on-accent:   #08090d;
+
+  /* Rythme */
+  --radius:    14px;
+  --radius-sm: 9px;
+  --gap:       20px;
+
+  /* Élévation par z-index nommés, plutôt qu'au jugé */
+  --z-nav: 20;
+  --z-top: 50;
+}
+
+/* Typographie
+   Une seule fonte chargée : JetBrains Mono, réservée aux relevés, labels et
+   métadonnées — c'est ce qui signe « instrument de mesure ». Le corps reste
+   en pile système : zéro requête supplémentaire, et le rendu natif macOS. */
+:root{
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+body{
+  font-family:var(--font-sans);
+  background:var(--bg);
+  color:var(--txt);
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+a{color:inherit;text-decoration:none}
+
+/* Titres : la personnalité vient du serrage et du poids, pas d'un dégradé */
+h1,h2,h3{line-height:1.12;letter-spacing:-.025em;font-weight:800}
+
+/* Relevés monospace — labels, métadonnées, valeurs */
+.mono{font-family:var(--font-mono);font-variant-ligatures:none}
+
+/* Les balises de code : sans cette règle, le navigateur leur applique sa
+   monospace par défaut et JetBrains Mono est chargée pour rien. */
+code,kbd,samp,pre{font-family:var(--font-mono)}
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.12em;
+  color:var(--accent);
+}
+
+/* --- Plancher d'accessibilité ------------------------------------------- */
+
+/* Focus lisible sur fond sombre. Le ring natif existe déjà mais se perd
+   sur ces surfaces : on le renforce sans jamais le supprimer. */
+:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+  border-radius:4px;
+}
+
+/* Corps lisible sur mobile : jamais sous 16px */
+@media (max-width:600px){ body{font-size:16px} }
+
+/* Cibles tactiles : 44px minimum sur les actions principales */
+.btn,.tap{min-height:44px;display:inline-flex;align-items:center;cursor:pointer}
+
+/* Respect de la préférence système de mouvement réduit */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+/* Lien d'évitement — visible uniquement au clavier */
+.skip{
+  position:absolute;left:-9999px;top:0;z-index:var(--z-top);
+  background:var(--accent);color:var(--on-accent);padding:10px 16px;border-radius:0 0 var(--radius-sm) 0;
+  font-weight:700;
+}
+.skip:focus{left:0}

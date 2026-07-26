@@ -8,10 +8,14 @@
 <meta property="og:title" content="TheNews — Multi-source news watch for macOS & iOS">
 <meta property="og:description" content="Aggregate Le Monde, Les Echos and any RSS feed in one app. Cross-source grouping, daily briefing, widget & iCloud. Serverless, on-device.">
 <meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="assets/base.css">
 <style>
   :root{
     --bg:#0b1020; --bg2:#0f1630; --card:#141c38; --line:#243056;
-    --accent:#4b9cff; --accent2:#7ad0ff; --salmon:#ffcaa6;
+    --accent:#e5484d; --accent2:#f26e72; --on-accent:#08090d; --salmon:#ffcaa6;
     --text:#eaf0ff; --muted:#9fb0d4; --radius:18px;
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -34,7 +38,7 @@
   .ghlink{font-weight:700;font-size:.9rem;color:var(--accent);text-decoration:none}
   /* header */
   header{padding:72px 0 44px;text-align:center}
-  .tag-pill{display:inline-block;font-size:.8rem;font-weight:700;color:var(--accent2);
+  .tag-pill{display:inline-block;font-family:var(--font-mono);font-size:.76rem;font-weight:700;color:var(--accent2);
     border:1px solid var(--line);border-radius:999px;padding:5px 14px;margin-bottom:20px}
   h1{font-size:clamp(2.1rem,5vw,3.4rem);line-height:1.1;letter-spacing:-.02em;margin-bottom:18px}
   .grad{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -42,10 +46,24 @@
   .cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
   .btn{display:inline-flex;align-items:center;gap:8px;font-weight:700;text-decoration:none;
     border-radius:12px;padding:12px 20px;border:1px solid var(--line);transition:.2s}
-  .btn.primary{background:linear-gradient(160deg,var(--accent),#2f6fd6);border-color:transparent;color:#fff}
+  .btn.primary{background:linear-gradient(160deg,var(--accent),#f26e72);border-color:transparent;color:var(--on-accent)}
   .btn:hover{transform:translateY(-2px);border-color:var(--accent)}
   .badges{margin-top:26px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-  .badge{font-size:.76rem;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:4px 10px;background:rgba(255,255,255,.02)}
+  .badge{font-family:var(--font-mono);font-size:.72rem;color:var(--muted);border:1px solid var(--line);border-radius:8px;padding:4px 10px;background:rgba(255,255,255,.02)}
+
+  /* Démonstration : un même sujet, trois sources, une seule carte */
+  .demo{max-width:700px;margin:46px auto 0;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;box-shadow:0 30px 70px rgba(0,0,0,.5);text-align:left}
+  .demo .hd{display:flex;align-items:center;gap:11px;padding:13px 16px;
+    border-bottom:1px solid var(--line);background:var(--bg2)}
+  .demo .n{font-family:var(--font-mono);font-size:9.5px;font-weight:700;color:var(--on-accent);
+    background:var(--accent);padding:2px 8px;border-radius:5px;flex:none}
+  .demo .t{font-weight:800;font-size:.95rem;letter-spacing:-.01em}
+  .demo .src{display:flex;gap:11px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .demo .src:last-child{border-bottom:0}
+  .demo .lg{font-family:var(--font-mono);font-size:9px;font-weight:700;padding:3px 7px;border-radius:5px;
+    border:1px solid var(--line);color:var(--muted);white-space:nowrap;flex:none;margin-top:2px}
+  .demo .src p{font-size:.875rem;color:var(--muted);margin:0;line-height:1.45}
   /* sections */
   section{padding:46px 0}
   h2{font-size:1.7rem;letter-spacing:-.01em;margin-bottom:6px;text-align:center}
@@ -54,7 +72,7 @@
   .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:22px;transition:.2s}
   .card:hover{transform:translateY(-4px);border-color:var(--accent)}
   .card .emoji{font-size:1.6rem;width:46px;height:46px;display:flex;align-items:center;justify-content:center;
-    border-radius:12px;background:rgba(75,156,255,.12);margin-bottom:14px}
+    border-radius:12px;background:rgba(229,72,77,.12);margin-bottom:14px}
   .card h3{font-size:1.12rem;margin-bottom:8px}
   .card p{color:var(--muted);font-size:.94rem}
   /* under the hood */
@@ -77,17 +95,10 @@
   .block.fr{display:none}
   body.lang-fr .block.fr{display:block}
   body.lang-fr .block.en{display:none}
-
-  /* a11y : respecter la préférence système de mouvement réduit */
-  @media (prefers-reduced-motion: reduce){
-    *,*::before,*::after{
-      animation-duration:.01ms !important;animation-iteration-count:1 !important;
-      transition-duration:.01ms !important;scroll-behavior:auto !important;
-    }
-  }
 </style>
 </head>
 <body class="lang-en">
+<a class="skip" href="#top"><span class="en">Skip to content</span><span class="fr">Aller au contenu</span></a>
 
 <nav><div class="wrap">
   <div class="brand"><img class="logo" src="icon.png" alt="TheNews icon"> TheNews</div>
@@ -99,7 +110,7 @@
   <a class="ghlink" href="https://github.com/vincentlauriat/TheNews" target="_blank" rel="noopener">GitHub ↗</a>
 </div></nav>
 
-<header><div class="wrap">
+<header id="top"><div class="wrap">
   <span class="tag-pill"><span class="en">macOS · iOS · iPadOS · watchOS · tvOS</span><span class="fr">macOS · iOS · iPadOS · watchOS · tvOS</span></span>
   <h1><span class="en">Your news, <span class="grad">from every source</span>, in one app</span>
       <span class="fr">Ton actu, <span class="grad">de toutes les sources</span>, dans une seule app</span></h1>
@@ -119,6 +130,28 @@
     <span class="badge">WidgetKit</span>
     <span class="badge">Sparkle-only dependency</span>
     <span class="badge">MIT</span>
+  </div>
+
+  <div class="demo" aria-hidden="true">
+    <div class="hd">
+      <span class="n"><span class="en">3 sources</span><span class="fr">3 sources</span></span>
+      <span class="t"><span class="en">The ECB raises its rates</span><span class="fr">La BCE relève ses taux</span></span>
+    </div>
+    <div class="src">
+      <span class="lg">Le Monde</span>
+      <p><span class="en">The European Central Bank tightens again to contain core inflation</span>
+         <span class="fr">La Banque centrale européenne resserre encore pour contenir l'inflation sous-jacente</span></p>
+    </div>
+    <div class="src">
+      <span class="lg">Les Echos</span>
+      <p><span class="en">Rates: the ECB opts for a further quarter-point hike</span>
+         <span class="fr">Taux : la BCE opte pour un quart de point supplémentaire</span></p>
+    </div>
+    <div class="src">
+      <span class="lg">RSS</span>
+      <p><span class="en">What the ECB decision changes for variable-rate borrowers</span>
+         <span class="fr">Ce que la décision de la BCE change pour les emprunteurs à taux variable</span></p>
+    </div>
   </div>
 </div></header>
 

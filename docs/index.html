@@ -89,40 +89,38 @@
   .plat .c{text-align:center}
   footer{padding:48px 0 60px;text-align:center;color:var(--muted);border-top:1px solid var(--line);margin-top:20px}
   footer a{color:var(--accent);text-decoration:none}
-  .fr{display:none}
-  body.lang-fr .fr{display:inline}
-  body.lang-fr .en{display:none}
-  .block.fr{display:none}
-  body.lang-fr .block.fr{display:block}
-  body.lang-fr .block.en{display:none}
+  /* Les règles de bascule de langue vivent désormais dans base.css v1.0.3.
+     La variante `.block` n'a plus lieu d'être : le socle ne force aucun
+     display sur la langue active, qui garde donc celui de sa balise. */
 </style>
 </head>
 <body class="lang-en">
-<a class="skip" href="#top"><span class="en">Skip to content</span><span class="fr">Aller au contenu</span></a>
+<a class="skip" href="#top"><span class="en">Skip to content</span><span class="fr">Aller au contenu</span><span class="zh">跳至內容</span></a>
 
 <nav><div class="wrap">
   <div class="brand"><img class="logo" src="icon.png" alt="TheNews icon"> TheNews</div>
   <div class="spacer"></div>
-  <div class="langtog">
-    <button id="l-en" class="on" onclick="setLang('en')">EN</button>
-    <button id="l-fr" onclick="setLang('fr')">FR</button>
+  <div class="langtog" role="group" aria-label="Language / Langue / 語言">
+    <button type="button" data-lang="en" class="on" onclick="setLang('en')">EN</button>
+    <button type="button" data-lang="fr" onclick="setLang('fr')">FR</button>
+    <button type="button" data-lang="zh" onclick="setLang('zh')">中文</button>
   </div>
   <a class="ghlink" href="https://github.com/vincentlauriat/TheNews" target="_blank" rel="noopener">GitHub ↗</a>
 </div></nav>
 
 <header id="top"><div class="wrap">
-  <span class="tag-pill"><span class="en">macOS · iOS · iPadOS · watchOS · tvOS</span><span class="fr">macOS · iOS · iPadOS · watchOS · tvOS</span></span>
+  <span class="tag-pill"><span class="en">macOS · iOS · iPadOS · watchOS · tvOS</span><span class="fr">macOS · iOS · iPadOS · watchOS · tvOS</span><span class="zh">macOS · iOS · iPadOS · watchOS · tvOS</span></span>
   <h1><span class="en">Your news, <span class="grad">from every source</span>, in one app</span>
-      <span class="fr">Ton actu, <span class="grad">de toutes les sources</span>, dans une seule app</span></h1>
+      <span class="fr">Ton actu, <span class="grad">de toutes les sources</span>, dans une seule app</span><span class="zh">你的新聞，<span class="grad">來自所有來源</span>，只用一個應用程式</span></h1>
   <p class="lead">
     <span class="en">TheNews aggregates <b>Le Monde</b>, <b>Les Echos</b> and <b>any RSS feed</b> into a single macOS &amp; iOS app — groups articles covering the same story, and delivers a daily briefing. Serverless, on-device, zero-dependency.</span>
-    <span class="fr">TheNews agrège <b>Le Monde</b>, <b>Les Echos</b> et <b>n'importe quel flux RSS</b> dans une seule app macOS &amp; iOS — regroupe les articles qui traitent du même sujet, et livre un briefing quotidien. Sans serveur, sur l'appareil, zéro dépendance.</span>
+    <span class="fr">TheNews agrège <b>Le Monde</b>, <b>Les Echos</b> et <b>n'importe quel flux RSS</b> dans une seule app macOS &amp; iOS — regroupe les articles qui traitent du même sujet, et livre un briefing quotidien. Sans serveur, sur l'appareil, zéro dépendance.</span><span class="zh">TheNews 把 <b>Le Monde</b>、<b>Les Echos</b> 與 <b>任何 RSS 訂閱源</b> 匯集到一個 macOS 與 iOS 應用程式——把報導同一主題的文章分組，並產出每日簡報。無伺服器、在裝置上執行、零依賴。</span>
   </p>
   <div class="cta-row">
     <a class="btn primary" href="https://github.com/vincentlauriat/TheNews/releases/latest" target="_blank" rel="noopener">
-      <span class="en">⬇ Download for macOS</span><span class="fr">⬇ Télécharger pour macOS</span></a>
+      <span class="en">⬇ Download for macOS</span><span class="fr">⬇ Télécharger pour macOS</span><span class="zh">⬇ 下載 macOS 版</span></a>
     <a class="btn" href="https://github.com/vincentlauriat/TheNews" target="_blank" rel="noopener">
-      <span class="en">View on GitHub</span><span class="fr">Voir sur GitHub</span> →</a>
+      <span class="en">View on GitHub</span><span class="fr">Voir sur GitHub</span><span class="zh">在 GitHub 上檢視</span> →</a>
   </div>
   <div class="badges">
     <span class="badge">SwiftUI</span>
@@ -134,117 +132,117 @@
 
   <div class="demo" aria-hidden="true">
     <div class="hd">
-      <span class="n"><span class="en">3 sources</span><span class="fr">3 sources</span></span>
-      <span class="t"><span class="en">The ECB raises its rates</span><span class="fr">La BCE relève ses taux</span></span>
+      <span class="n"><span class="en">3 sources</span><span class="fr">3 sources</span><span class="zh">3 個來源</span></span>
+      <span class="t"><span class="en">The ECB raises its rates</span><span class="fr">La BCE relève ses taux</span><span class="zh">歐洲央行升息</span></span>
     </div>
     <div class="src">
       <span class="lg">Le Monde</span>
       <p><span class="en">The European Central Bank tightens again to contain core inflation</span>
-         <span class="fr">La Banque centrale européenne resserre encore pour contenir l'inflation sous-jacente</span></p>
+         <span class="fr">La Banque centrale européenne resserre encore pour contenir l'inflation sous-jacente</span><span class="zh">歐洲央行再度緊縮，以抑制核心通膨</span></p>
     </div>
     <div class="src">
       <span class="lg">Les Echos</span>
       <p><span class="en">Rates: the ECB opts for a further quarter-point hike</span>
-         <span class="fr">Taux : la BCE opte pour un quart de point supplémentaire</span></p>
+         <span class="fr">Taux : la BCE opte pour un quart de point supplémentaire</span><span class="zh">利率：歐洲央行選擇再升一碼</span></p>
     </div>
     <div class="src">
       <span class="lg">RSS</span>
       <p><span class="en">What the ECB decision changes for variable-rate borrowers</span>
-         <span class="fr">Ce que la décision de la BCE change pour les emprunteurs à taux variable</span></p>
+         <span class="fr">Ce que la décision de la BCE change pour les emprunteurs à taux variable</span><span class="zh">歐洲央行的決定對浮動利率借款人有何影響</span></p>
     </div>
   </div>
 </div></header>
 
 <section><div class="wrap">
-  <h2><span class="en">Signature features</span><span class="fr">Fonctionnalités inédites</span></h2>
+  <h2><span class="en">Signature features</span><span class="fr">Fonctionnalités inédites</span><span class="zh">獨有功能</span></h2>
   <p class="sub"><span class="en">Built around one idea: many sources, one place, nothing leaves your device.</span>
-    <span class="fr">Autour d'une idée : plusieurs sources, un seul endroit, rien ne quitte l'appareil.</span></p>
+    <span class="fr">Autour d'une idée : plusieurs sources, un seul endroit, rien ne quitte l'appareil.</span><span class="zh">圍繞一個想法：多個來源、一個地方，任何資料都不離開裝置。</span></p>
   <div class="grid">
     <div class="card">
       <div class="emoji" aria-hidden="true">🗞️</div>
-      <h3><span class="en">Custom RSS sources</span><span class="fr">Sources RSS personnalisées</span></h3>
+      <h3><span class="en">Custom RSS sources</span><span class="fr">Sources RSS personnalisées</span><span class="zh">自訂 RSS 來源</span></h3>
       <p><span class="en">Add any RSS feed beyond Le Monde &amp; Les Echos. The catalog is dynamic — your feeds join in as another journal, grouped in the sidebar.</span>
-        <span class="fr">Ajoute n'importe quel flux au-delà du Monde &amp; des Echos. Le catalogue est dynamique — tes flux rejoignent l'app comme un journal de plus, groupés dans la sidebar.</span></p>
+        <span class="fr">Ajoute n'importe quel flux au-delà du Monde &amp; des Echos. Le catalogue est dynamique — tes flux rejoignent l'app comme un journal de plus, groupés dans la sidebar.</span><span class="zh">除了 Le Monde 與 Les Echos，還能加入任何訂閱源。目錄是動態的——你的訂閱源會像多一份報紙那樣加入應用程式，並在側邊欄分組。</span></p>
     </div>
     <div class="card">
       <div class="emoji" aria-hidden="true">🔗</div>
-      <h3><span class="en">Cross-source grouping</span><span class="fr">Regroupement cross-source</span></h3>
+      <h3><span class="en">Cross-source grouping</span><span class="fr">Regroupement cross-source</span><span class="zh">跨來源分組</span></h3>
       <p><span class="en">"Also covered by…": the same event seen through other sources, detected on-device with a Jaccard similarity on titles and summaries.</span>
-        <span class="fr">« Aussi couvert par… » : le même événement vu par d'autres sources, détecté sur l'appareil par similarité de Jaccard sur titres et chapôs.</span></p>
+        <span class="fr">« Aussi couvert par… » : le même événement vu par d'autres sources, détecté sur l'appareil par similarité de Jaccard sur titres et chapôs.</span><span class="zh">「其他來源也報導了……」：同一事件在其他來源的版本，於裝置上以標題與導言的 Jaccard 相似度偵測。</span></p>
     </div>
     <div class="card">
       <div class="emoji" aria-hidden="true">☀️</div>
-      <h3><span class="en">Daily briefing</span><span class="fr">Briefing quotidien</span></h3>
+      <h3><span class="en">Daily briefing</span><span class="fr">Briefing quotidien</span><span class="zh">每日簡報</span></h3>
       <p><span class="en">A condensed digest of the last 24 h — watch-list first, cross-source duplicates removed — with a notification at the time you pick.</span>
-        <span class="fr">Un condensé des dernières 24 h — veille en priorité, doublons cross-source retirés — avec une notification à l'heure choisie.</span></p>
+        <span class="fr">Un condensé des dernières 24 h — veille en priorité, doublons cross-source retirés — avec une notification à l'heure choisie.</span><span class="zh">最近 24 小時的摘要——追蹤主題優先、移除跨來源重複——並在你設定的時間發出通知。</span></p>
     </div>
     <div class="card">
       <div class="emoji" aria-hidden="true">📱</div>
-      <h3><span class="en">Widget &amp; iCloud</span><span class="fr">Widget &amp; iCloud</span></h3>
+      <h3><span class="en">Widget &amp; iCloud</span><span class="fr">Widget &amp; iCloud</span><span class="zh">小工具與 iCloud</span></h3>
       <p><span class="en">Home-screen widget (WidgetKit) on iOS &amp; macOS, plus iCloud sync of your subscriptions, favorites, watch topics and custom feeds across devices.</span>
-        <span class="fr">Widget d'écran d'accueil (WidgetKit) sur iOS &amp; macOS, et sync iCloud de tes abonnements, favoris, sujets de veille et flux perso entre appareils.</span></p>
+        <span class="fr">Widget d'écran d'accueil (WidgetKit) sur iOS &amp; macOS, et sync iCloud de tes abonnements, favoris, sujets de veille et flux perso entre appareils.</span><span class="zh">iOS 與 macOS 上的主畫面小工具（WidgetKit），並透過 iCloud 在裝置間同步你的訂閱、收藏、追蹤主題與自訂訂閱源。</span></p>
     </div>
     <div class="card">
       <div class="emoji" aria-hidden="true">✨</div>
-      <h3><span class="en">On-device AI (Apple Intelligence)</span><span class="fr">IA on-device (Apple Intelligence)</span></h3>
+      <h3><span class="en">On-device AI (Apple Intelligence)</span><span class="fr">IA on-device (Apple Intelligence)</span><span class="zh">裝置端 AI（Apple Intelligence）</span></h3>
       <p><span class="en">Surface the main themes of any list, match watch topics semantically (catches rewordings, not just exact keywords), auto-summarize feeds with no description, and search in plain language — all via Foundation Models, fully on-device, with an automatic no-AI fallback.</span>
-        <span class="fr">Dégage les grands thèmes d'une liste, fait correspondre les sujets de veille sémantiquement (capte les reformulations, pas seulement les mots-clés exacts), résume automatiquement les flux sans chapô, et cherche en langage naturel — via Foundation Models, 100 % sur l'appareil, avec repli automatique sans IA.</span></p>
+        <span class="fr">Dégage les grands thèmes d'une liste, fait correspondre les sujets de veille sémantiquement (capte les reformulations, pas seulement les mots-clés exacts), résume automatiquement les flux sans chapô, et cherche en langage naturel — via Foundation Models, 100 % sur l'appareil, avec repli automatique sans IA.</span><span class="zh">歸納任何清單的主要主題、以語意比對追蹤主題（能捕捉改寫，而不只是完全相同的關鍵字）、自動摘要沒有導言的訂閱源，並以自然語言搜尋——全部透過 Foundation Models，100% 在裝置上執行，並可自動回退到不使用 AI 的模式。</span></p>
     </div>
     <div class="card">
       <div class="emoji" aria-hidden="true">⌚</div>
-      <h3><span class="en">Apple Watch app</span><span class="fr">App Apple Watch</span></h3>
+      <h3><span class="en">Apple Watch app</span><span class="fr">App Apple Watch</span><span class="zh">Apple Watch 應用程式</span></h3>
       <p><span class="en">A standalone watchOS companion: the top headlines from Le Monde and Les Echos, loaded live on your wrist.</span>
-        <span class="fr">Une app compagnon watchOS autonome : les gros titres du Monde et des Echos, chargés en direct à ton poignet.</span></p>
+        <span class="fr">Une app compagnon watchOS autonome : les gros titres du Monde et des Echos, chargés en direct à ton poignet.</span><span class="zh">獨立的 watchOS companion 應用程式：Le Monde 與 Les Echos 的頭條，即時載入到你的手腕上。</span></p>
     </div>
     <div class="card">
       <div class="emoji" aria-hidden="true">📺</div>
-      <h3><span class="en">Apple TV app</span><span class="fr">App Apple TV</span></h3>
+      <h3><span class="en">Apple TV app</span><span class="fr">App Apple TV</span><span class="zh">Apple TV 應用程式</span></h3>
       <p><span class="en">A standalone tvOS companion: Briefing, all articles and every source's sections on the big screen, with thumbnails and full remote navigation.</span>
-        <span class="fr">Une app compagnon tvOS autonome : Briefing, tous les articles et les rubriques de chaque source sur grand écran, avec miniatures et navigation complète à la télécommande.</span></p>
+        <span class="fr">Une app compagnon tvOS autonome : Briefing, tous les articles et les rubriques de chaque source sur grand écran, avec miniatures et navigation complète à la télécommande.</span><span class="zh">獨立的 tvOS companion 應用程式：簡報、所有文章與各來源的分類，在大螢幕上呈現，附縮圖並可完全用遙控器操作。</span></p>
     </div>
     <div class="card">
       <div class="emoji" aria-hidden="true">🌙</div>
-      <h3><span class="en">macOS screensaver</span><span class="fr">Écran de veille macOS</span></h3>
+      <h3><span class="en">macOS screensaver</span><span class="fr">Écran de veille macOS</span><span class="zh">macOS 螢幕保護程式</span></h3>
       <p><span class="en">A standalone screensaver with a rotating editorial briefing, installed automatically and kept in sync with every app update — no separate download or setup.</span>
-        <span class="fr">Un écran de veille autonome avec un briefing éditorial en rotation, installé automatiquement et tenu à jour avec chaque mise à jour de l'app — aucun téléchargement ni réglage séparé.</span></p>
+        <span class="fr">Un écran de veille autonome avec un briefing éditorial en rotation, installé automatiquement et tenu à jour avec chaque mise à jour de l'app — aucun téléchargement ni réglage séparé.</span><span class="zh">獨立的螢幕保護程式，輪播編輯簡報，隨應用程式自動安裝並在每次更新時同步——無須另外下載或設定。</span></p>
     </div>
   </div>
 </div></section>
 
 <section><div class="wrap">
-  <h2><span class="en">Works on both</span><span class="fr">Sur les deux plateformes</span></h2>
-  <p class="sub"><span class="en">One shared SwiftUI codebase.</span><span class="fr">Un codebase SwiftUI partagé.</span></p>
+  <h2><span class="en">Works on both</span><span class="fr">Sur les deux plateformes</span><span class="zh">兩個平台皆可</span></h2>
+  <p class="sub"><span class="en">One shared SwiftUI codebase.</span><span class="fr">Un codebase SwiftUI partagé.</span><span class="zh">共用同一份 SwiftUI 程式碼。</span></p>
   <div class="plat">
-    <div class="row"><div><span class="en">Feature</span><span class="fr">Fonctionnalité</span></div><div class="c">macOS</div><div class="c">iOS</div></div>
-    <div class="row"><div><span class="en">Multi-source + custom RSS</span><span class="fr">Multi-source + RSS perso</span></div><div class="c">✅</div><div class="c">✅</div></div>
-    <div class="row"><div><span class="en">Cross-source grouping</span><span class="fr">Regroupement cross-source</span></div><div class="c">✅</div><div class="c">✅</div></div>
-    <div class="row"><div><span class="en">Daily briefing + alerts</span><span class="fr">Briefing + alertes</span></div><div class="c">✅</div><div class="c">✅</div></div>
-    <div class="row"><div><span class="en">On-device AI (digest, semantic match, search)</span><span class="fr">IA on-device (synthèse, matching, recherche)</span></div><div class="c">✅</div><div class="c">✅</div></div>
-    <div class="row"><div><span class="en">Home-screen widget</span><span class="fr">Widget d'accueil</span></div><div class="c">✅</div><div class="c">✅</div></div>
-    <div class="row"><div><span class="en">Apple Watch companion</span><span class="fr">App Apple Watch</span></div><div class="c">—</div><div class="c">✅</div></div>
-    <div class="row"><div><span class="en">Apple TV companion</span><span class="fr">App Apple TV</span></div><div class="c">—</div><div class="c">—</div></div>
-    <div class="row"><div><span class="en">iCloud sync</span><span class="fr">Sync iCloud</span></div><div class="c">✅</div><div class="c">✅</div></div>
-    <div class="row"><div><span class="en">Screensaver</span><span class="fr">Écran de veille</span></div><div class="c">✅</div><div class="c">—</div></div>
+    <div class="row"><div><span class="en">Feature</span><span class="fr">Fonctionnalité</span><span class="zh">功能</span></div><div class="c">macOS</div><div class="c">iOS</div></div>
+    <div class="row"><div><span class="en">Multi-source + custom RSS</span><span class="fr">Multi-source + RSS perso</span><span class="zh">多來源 + 自訂 RSS</span></div><div class="c">✅</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">Cross-source grouping</span><span class="fr">Regroupement cross-source</span><span class="zh">跨來源分組</span></div><div class="c">✅</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">Daily briefing + alerts</span><span class="fr">Briefing + alertes</span><span class="zh">簡報 + 通知</span></div><div class="c">✅</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">On-device AI (digest, semantic match, search)</span><span class="fr">IA on-device (synthèse, matching, recherche)</span><span class="zh">裝置端 AI（摘要、比對、搜尋）</span></div><div class="c">✅</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">Home-screen widget</span><span class="fr">Widget d'accueil</span><span class="zh">主畫面小工具</span></div><div class="c">✅</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">Apple Watch companion</span><span class="fr">App Apple Watch</span><span class="zh">Apple Watch 應用程式</span></div><div class="c">—</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">Apple TV companion</span><span class="fr">App Apple TV</span><span class="zh">Apple TV 應用程式</span></div><div class="c">—</div><div class="c">—</div></div>
+    <div class="row"><div><span class="en">iCloud sync</span><span class="fr">Sync iCloud</span><span class="zh">iCloud 同步</span></div><div class="c">✅</div><div class="c">✅</div></div>
+    <div class="row"><div><span class="en">Screensaver</span><span class="fr">Écran de veille</span><span class="zh">螢幕保護程式</span></div><div class="c">✅</div><div class="c">—</div></div>
   </div>
   <p class="sub" style="margin-top:14px;font-size:.85rem">
     <span class="en">Apple Watch &amp; Apple TV are separate standalone companion apps (not tied to macOS or iOS).</span>
-    <span class="fr">Apple Watch et Apple TV sont des apps compagnons autonomes séparées (indépendantes de macOS ou iOS).</span>
+    <span class="fr">Apple Watch et Apple TV sont des apps compagnons autonomes séparées (indépendantes de macOS ou iOS).</span><span class="zh">Apple Watch 與 Apple TV 是各自獨立的 companion 應用程式（不依賴 macOS 或 iOS）。</span>
   </p>
 </div></section>
 
 <section><div class="wrap">
-  <h2><span class="en">Under the hood</span><span class="fr">Sous le capot</span></h2>
-  <p class="sub"><span class="en">Native Apple frameworks, nothing else.</span><span class="fr">Que du natif Apple, rien d'autre.</span></p>
+  <h2><span class="en">Under the hood</span><span class="fr">Sous le capot</span><span class="zh">底層架構</span></h2>
+  <p class="sub"><span class="en">Native Apple frameworks, nothing else.</span><span class="fr">Que du natif Apple, rien d'autre.</span><span class="zh">只有 Apple 原生技術，別無其他。</span></p>
   <div class="hood">
     <ul>
       <li><span class="en"><b>Serverless &amp; private</b> — parsing, watch, grouping and briefing all run on-device. No account, no telemetry.</span>
-        <span class="fr"><b>Sans serveur &amp; privé</b> — parsing, veille, regroupement et briefing tournent sur l'appareil. Aucun compte, aucune télémétrie.</span></li>
+        <span class="fr"><b>Sans serveur &amp; privé</b> — parsing, veille, regroupement et briefing tournent sur l'appareil. Aucun compte, aucune télémétrie.</span><span class="zh"><b>無伺服器且私密</b>——解析、追蹤、分組與簡報都在裝置上執行。不需帳號，沒有遙測。</span></li>
       <li><span class="en"><b>Dynamic catalog</b> — built-in journals + your RSS feeds, `Feed.catalog = builtIn + custom`.</span>
-        <span class="fr"><b>Catalogue dynamique</b> — journaux fournis + tes flux RSS, `Feed.catalog = builtIn + custom`.</span></li>
+        <span class="fr"><b>Catalogue dynamique</b> — journaux fournis + tes flux RSS, `Feed.catalog = builtIn + custom`.</span><span class="zh"><b>動態目錄</b>——內建報紙 + 你的 RSS 訂閱源，`Feed.catalog = builtIn + custom`。</span></li>
       <li><span class="en"><b>Almost zero dependency</b> — SwiftData, XMLParser, UserNotifications, WidgetKit, CloudKit. Only exception: Sparkle, for macOS auto-update outside the App Store.</span>
-        <span class="fr"><b>Quasi zéro dépendance</b> — SwiftData, XMLParser, UserNotifications, WidgetKit, CloudKit. Seule exception : Sparkle, pour l'auto-update macOS hors App Store.</span></li>
+        <span class="fr"><b>Quasi zéro dépendance</b> — SwiftData, XMLParser, UserNotifications, WidgetKit, CloudKit. Seule exception : Sparkle, pour l'auto-update macOS hors App Store.</span><span class="zh"><b>幾乎零依賴</b>——SwiftData、XMLParser、UserNotifications、WidgetKit、CloudKit。唯一例外是 Sparkle，用於 App Store 之外的 macOS 自動更新。</span></li>
       <li><span class="en"><b>Open source (MIT)</b> — one shared SwiftUI codebase for macOS &amp; iOS.</span>
-        <span class="fr"><b>Open source (MIT)</b> — un codebase SwiftUI partagé macOS &amp; iOS.</span></li>
+        <span class="fr"><b>Open source (MIT)</b> — un codebase SwiftUI partagé macOS &amp; iOS.</span><span class="zh"><b>開源（MIT）</b>——macOS 與 iOS 共用同一份 SwiftUI 程式碼。</span></li>
     </ul>
   </div>
 </div></section>
@@ -252,25 +250,38 @@
 <footer><div class="wrap">
   <p>
     <span class="en">Made by <a href="https://lauriat.fr" target="_blank" rel="noopener">Vincent Lauriat</a> · </span>
-    <span class="fr">Par <a href="https://lauriat.fr" target="_blank" rel="noopener">Vincent Lauriat</a> · </span>
+    <span class="fr">Par <a href="https://lauriat.fr" target="_blank" rel="noopener">Vincent Lauriat</a> · </span><span class="zh">作者：<a href="https://lauriat.fr" target="_blank" rel="noopener">Vincent Lauriat</a> · </span>
     <a href="https://github.com/vincentlauriat/TheNews" target="_blank" rel="noopener">GitHub</a> ·
-    <a href="https://vincentlauriat.github.io" target="_blank" rel="noopener"><span class="en">More apps</span><span class="fr">Autres apps</span></a>
+    <a href="https://vincentlauriat.github.io" target="_blank" rel="noopener"><span class="en">More apps</span><span class="fr">Autres apps</span><span class="zh">其他應用程式</span></a>
   </p>
 </div></footer>
 
 <script>
+  /* zh-Hant et non zh : sur un système configuré en chinois simplifié, un
+     simple `zh` laisse le navigateur choisir une fonte Han simplifiée, qui
+     rend certains caractères traditionnels dans la mauvaise forme. */
+  var LANG_TAG={en:'en',fr:'fr',zh:'zh-Hant'};
   function setLang(l){
-    document.body.classList.remove('lang-en','lang-fr');
+    if(!LANG_TAG[l]) l='en';
+    document.body.classList.remove('lang-en','lang-fr','lang-zh');
     document.body.classList.add('lang-'+l);
-    document.documentElement.lang=l;
-    document.getElementById('l-en').classList.toggle('on',l==='en');
-    document.getElementById('l-fr').classList.toggle('on',l==='fr');
+    document.documentElement.lang=LANG_TAG[l];
+    /* On boucle sur les boutons au lieu de les nommer un par un : ajouter une
+       4ᵉ langue ne demandera alors aucune retouche de ce script. */
+    document.querySelectorAll('.langtog button').forEach(function(b){
+      var on=b.dataset.lang===l;
+      b.classList.toggle('on',on);
+      b.setAttribute('aria-pressed',on?'true':'false');
+    });
     try{localStorage.setItem('vl-lang',l)}catch(e){}
   }
   (function(){
     var saved;try{saved=localStorage.getItem('vl-lang')}catch(e){}
-    var l=saved||((navigator.language||'en').slice(0,2)==='fr'?'fr':'en');
-    setLang(l);
+    var n=(navigator.language||'en').slice(0,2).toLowerCase();
+    /* Le traditionnel est servi à tout visiteur sinophone, y compris zh-CN :
+       c'est la seule variante chinoise disponible, et la renvoyer vaut mieux
+       que de rabattre ce visiteur sur l'anglais. */
+    setLang(saved||(n==='zh'?'zh':(n==='fr'?'fr':'en')));
   })();
 </script>
 </body>

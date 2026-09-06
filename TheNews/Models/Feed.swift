@@ -74,10 +74,81 @@ extension Feed {
         lesEchos("elections",    "Élections",          "checkmark.seal",            "elections"),
     ]
 
+    // MARK: - L'Opinion
+
+    /// Fabrique une rubrique L'Opinion. Le site sert ses flux à la racine : `index.rss`
+    /// pour la une, `<section>.rss` pour chaque rubrique (RSS 2.0 avec `media:content`).
+    private static func lopinion(_ id: String, _ title: String, _ symbol: String, _ path: String) -> Feed {
+        Feed(
+            id: "lopinion.\(id)",
+            sourceID: Source.lopinion.id,
+            title: title,
+            symbol: symbol,
+            rssURL: URL(string: "https://www.lopinion.fr/\(path)")!
+        )
+    }
+
+    /// Catalogue des flux RSS publics de L'Opinion.
+    ///
+    /// Bâti sur les sections réelles du site (`<section>.rss`), pas sur la famille
+    /// `<thème>/index.rss` qui existe en parallèle : celle-ci agrège des articles déjà
+    /// couverts par les sections (« Tech » et « Entreprises » sont à 80 % de l'Économie)
+    /// et ferait doublon sans rien apporter.
+    ///
+    /// Le flux racine `index.rss` est volontairement absent, bien qu'il soit le flux
+    /// « officiel » du site : ses 250 entrées **sont** les neuf sections réunies. Or un
+    /// article n'est stocké qu'une fois, sous la rubrique qui l'a ingéré la première, et
+    /// `RefreshEngine` ingère dans l'ordre d'arrivée réseau (`withTaskGroup`), pas dans
+    /// celui du catalogue : servir le flux racine à côté de ses propres sous-ensembles
+    /// rendrait le contenu des rubriques non déterministe d'un rafraîchissement à
+    /// l'autre. Les neuf sections couvrent le site plus finement de toute façon —
+    /// `patrimoine.rss` publie 28 articles absents de `index.rss`.
+    static let lopinionCatalog: [Feed] = [
+        lopinion("politique",     "Politique",           "building.columns",          "politique.rss"),
+        lopinion("international", "International",       "globe",                     "international.rss"),
+        lopinion("economie",      "Économie",            "chart.line.uptrend.xyaxis", "economie.rss"),
+        lopinion("business",      "L'Opinion Business",  "building.2",                "l-opinion-business.rss"),
+        lopinion("opinions",      "Opinions",            "text.bubble",               "opinions.rss"),
+        lopinion("edito",         "Édito",               "text.quote",                "edito.rss"),
+        lopinion("patrimoine",    "Patrimoine",          "banknote",                  "patrimoine.rss"),
+        lopinion("weekend",       "'O2 week-end",        "sparkles",                  "o2-week-end.rss"),
+    ]
+
+    // MARK: - Calipia
+
+    /// Fabrique une rubrique Calipia. Le blog tourne sous WordPress : la « une »
+    /// est le flux racine `/feed/`, les rubriques les flux de catégorie
+    /// `/category/<slug>/feed/`.
+    private static func calipia(_ id: String, _ title: String, _ symbol: String, _ path: String) -> Feed {
+        Feed(
+            id: "calipia.\(id)",
+            sourceID: Source.calipia.id,
+            title: title,
+            symbol: symbol,
+            rssURL: URL(string: "https://blog.calipia.com/\(path)")!
+        )
+    }
+
+    /// Catalogue des flux du blog Calipia.
+    ///
+    /// Les catégories « Actualité » et « Divers » du blog ne sont volontairement pas
+    /// reprises : la première couvre la quasi-totalité des billets (elle ferait
+    /// doublon avec « Le blog »), la seconde est un fourre-tout sans valeur
+    /// éditoriale. Les deux restent disponibles en flux perso si besoin.
+    static let calipiaCatalog: [Feed] = [
+        calipia("blog",           "Le blog",        "newspaper",       "feed/"),
+        calipia("ia",             "IA",             "brain",           "category/ia/feed/"),
+        calipia("securite",       "Sécurité",       "lock.shield",     "category/securite/feed/"),
+        calipia("os",             "OS",             "desktopcomputer", "category/os/feed/"),
+        calipia("materiel",       "Matériel",       "laptopcomputer",  "category/materiel/feed/"),
+        calipia("productivite",   "Productivité",   "checklist",       "category/productivite/feed/"),
+        calipia("administration", "Administration", "gearshape.2",     "category/administration/feed/"),
+    ]
+
     // MARK: - Catalogue combiné (multi-source, dynamique)
 
     /// Rubriques intégrées en dur (journaux fournis avec l'app).
-    static let builtInCatalog: [Feed] = leMondeCatalog + lesEchosCatalog
+    static let builtInCatalog: [Feed] = leMondeCatalog + lesEchosCatalog + lopinionCatalog + calipiaCatalog
 
     /// Flux ajoutés par l'utilisateur (`CustomFeed`), mis en cache pour un accès
     /// synchrone depuis `byID`/`catalog`. Rechargé par `CustomFeedStore.reloadCatalog()`

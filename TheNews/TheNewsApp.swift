@@ -1,5 +1,9 @@
 import SwiftUI
 import SwiftData
+import AppIntents
+#if os(macOS)
+import AppKit
+#endif
 #if os(iOS)
 import BackgroundTasks
 #endif
@@ -32,6 +36,9 @@ struct TheNewsApp: App {
     /// de la vue, donc au moins un tour de run loop de plus.
     init() {
         NotificationService.shared.configureDelegate()
+        #if os(iOS)
+        WatchFeedSync.shared.activate()
+        #endif
     }
 
     var body: some Scene {
@@ -51,6 +58,9 @@ struct TheNewsApp: App {
         .defaultSize(width: 960, height: 640)
         .commands {
             CommandGroup(replacing: .newItem) {}
+            CommandGroup(replacing: .appInfo) {
+                Button(settings.t("about_app")) { Self.showAboutPanel() }
+            }
             CommandGroup(after: .appInfo) {
                 Button(settings.t("check_for_updates")) { SparkleUpdater.shared.checkForUpdates() }
             }
@@ -76,6 +86,33 @@ struct TheNewsApp: App {
         }
         #endif
     }
+
+    #if os(macOS)
+    /// Panneau « À propos » standard, enrichi d'une signature cliquable.
+    ///
+    /// `orderFrontStandardAboutPanel` rend l'option `.credits` comme texte attribué :
+    /// c'est le seul champ du panneau natif qui accepte un lien actif. La signature
+    /// reste en anglais et non traduite — c'est une signature d'auteur, pas du
+    /// texte d'interface.
+    static func showAboutPanel() {
+        let signature = "Made with Love by Vincent Lauriat"
+        let credits = NSMutableAttributedString(
+            string: signature,
+            attributes: [
+                .font: NSFont.systemFont(ofSize: NSFont.smallSystemFontSize),
+                .foregroundColor: NSColor.secondaryLabelColor
+            ]
+        )
+        if let site = URL(string: "https://lauriat.fr") {
+            credits.addAttribute(
+                .link,
+                value: site,
+                range: (signature as NSString).range(of: "Vincent Lauriat")
+            )
+        }
+        NSApp.orderFrontStandardAboutPanel(options: [.credits: credits])
+    }
+    #endif
 
     #if os(iOS)
     /// Planifie la prochaine exécution en fond (au plus tôt dans ~1 h).

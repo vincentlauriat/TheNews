@@ -6,7 +6,7 @@ import SwiftData
 /// dynamique (`Feed.customCatalog`). Rattaché à la pseudo-source « Mes flux »
 /// (`Source.custom`) pour le regroupement dans la sidebar et l'écran de gestion.
 @Model
-final class CustomFeed {
+final class CustomFeed: Identifiable {
     // Valeurs par défaut + pas de `.unique` : exigences SwiftData + CloudKit. `id` est
     // un UUID, unique par construction.
     var id: String = "custom.\(UUID().uuidString)"

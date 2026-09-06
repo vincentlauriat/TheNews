@@ -8,6 +8,7 @@ enum Strings {
         "fr": [
             "app_name": "TheNews",
             "check_for_updates": "Rechercher les mises à jour…",
+            "about_app": "À propos de TheNews",
 
             // Sidebar / liste
             "search_placeholder": "Rechercher…",
@@ -68,6 +69,10 @@ enum Strings {
             "feed_url": "URL du flux RSS",
             "feed_url_footer": "L'adresse du flux (souvent en /rss ou /feed). Vérifiée à l'ajout.",
             "add": "Ajouter",
+            "delete": "Supprimer",
+            "feed_edit": "Modifier le flux",
+            "feed_delete_confirm_title": "Supprimer ce flux ?",
+            "feed_delete_confirm_body": "Les articles de ce flux déjà téléchargés seront supprimés, y compris ceux mis en favori.",
 
             // Veille / alertes
             "alerts": "Alertes",
@@ -142,7 +147,9 @@ enum Strings {
             "apikey_present": "Une clé API est enregistrée.",
             "apikey_absent": "Aucune clé API enregistrée.",
             "settings_about": "À propos",
-            "settings_about_text": "TheNews — veille d'information multi-sources (Le Monde, Les Echos) sur flux RSS. macOS + iOS, sans serveur.",
+            "settings_about_text": "TheNews — veille d'information multi-sources (Le Monde, Les Echos, L'Opinion, Calipia) sur flux RSS. macOS + iOS, sans serveur.",
+            "watch_app_section": "Apple Watch",
+            "watch_app_footer": "Choisis les rubriques Le Monde et Les Echos envoyées à l'app Apple Watch. Garde au moins une rubrique active.",
 
             // Divers
             "ok": "OK",
@@ -154,6 +161,7 @@ enum Strings {
         "en": [
             "app_name": "TheNews",
             "check_for_updates": "Check for Updates…",
+            "about_app": "About TheNews",
 
             "search_placeholder": "Search…",
             "refresh": "Refresh",
@@ -213,6 +221,10 @@ enum Strings {
             "feed_url": "RSS feed URL",
             "feed_url_footer": "The feed address (often under /rss or /feed). Checked when adding.",
             "add": "Add",
+            "delete": "Delete",
+            "feed_edit": "Edit feed",
+            "feed_delete_confirm_title": "Delete this feed?",
+            "feed_delete_confirm_body": "Articles already downloaded from this feed will be deleted, including favourited ones.",
 
             // Watch / alerts
             "alerts": "Alerts",
@@ -284,7 +296,9 @@ enum Strings {
             "apikey_present": "An API key is stored.",
             "apikey_absent": "No API key stored.",
             "settings_about": "About",
-            "settings_about_text": "TheNews — multi-source news monitoring (Le Monde, Les Echos) over RSS feeds. macOS + iOS, serverless.",
+            "settings_about_text": "TheNews — multi-source news monitoring (Le Monde, Les Echos, L'Opinion, Calipia) over RSS feeds. macOS + iOS, serverless.",
+            "watch_app_section": "Apple Watch",
+            "watch_app_footer": "Choose the Le Monde and Les Echos sections sent to the Apple Watch app. Keep at least one section enabled.",
 
             "ok": "OK",
             "error_title": "Error",

@@ -40,3 +40,6 @@ CHANGES.md
 MEMORY.md
 PLAN.md
 TODOS.md
+.bmad-loop/runs/
+.bmad-loop/cache/
+.bmad-loop/policy.toml

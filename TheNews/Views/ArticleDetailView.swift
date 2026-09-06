@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 #if os(iOS)
 import Photos
 import UIKit

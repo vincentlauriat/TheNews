@@ -12,14 +12,22 @@ struct ContentView: View {
     @State private var feedSelection: FeedSelection? = .all
     @State private var selectedId: String?
     @State private var showingManage = false
+    @State private var didStartInitialLoad = false
     #if os(iOS)
+    private static let launchRefreshKey = "TheNews.lastLaunchRefreshAt"
+    private static let launchRefreshInterval: TimeInterval = 15 * 60
+
+    @Environment(\.openURL) private var openURL
     @State private var showingSettings = false
     #endif
 
     var body: some View {
         splitView
-        .task { await vm.load(context: modelContext, lang: settings.effectiveLang) }
+        .task { await loadInitialContentIfNeeded() }
         .task { await requestNotificationsIfNeeded() }
+        #if os(iOS)
+        .task { await listenForWatchOpenRequests() }
+        #endif
         #if os(macOS)
         .task { await runPeriodicRefresh() }
         #endif
@@ -211,7 +219,49 @@ struct ContentView: View {
             #endif
     }
 
+    // MARK: - Chargement initial
+
+    /// Affiche d'abord le cache local. Sur iOS, le refresh réseau est différé et limité
+    /// aux lancements où les données n'ont pas déjà été rafraîchies récemment.
+    private func loadInitialContentIfNeeded() async {
+        guard !didStartInitialLoad else { return }
+        didStartInitialLoad = true
+        vm.loadCached(context: modelContext)
+        await Task.yield()
+        #if os(iOS)
+        guard shouldRefreshOnLaunch() else { return }
+        try? await Task.sleep(for: .seconds(2))
+        guard !Task.isCancelled else { return }
+        #endif
+        await vm.refresh(context: modelContext, lang: settings.effectiveLang)
+        #if os(iOS)
+        if vm.errorMessage == nil { Self.recordLaunchRefresh() }
+        #endif
+    }
+
+    #if os(iOS)
+    private func shouldRefreshOnLaunch() -> Bool {
+        guard let lastRefresh = UserDefaults.standard.object(forKey: Self.launchRefreshKey) as? Date else {
+            return true
+        }
+        return Date().timeIntervalSince(lastRefresh) >= Self.launchRefreshInterval
+    }
+
+    private static func recordLaunchRefresh() {
+        UserDefaults.standard.set(Date(), forKey: launchRefreshKey)
+    }
+    #endif
+
     // MARK: - Notifications & rafraîchissement
+
+    #if os(iOS)
+    private func listenForWatchOpenRequests() async {
+        for await notification in NotificationCenter.default.notifications(named: WatchFeedSync.openURLRequestedNotification) {
+            guard let url = notification.userInfo?[WatchFeedSync.openURLUserInfoKey] as? URL else { continue }
+            openURL(url)
+        }
+    }
+    #endif
 
     /// Demande l'autorisation de notifier au premier lancement (si indéterminée).
     private func requestNotificationsIfNeeded() async {

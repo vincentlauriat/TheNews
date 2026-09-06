@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(AppSettings.self) private var settings
     @State private var notifications = NotificationService.shared
+    @State private var watchFeedIDs = WatchFeedConfiguration.load()
 
     var body: some View {
         @Bindable var settings = settings
@@ -73,6 +74,28 @@ struct SettingsView: View {
             }
             #endif
 
+            #if os(iOS)
+            Section {
+                ForEach(watchFeedGroups, id: \.source.id) { group in
+                    DisclosureGroup(group.source.name) {
+                        ForEach(group.feeds) { feed in
+                            Toggle(isOn: watchFeedBinding(for: feed)) {
+                                Label(feed.title, systemImage: feed.symbol)
+                            }
+                        }
+                    }
+                }
+            } header: {
+                Text(settings.t("watch_app_section"))
+            } footer: {
+                Text(settings.t("watch_app_footer"))
+            }
+            .onAppear {
+                WatchFeedSync.shared.activate()
+                watchFeedIDs = WatchFeedSync.shared.selectedFeedIDs()
+            }
+            #endif
+
             Section {
                 Picker(settings.t("digest_length"), selection: $settings.digestLengthRaw) {
                     ForEach(DigestLength.allCases) { Text(settings.t($0.titleKey)).tag($0.rawValue) }
@@ -133,6 +156,34 @@ struct SettingsView: View {
         .frame(width: 460, height: 420)
         #endif
     }
+
+    #if os(iOS)
+    private var watchFeedGroups: [(source: Source, feeds: [Feed])] {
+        [
+            (Source.leMonde, Feed.leMondeCatalog),
+            (Source.lesEchos, Feed.lesEchosCatalog),
+            (Source.lopinion, Feed.lopinionCatalog),
+            (Source.calipia, Feed.calipiaCatalog)
+        ]
+    }
+
+    private func watchFeedBinding(for feed: Feed) -> Binding<Bool> {
+        Binding(
+            get: { watchFeedIDs.contains(feed.id) },
+            set: { isSelected in
+                var selected = watchFeedIDs
+                if isSelected {
+                    selected.append(feed.id)
+                } else {
+                    guard selected.count > 1 else { return }
+                    selected.removeAll { $0 == feed.id }
+                }
+                watchFeedIDs = WatchFeedConfiguration.sanitizedFeedIDs(selected)
+                WatchFeedSync.shared.updateSelection(watchFeedIDs)
+            }
+        )
+    }
+    #endif
 
     /// (Re)programme le briefing quotidien selon les réglages courants.
     private func rescheduleBriefing() {

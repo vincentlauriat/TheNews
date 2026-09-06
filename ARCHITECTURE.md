@@ -1,6 +1,6 @@
 # Architecture
 
-Application SwiftUI **à codebase unique partagé** entre les cibles macOS et iOS/iPadOS. Les différences de plateforme sont gérées par des blocs `#if os(macOS)` / `#if os(iOS)`, jamais par duplication de fichiers. TheNews est **multi-sources** : il agrège plusieurs journaux (Le Monde, Les Echos) dans une même interface. Deux compagnons **autonomes** (watchOS, tvOS) réutilisent une partie de ce codebase (`Source`/`Feed`/`RSSService`/`RSSParser`) sans SwiftData ni CloudKit — voir leurs sections dédiées plus bas.
+Application SwiftUI **à codebase unique partagé** entre les cibles macOS et iOS/iPadOS. Les différences de plateforme sont gérées par des blocs `#if os(macOS)` / `#if os(iOS)`, jamais par duplication de fichiers. TheNews est **multi-sources** : il agrège plusieurs journaux (Le Monde, Les Echos, L'Opinion, Calipia) dans une même interface. Deux compagnons **autonomes** (watchOS, tvOS) réutilisent une partie de ce codebase (`Source`/`Feed`/`RSSService`/`RSSParser`) sans SwiftData ni CloudKit — voir leurs sections dédiées plus bas.
 
 ## Vue d'ensemble
 
@@ -63,7 +63,7 @@ soit leur journal.
 
 Le catalogue n'est plus figé : `Feed.catalog = builtInCatalog + customCatalog`.
 
-- `builtInCatalog` — les journaux fournis (Le Monde, Les Echos), statiques en code.
+- `builtInCatalog` — les journaux fournis (Le Monde, Les Echos, L'Opinion, Calipia), statiques en code.
 - `customCatalog` — cache des flux ajoutés par l'utilisateur, dérivé du modèle SwiftData `CustomFeed`.
   `CustomFeedStore.reloadCatalog()` le reconstruit depuis la base au démarrage (`FeedViewModel.load`,
   `RefreshEngine.run`) et après chaque ajout/suppression. Tous les consommateurs du catalogue étant
@@ -268,9 +268,30 @@ perso). Les réglages d'interface (`UserDefaults`) ne sont pas synchronisés.
 ## Décisions clés
 
 - **Observation** (`@Observable`, Swift 5.9) plutôt que `ObservableObject`. Les ViewModels sont `@MainActor`.
-- **Multi-sources par concaténation de catalogues** : le mix Le Monde + Les Echos ne demande aucun
-  refactor des services — seuls `Source`/`Feed` et deux vues (sidebar, gestion) connaissent la notion
-  de source. Extensible à un N-ième journal sans refonte.
+- **Multi-sources par concaténation de catalogues** : le mix Le Monde + Les Echos + L'Opinion +
+  Calipia ne demande aucun refactor des services — seuls `Source`/`Feed` et deux vues (sidebar,
+  gestion) connaissent la notion de source. Extensible à un N-ième journal sans refonte.
+  ⚠️ Le catalogue intégré est répété dans **quatre** fichiers (`Feed.builtInCatalog`, les deux
+  `WatchFeedConfiguration` — partagée et watchOS —, et `watchFeedGroups` dans `SettingsView` /
+  `WatchSettingsView`). Les deux `WatchFeedConfiguration` écartent *en silence* ce que l'autre
+  autorise : une divergence ne lève aucune erreur, elle produit un flux qui n'arrive jamais sur la
+  montre. Verrouillé par `WatchFeedConfigurationTests.testAllowedFeedIDsMirrorBuiltInCatalog`.
+- **Identité d'un article = lien canonique**, pas le `guid` : schéma normalisé en `https`, hôte en
+  minuscules, requête et fragment retirés, barre oblique finale supprimée (`ParsedArticle.canonicalLink`).
+  Les trois couches de déduplication — `FeedStore.ingest`, `dedupedByIdentity`, `pruneDuplicates` —
+  doivent partager cette même clé : quand `ingest` rapprochait encore sur le `guid` brut, un flux
+  publiant le même billet sous deux `guid` (`http` et `https`) faisait insérer une ligne corrigée que
+  `pruneDuplicates`, qui conserve la plus ancienne, supprimait aussitôt.
+- **`ingest` réaligne, il ne se contente pas d'insérer** : `title`, `summary` et `imageURL` sont
+  réécrits depuis le flux, `isRead`/`isFavorite`/`link` sont préservés. Sans cette passe, un article
+  garde à jamais la forme de son premier téléchargement et tout correctif du parseur reste invisible
+  sur les lignes déjà en base.
+- **Un article n'appartient qu'à une rubrique** (`Article.feedID` est scalaire) : celle qui l'ingère
+  la première. Or `RefreshEngine` ingère dans l'**ordre d'arrivée réseau** (`withTaskGroup`), pas
+  dans l'ordre du catalogue. Conséquence : ne jamais mettre au catalogue un flux « tout le site » à
+  côté de ses propres sous-ensembles — le contenu des rubriques deviendrait non déterministe d'un
+  rafraîchissement à l'autre. C'est la raison pour laquelle `index.rss` de L'Opinion et les
+  catégories « Actualité »/« Divers » de Calipia sont écartés.
 - **Réglages** : `AppSettings` centralise apparence, langue et secrets (`UserDefaults` + **Keychain**). Injecté dans l'environnement SwiftUI.
 - **Localisation maison** : dictionnaire `[lang: [clé: valeur]]` (`Strings.swift`) avec repli `en`, résolu par `settings.t("clé")`.
 - **Build** : projet Xcode **généré** par XcodeGen (`project.yml`) — le `.xcodeproj` n'est pas versionné. Régénérer avec `xcodegen generate`.

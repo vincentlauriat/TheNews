@@ -4,8 +4,9 @@
 
 **Veille d'information multi-sources pour macOS & iOS — sans serveur, 100 % sur l'appareil.**
 
-Agrège *Le Monde*, *Les Echos* et **n'importe quel flux RSS** dans une seule app, regroupe
-automatiquement les articles qui parlent du même sujet, et te livre un briefing quotidien condensé.
+Agrège *Le Monde*, *Les Echos*, *L'Opinion*, *Calipia* et **n'importe quel flux RSS** dans une seule
+app, regroupe automatiquement les articles qui parlent du même sujet, et te livre un briefing
+quotidien condensé.
 
 ![Platforms](https://img.shields.io/badge/platforms-macOS%20%7C%20iOS%20%7C%20iPadOS%20%7C%20watchOS%20%7C%20tvOS-blue)
 ![Swift](https://img.shields.io/badge/Swift-5.9-orange)
@@ -57,7 +58,9 @@ lus »**), apparence & langue (fr/en).
 
 | Fonctionnalité | macOS | iOS/iPadOS |
 |---|:---:|:---:|
-| Le Monde (11 rubriques) + Les Echos (9 rubriques) + flux perso | ✅ | ✅ |
+| Le Monde (11) + Les Echos (9) + L'Opinion (8) + Calipia (7 rubriques) + flux perso | ✅ | ✅ |
+| Ajout, **modification et suppression** de flux perso | ✅ | ✅ |
+| Navigation clavier dans la liste d'articles (modes liste et carte) | ✅ | — |
 | Sidebar groupée par source · vue « Tous les articles » | ✅ | ✅ |
 | Regroupement cross-source « Aussi couvert par… » | ✅ | ✅ |
 | Briefing quotidien + notification programmée | ✅ | ✅ |

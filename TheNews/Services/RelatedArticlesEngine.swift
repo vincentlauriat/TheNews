@@ -92,7 +92,7 @@ enum RelatedArticlesEngine {
             return scored.sorted { $0.score > $1.score }.prefix(limit).map(\.id)
         }.value
 
-        let byID = Dictionary(uniqueKeysWithValues: rows.map { ($0.id, $0) })
+        let byID = Dictionary(rows.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         return topIDs.compactMap { byID[$0] }
     }
 }

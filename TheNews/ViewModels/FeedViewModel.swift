@@ -40,6 +40,7 @@ final class FeedViewModel {
     var showingDigest = false
 
     private let service = RSSService()
+    private let visibleArticleLimit = 180
 
     /// Titre affiché en tête de la liste selon la portée courante.
     func title(_ t: (String) -> String) -> String {
@@ -114,13 +115,17 @@ final class FeedViewModel {
 
     // MARK: - Chargement
 
-    /// Premier chargement : recharge les flux perso, seed des abonnements par défaut,
-    /// cache local, puis réseau.
-    func load(context: ModelContext, lang: String = "fr") async {
+    /// Premier chargement visible : prépare les flux locaux et affiche immédiatement le cache.
+    /// Le refresh réseau est déclenché ensuite par `ContentView` pour ne pas bloquer l'ouverture.
+    func loadCached(context: ModelContext) {
         CustomFeedStore(context: context).reloadCatalog()
         try? SubscriptionStore(context: context).seedIfNeeded()
-        try? FeedStore(context: context).pruneDuplicates()   // nettoie les doublons hérités de la sync
         reload(context: context)
+    }
+
+    /// Compatibilité pour les appels qui veulent explicitement cache + réseau.
+    func load(context: ModelContext, lang: String = "fr") async {
+        loadCached(context: context)
         await refresh(context: context, lang: lang)
     }
 
@@ -222,18 +227,18 @@ final class FeedViewModel {
         switch selection {
         case .all:
             let ids = (try? SubscriptionStore(context: context).subscribedFeedIDs()) ?? []
-            articles = (try? store.articles(feedIDs: ids)) ?? []
+            articles = (try? store.articles(feedIDs: ids, limit: visibleArticleLimit)) ?? []
         case .briefing:
             articles = BriefingEngine.today(context: context, limit: 13)
         case .alerts:
             let ids = (try? SubscriptionStore(context: context).subscribedFeedIDs()) ?? []
-            let all = (try? store.articles(feedIDs: ids)) ?? []
+            let all = (try? store.articles(feedIDs: ids, limit: visibleArticleLimit)) ?? []
             let topics = activeTopics(context: context)
             articles = topics.isEmpty ? [] : all.filter { MatchingEngine.isMatch($0, topics: topics) }
         case .favorites:
-            articles = (try? store.favorites()) ?? []
+            articles = (try? store.favorites(limit: visibleArticleLimit)) ?? []
         case .feed(let id):
-            articles = (try? store.articles(feedID: id)) ?? []
+            articles = (try? store.articles(feedID: id, limit: visibleArticleLimit)) ?? []
         }
     }
 
@@ -248,7 +253,7 @@ final class FeedViewModel {
         guard !topics.isEmpty else { return }
         let store = FeedStore(context: context)
         let ids = (try? SubscriptionStore(context: context).subscribedFeedIDs()) ?? []
-        let all = (try? store.articles(feedIDs: ids)) ?? []
+        let all = (try? store.articles(feedIDs: ids, limit: visibleArticleLimit)) ?? []
         let matchedIDs = Set(articles.map(\.id))
         let cutoff = Calendar.current.date(byAdding: .day, value: -3, to: Date()) ?? .distantPast
         let candidates = Array(

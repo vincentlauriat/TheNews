@@ -4,16 +4,26 @@ import SwiftData
 /// Formulaire d'ajout d'un flux RSS personnalisé (titre + URL). L'URL est validée
 /// par une sonde réseau (le flux doit renvoyer au moins un article) avant l'ajout.
 struct AddCustomFeedView: View {
+    let editingFeed: CustomFeed?
+
     @Environment(AppSettings.self) private var settings
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    @State private var title = ""
-    @State private var urlString = ""
+    @State private var title: String
+    @State private var urlString: String
     @State private var isValidating = false
     @State private var errorMessage: String?
 
-    private var canAdd: Bool {
+    init(editingFeed: CustomFeed? = nil) {
+        self.editingFeed = editingFeed
+        _title = State(initialValue: editingFeed?.title ?? "")
+        _urlString = State(initialValue: editingFeed?.urlString ?? "")
+    }
+
+    private var isEditing: Bool { editingFeed != nil }
+
+    private var canSave: Bool {
         !title.trimmingCharacters(in: .whitespaces).isEmpty
         && !urlString.trimmingCharacters(in: .whitespaces).isEmpty
         && !isValidating
@@ -49,7 +59,7 @@ struct AddCustomFeedView: View {
             }
         }
         .formStyle(.grouped)
-        .navigationTitle(settings.t("feed_add"))
+        .navigationTitle(settings.t(isEditing ? "feed_edit" : "feed_add"))
         #if os(iOS)
         .navigationBarTitleDisplayMode(.inline)
         #endif
@@ -61,8 +71,8 @@ struct AddCustomFeedView: View {
                 if isValidating {
                     ProgressView()
                 } else {
-                    Button(settings.t("add")) { Task { await addFeed() } }
-                        .disabled(!canAdd)
+                    Button(settings.t(isEditing ? "save" : "add")) { Task { await saveFeed() } }
+                        .disabled(!canSave)
                 }
             }
         }
@@ -71,12 +81,17 @@ struct AddCustomFeedView: View {
         #endif
     }
 
-    private func addFeed() async {
+    private func saveFeed() async {
         isValidating = true
         errorMessage = nil
         do {
             try await CustomFeedStore.validate(urlString: urlString)
-            try CustomFeedStore(context: modelContext).add(title: title, urlString: urlString)
+            let store = CustomFeedStore(context: modelContext)
+            if let editingFeed {
+                try store.update(editingFeed, title: title, urlString: urlString)
+            } else {
+                try store.add(title: title, urlString: urlString)
+            }
             dismiss()
         } catch {
             errorMessage = error.localizedDescription

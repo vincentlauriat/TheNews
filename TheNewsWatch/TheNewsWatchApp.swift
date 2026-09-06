@@ -1,4 +1,5 @@
 import SwiftUI
+import AppIntents
 
 /// App compagnon watchOS — vue rapide autonome : récupère et affiche les gros
 /// titres des flux principaux, indépendamment de l'iPhone.
@@ -7,6 +8,7 @@ struct TheNewsWatchApp: App {
     var body: some Scene {
         WindowGroup {
             WatchFeedView()
+                .task { WatchFeedSync.shared.activate() }
         }
     }
 }

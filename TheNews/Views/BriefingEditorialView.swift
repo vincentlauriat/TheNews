@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 /// Écran éditorial du Briefing (macOS) : remplace le triptyque liste + détail
 /// par une page unique façon « une » de journal — un grand hero pour l'article

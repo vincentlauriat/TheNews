@@ -20,6 +20,23 @@ struct Source: Identifiable, Hashable, Codable, Sendable {
         homepageURL: URL(string: "https://www.lesechos.fr")!
     )
 
+    /// Blog de Calipia, cabinet de conseil spécialisé sur l'écosystème Microsoft.
+    /// Publié sous WordPress : le flux principal et les flux de catégorie sont
+    /// exposés sur le même hôte (`/feed/`, `/category/<slug>/feed/`).
+    static let calipia = Source(
+        id: "calipia",
+        name: "Calipia",
+        homepageURL: URL(string: "https://blog.calipia.com")!
+    )
+
+    /// Quotidien L'Opinion (économie, politique, international). Flux publics servis
+    /// directement par le site : `index.rss` pour la une, `<section>.rss` par rubrique.
+    static let lopinion = Source(
+        id: "lopinion",
+        name: "L'Opinion",
+        homepageURL: URL(string: "https://www.lopinion.fr")!
+    )
+
     /// Pseudo-source regroupant les flux RSS ajoutés par l'utilisateur (`CustomFeed`).
     static let custom = Source(
         id: "custom",
@@ -28,7 +45,7 @@ struct Source: Identifiable, Hashable, Codable, Sendable {
     )
 
     /// Sources agrégées par TheNews, dans l'ordre d'affichage. « Mes flux » en dernier.
-    static let all: [Source] = [.leMonde, .lesEchos, .custom]
+    static let all: [Source] = [.leMonde, .lesEchos, .lopinion, .calipia, .custom]
 
     static func byID(_ id: String) -> Source? { all.first { $0.id == id } }
 }

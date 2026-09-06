@@ -95,6 +95,10 @@ targets:
           DST="${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Contents/Resources/${SAVER_NAME}"
           rm -rf "${DST}"
           ditto "${SRC}" "${DST}"
+        inputFiles:
+          - "$(BUILT_PRODUCTS_DIR)/TheNewsBriefing.saver"
+        outputFiles:
+          - "$(BUILT_PRODUCTS_DIR)/$(PRODUCT_NAME).app/Contents/Resources/TheNewsBriefing.saver"
     info:
       path: TheNews/Info.plist
       properties:

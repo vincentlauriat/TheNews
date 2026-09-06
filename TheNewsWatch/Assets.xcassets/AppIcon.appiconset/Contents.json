@@ -1,6 +1,7 @@
 {
   "images" : [
     {
+      "filename" : "48.png",
       "idiom" : "watch",
       "role" : "notificationCenter",
       "scale" : "2x",
@@ -8,6 +9,7 @@
       "subtype" : "38mm"
     },
     {
+      "filename" : "55.png",
       "idiom" : "watch",
       "role" : "notificationCenter",
       "scale" : "2x",
@@ -29,6 +31,7 @@
       "size" : "29x29"
     },
     {
+      "filename" : "66.png",
       "idiom" : "watch",
       "role" : "notificationCenter",
       "scale" : "2x",
@@ -129,54 +132,6 @@
       "scale" : "1x",
       "size" : "1024x1024"
     },
-    {
-      "filename" : "44.png",
-      "idiom" : "watch",
-      "role" : "notificationCenter",
-      "scale" : "2x",
-      "size" : "22x22",
-      "subtype" : "38mm"
-    },
-    {
-      "filename" : "48.png",
-      "idiom" : "watch",
-      "role" : "notificationCenter",
-      "scale" : "2x",
-      "size" : "24x24",
-      "subtype" : "42mm"
-    },
-    {
-      "filename" : "55.png",
-      "idiom" : "watch",
-      "role" : "notificationCenter",
-      "scale" : "2x",
-      "size" : "27.5x27.5",
-      "subtype" : "45mm"
-    },
-    {
-      "filename" : "60.png",
-      "idiom" : "watch",
-      "role" : "notificationCenter",
-      "scale" : "2x",
-      "size" : "30x30",
-      "subtype" : "41mm"
-    },
-    {
-      "filename" : "64.png",
-      "idiom" : "watch",
-      "role" : "notificationCenter",
-      "scale" : "2x",
-      "size" : "32x32",
-      "subtype" : "45mm"
-    },
-    {
-      "filename" : "66.png",
-      "idiom" : "watch",
-      "role" : "notificationCenter",
-      "scale" : "2x",
-      "size" : "33x33",
-      "subtype" : "49mm"
-    }
   ],
   "info" : {
     "author" : "xcode",

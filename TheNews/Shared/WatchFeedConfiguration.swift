@@ -47,7 +47,12 @@ struct WatchFeedConfiguration: Equatable, Sendable {
         "calipia.os",
         "calipia.materiel",
         "calipia.productivite",
-        "calipia.administration"
+        "calipia.administration",
+        "numerama.tech",
+        "numerama.sciences",
+        "numerama.popculture",
+        "numerama.vroom",
+        "numerama.cyberguerre"
     ]
 
     static func sanitizedFeedIDs(_ ids: [String]) -> [String] {

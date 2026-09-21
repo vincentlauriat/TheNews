@@ -9,6 +9,7 @@ struct WatchFeedConfiguration: Equatable, Sendable {
 
     static var availableFeeds: [Feed] {
         Feed.leMondeCatalog + Feed.lesEchosCatalog + Feed.lopinionCatalog + Feed.calipiaCatalog
+            + Feed.numeramaCatalog
     }
 
     static func sanitizedFeedIDs(_ ids: [String]) -> [String] {

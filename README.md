@@ -4,7 +4,7 @@
 
 **Veille d'information multi-sources pour macOS & iOS — sans serveur, 100 % sur l'appareil.**
 
-Agrège *Le Monde*, *Les Echos*, *L'Opinion*, *Calipia* et **n'importe quel flux RSS** dans une seule
+Agrège *Le Monde*, *Les Echos*, *L'Opinion*, *Calipia*, *Numerama* et **n'importe quel flux RSS** dans une seule
 app, regroupe automatiquement les articles qui parlent du même sujet, et te livre un briefing
 quotidien condensé.
 
@@ -58,7 +58,7 @@ lus »**), apparence & langue (fr/en).
 
 | Fonctionnalité | macOS | iOS/iPadOS |
 |---|:---:|:---:|
-| Le Monde (11) + Les Echos (9) + L'Opinion (8) + Calipia (7 rubriques) + flux perso | ✅ | ✅ |
+| Le Monde (11) + Les Echos (9) + L'Opinion (8) + Calipia (7) + Numerama (5 rubriques) + flux perso | ✅ | ✅ |
 | Ajout, **modification et suppression** de flux perso | ✅ | ✅ |
 | Navigation clavier dans la liste d'articles (modes liste et carte) | ✅ | — |
 | Sidebar groupée par source · vue « Tous les articles » | ✅ | ✅ |

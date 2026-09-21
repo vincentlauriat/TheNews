@@ -38,6 +38,27 @@ final class FeedCatalogTests: XCTestCase {
         XCTAssertEqual(Source.byID("lopinion"), Source.lopinion)
     }
 
+    func testNumeramaIsAListedSource() {
+        XCTAssertTrue(Source.all.contains(Source.numerama))
+        XCTAssertEqual(Source.byID("numerama"), Source.numerama)
+    }
+
+    func testNumeramaCatalogIsGroupedUnderItsSource() {
+        let grouped = Feed.bySource.first { $0.source == Source.numerama }
+        XCTAssertEqual(grouped?.feeds, Feed.numeramaCatalog)
+    }
+
+    /// Le flux racine de Numerama est l'union de ses sections : il ne doit jamais
+    /// être catalogué à côté d'elles (voir `numeramaCatalog`).
+    func testNumeramaCatalogOnlyListsSectionFeeds() {
+        for feed in Feed.numeramaCatalog {
+            XCTAssertNotEqual(feed.rssURL, URL(string: "https://www.numerama.com/feed/"))
+            // `URL.path` retire la barre oblique finale : on teste la chaîne complète.
+            XCTAssertTrue(feed.rssURL.absoluteString.hasSuffix("/feed/"), feed.rssURL.absoluteString)
+            XCTAssertEqual(feed.rssURL.pathComponents.count, 3, feed.rssURL.absoluteString) // "/", section, "feed"
+        }
+    }
+
     func testLOpinionCatalogIsGroupedUnderItsSource() {
         let grouped = Feed.bySource.first { $0.source == Source.lopinion }
         XCTAssertEqual(grouped?.feeds, Feed.lopinionCatalog)

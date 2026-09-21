@@ -148,7 +148,41 @@ extension Feed {
     // MARK: - Catalogue combiné (multi-source, dynamique)
 
     /// Rubriques intégrées en dur (journaux fournis avec l'app).
-    static let builtInCatalog: [Feed] = leMondeCatalog + lesEchosCatalog + lopinionCatalog + calipiaCatalog
+    // MARK: - Numerama
+
+    /// Fabrique une rubrique Numerama à partir du slug de sa section.
+    private static func numerama(_ id: String, _ title: String, _ symbol: String, _ section: String) -> Feed {
+        Feed(
+            id: "numerama.\(id)",
+            sourceID: Source.numerama.id,
+            title: title,
+            symbol: symbol,
+            rssURL: URL(string: "https://www.numerama.com/\(section)/feed/")!
+        )
+    }
+
+    /// Catalogue des flux de section de Numerama (`/<section>/feed/`).
+    ///
+    /// Seules les sections dont le flux publie majoritairement ses propres articles
+    /// sont retenues (mesuré le 2026-09-21 sur 15 entrées chacune : Tech 13, Sciences 14,
+    /// Pop culture 13, Vroom 15, Cyberguerre 12). « Société » (`/politique/`, 4/15) et
+    /// « Business » (2/15) republient surtout des articles des autres sections ; comme un
+    /// article n'est stocké que sous la rubrique qui l'ingère la première, les cataloguer
+    /// rendrait le contenu des rubriques non déterministe. Le flux racine `/feed/` est
+    /// l'union des sections et est écarté pour la même raison.
+    ///
+    /// Ces flux ne déclarent ni `enclosure` ni `media:content` : l'illustration n'existe
+    /// que comme `<img>` dans `content:encoded`, d'où le repli de `RSSParser`.
+    static let numeramaCatalog: [Feed] = [
+        numerama("tech",        "Tech",        "cpu",                   "tech"),
+        numerama("sciences",    "Sciences",    "atom",                  "sciences"),
+        numerama("popculture",  "Pop culture", "gamecontroller",        "pop-culture"),
+        numerama("vroom",       "Vroom",       "car",                   "vroom"),
+        numerama("cyberguerre", "Cyberguerre", "exclamationmark.shield", "cyberguerre"),
+    ]
+
+    static let builtInCatalog: [Feed] =
+        leMondeCatalog + lesEchosCatalog + lopinionCatalog + calipiaCatalog + numeramaCatalog
 
     /// Flux ajoutés par l'utilisateur (`CustomFeed`), mis en cache pour un accès
     /// synchrone depuis `byID`/`catalog`. Rechargé par `CustomFeedStore.reloadCatalog()`

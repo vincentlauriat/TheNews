@@ -1,0 +1,139 @@
+{
+  "name": "TheNews",
+  "no": "30",
+  "repo": "vincentlauriat/TheNews",
+  "url": "https://vincentlauriat.github.io/TheNews/",
+  "accent": "#e5484d",
+  "meta": {
+    "title": "TheNews — Multi-source news watch for macOS & iOS",
+    "description": "TheNews aggregates Le Monde, Les Echos and any RSS feed into one macOS & iOS app — cross-source grouping, daily briefing, home-screen widget and iCloud sync. Serverless, on-device, zero-dependency."
+  },
+  "role": {"en": "Multi-source news watch for macOS &amp; iOS", "fr": "Veille d'actualité multi-source pour macOS &amp; iOS", "zh": "macOS 與 iOS 的多來源新聞追蹤"},
+  "thesis": {
+    "en": "Your news, from every source, in one app",
+    "fr": "Ton actu, de toutes les sources, dans une seule app",
+    "zh": "你的新聞，來自所有來源，只用一個應用程式"
+  },
+  "lede": {
+    "en": "TheNews aggregates <b>Le Monde</b>, <b>Les Echos</b> and <b>any RSS feed</b> into a single macOS &amp; iOS app — groups articles covering the same story, and delivers a daily briefing. Serverless, on-device, zero-dependency.",
+    "fr": "TheNews agrège <b>Le Monde</b>, <b>Les Echos</b> et <b>n'importe quel flux RSS</b> dans une seule app macOS &amp; iOS — regroupe les articles qui traitent du même sujet, et livre un briefing quotidien. Sans serveur, sur l'appareil, zéro dépendance.",
+    "zh": "TheNews 把 <b>Le Monde</b>、<b>Les Echos</b> 與 <b>任何 RSS 訂閱源</b> 匯集到一個 macOS 與 iOS 應用程式——把報導同一主題的文章分組，並產出每日簡報。無伺服器、在裝置上執行、零依賴。"
+  },
+  "actions": [
+    {"primary": true, "href": "https://github.com/vincentlauriat/TheNews/releases/latest",
+     "label": {"en": "Download for macOS", "fr": "Télécharger pour macOS", "zh": "下載 macOS 版"}},
+    {"href": "https://github.com/vincentlauriat/TheNews",
+     "label": {"en": "View on GitHub", "fr": "Voir sur GitHub", "zh": "在 GitHub 上檢視"}}
+  ],
+  "facts": [
+    {"k": {"en": "Platforms", "fr": "Plateformes", "zh": "平台"}, "v": "macOS · iOS · iPadOS · watchOS · tvOS"},
+    {"k": {"en": "Built with", "fr": "Technologie", "zh": "技術"}, "v": "SwiftUI · SwiftData · CloudKit · WidgetKit"},
+    {"k": {"en": "Dependencies", "fr": "Dépendances", "zh": "相依套件"},
+     "v": {"en": "Sparkle-only dependency", "fr": "Sparkle pour seule dépendance", "zh": "唯一依賴為 Sparkle"}},
+    {"k": {"en": "Licence", "fr": "Licence", "zh": "授權"}, "v": "MIT"}
+  ],
+  "hero": {
+    "src": "screenshot.png", "w": 1999, "h": 1392,
+    "alt": "TheNews on macOS: sidebar of Le Monde and Les Echos sections, article list, and an article with its “Also covered by…” sources"
+  },
+  "opener": {
+    "h": {"en": "Signature features", "fr": "Fonctionnalités inédites", "zh": "獨有功能"}
+  },
+  "features": [
+    {"h": {"en": "Custom RSS sources", "fr": "Sources RSS personnalisées", "zh": "自訂 RSS 來源"},
+     "p": {"en": "Add any RSS feed beyond Le Monde &amp; Les Echos. The catalog is dynamic — your feeds join in as another journal, grouped in the sidebar.",
+           "fr": "Ajoute n'importe quel flux au-delà du Monde &amp; des Echos. Le catalogue est dynamique — tes flux rejoignent l'app comme un journal de plus, groupés dans la sidebar.",
+           "zh": "除了 Le Monde 與 Les Echos，還能加入任何訂閱源。目錄是動態的——你的訂閱源會像多一份報紙那樣加入應用程式，並在側邊欄分組。"}},
+    {"h": {"en": "Cross-source grouping", "fr": "Regroupement cross-source", "zh": "跨來源分組"},
+     "p": {"en": "\"Also covered by…\": the same event seen through other sources, detected on-device with a Jaccard similarity on titles and summaries.",
+           "fr": "« Aussi couvert par… » : le même événement vu par d'autres sources, détecté sur l'appareil par similarité de Jaccard sur titres et chapôs.",
+           "zh": "「其他來源也報導了……」：同一事件在其他來源的版本，於裝置上以標題與導言的 Jaccard 相似度偵測。"}},
+    {"h": {"en": "Daily briefing", "fr": "Briefing quotidien", "zh": "每日簡報"},
+     "p": {"en": "A condensed digest of the last 24 h — watch-list first, cross-source duplicates removed — with a notification at the time you pick.",
+           "fr": "Un condensé des dernières 24 h — veille en priorité, doublons cross-source retirés — avec une notification à l'heure choisie.",
+           "zh": "最近 24 小時的摘要——追蹤主題優先、移除跨來源重複——並在你設定的時間發出通知。"}},
+    {"h": {"en": "Widget &amp; iCloud", "fr": "Widget &amp; iCloud", "zh": "小工具與 iCloud"},
+     "p": {"en": "Home-screen widget (WidgetKit) on iOS &amp; macOS, plus iCloud sync of your subscriptions, favorites, watch topics and custom feeds across devices.",
+           "fr": "Widget d'écran d'accueil (WidgetKit) sur iOS &amp; macOS, et sync iCloud de tes abonnements, favoris, sujets de veille et flux perso entre appareils.",
+           "zh": "iOS 與 macOS 上的主畫面小工具（WidgetKit），並透過 iCloud 在裝置間同步你的訂閱、收藏、追蹤主題與自訂訂閱源。"}},
+    {"h": {"en": "On-device AI (Apple Intelligence)", "fr": "IA on-device (Apple Intelligence)", "zh": "裝置端 AI（Apple Intelligence）"},
+     "p": {"en": "Surface the main themes of any list, match watch topics semantically (catches rewordings, not just exact keywords), auto-summarize feeds with no description, and search in plain language — all via Foundation Models, fully on-device, with an automatic no-AI fallback.",
+           "fr": "Dégage les grands thèmes d'une liste, fait correspondre les sujets de veille sémantiquement (capte les reformulations, pas seulement les mots-clés exacts), résume automatiquement les flux sans chapô, et cherche en langage naturel — via Foundation Models, 100 % sur l'appareil, avec repli automatique sans IA.",
+           "zh": "歸納任何清單的主要主題、以語意比對追蹤主題（能捕捉改寫，而不只是完全相同的關鍵字）、自動摘要沒有導言的訂閱源，並以自然語言搜尋——全部透過 Foundation Models，100% 在裝置上執行，並可自動回退到不使用 AI 的模式。"}},
+    {"h": {"en": "Apple Watch app", "fr": "App Apple Watch", "zh": "Apple Watch 應用程式"},
+     "p": {"en": "A standalone watchOS companion: the top headlines from Le Monde and Les Echos, loaded live on your wrist.",
+           "fr": "Une app compagnon watchOS autonome : les gros titres du Monde et des Echos, chargés en direct à ton poignet.",
+           "zh": "獨立的 watchOS companion 應用程式：Le Monde 與 Les Echos 的頭條，即時載入到你的手腕上。"}},
+    {"h": {"en": "Apple TV app", "fr": "App Apple TV", "zh": "Apple TV 應用程式"},
+     "p": {"en": "A standalone tvOS companion: Briefing, all articles and every source's sections on the big screen, with thumbnails and full remote navigation.",
+           "fr": "Une app compagnon tvOS autonome : Briefing, tous les articles et les rubriques de chaque source sur grand écran, avec miniatures et navigation complète à la télécommande.",
+           "zh": "獨立的 tvOS companion 應用程式：簡報、所有文章與各來源的分類，在大螢幕上呈現，附縮圖並可完全用遙控器操作。"}},
+    {"h": {"en": "macOS screensaver", "fr": "Écran de veille macOS", "zh": "macOS 螢幕保護程式"},
+     "p": {"en": "A standalone screensaver with a rotating editorial briefing, installed automatically and kept in sync with every app update — no separate download or setup.",
+           "fr": "Un écran de veille autonome avec un briefing éditorial en rotation, installé automatiquement et tenu à jour avec chaque mise à jour de l'app — aucun téléchargement ni réglage séparé.",
+           "zh": "獨立的螢幕保護程式，輪播編輯簡報，隨應用程式自動安裝並在每次更新時同步——無須另外下載或設定。"}}
+  ],
+  "chapters": [
+    {"id": "platforms",
+     "h": {"en": "Works on both", "fr": "Sur les deux plateformes", "zh": "兩個平台皆可"},
+     "p": {"en": "One shared SwiftUI codebase.", "fr": "Un codebase SwiftUI partagé.", "zh": "共用同一份 SwiftUI 程式碼。"},
+     "blocks": [
+       {"type": "table",
+        "head": [{"en": "Feature", "fr": "Fonctionnalité", "zh": "功能"}, "macOS", "iOS"],
+        "rows": [
+          [{"en": "Multi-source + custom RSS", "fr": "Multi-source + RSS perso", "zh": "多來源 + 自訂 RSS"}, {"en": "Yes", "fr": "Oui", "zh": "是"}, {"en": "Yes", "fr": "Oui", "zh": "是"}],
+          [{"en": "Cross-source grouping", "fr": "Regroupement cross-source", "zh": "跨來源分組"}, {"en": "Yes", "fr": "Oui", "zh": "是"}, {"en": "Yes", "fr": "Oui", "zh": "是"}],
+          [{"en": "Daily briefing + alerts", "fr": "Briefing + alertes", "zh": "簡報 + 通知"}, {"en": "Yes", "fr": "Oui", "zh": "是"}, {"en": "Yes", "fr": "Oui", "zh": "是"}],
+          [{"en": "On-device AI (digest, semantic match, search)", "fr": "IA on-device (synthèse, matching, recherche)", "zh": "裝置端 AI（摘要、比對、搜尋）"}, {"en": "Yes", "fr": "Oui", "zh": "是"}, {"en": "Yes", "fr": "Oui", "zh": "是"}],
+          [{"en": "Home-screen widget", "fr": "Widget d'accueil", "zh": "主畫面小工具"}, {"en": "Yes", "fr": "Oui", "zh": "是"}, {"en": "Yes", "fr": "Oui", "zh": "是"}],
+          [{"en": "Apple Watch companion", "fr": "App Apple Watch", "zh": "Apple Watch 應用程式"}, "—", {"en": "Yes", "fr": "Oui", "zh": "是"}],
+          [{"en": "Apple TV companion", "fr": "App Apple TV", "zh": "Apple TV 應用程式"}, "—", "—"],
+          [{"en": "iCloud sync", "fr": "Sync iCloud", "zh": "iCloud 同步"}, {"en": "Yes", "fr": "Oui", "zh": "是"}, {"en": "Yes", "fr": "Oui", "zh": "是"}],
+          [{"en": "Screensaver", "fr": "Écran de veille", "zh": "螢幕保護程式"}, {"en": "Yes", "fr": "Oui", "zh": "是"}, "—"]
+        ]},
+       {"type": "p", "t": {
+         "en": "Apple Watch &amp; Apple TV are separate standalone companion apps (not tied to macOS or iOS).",
+         "fr": "Apple Watch et Apple TV sont des apps compagnons autonomes séparées (indépendantes de macOS ou iOS).",
+         "zh": "Apple Watch 與 Apple TV 是各自獨立的 companion 應用程式（不依賴 macOS 或 iOS）。"}}
+     ]},
+    {"id": "hood",
+     "h": {"en": "Under the hood", "fr": "Sous le capot", "zh": "底層架構"},
+     "p": {"en": "Native Apple frameworks, nothing else.", "fr": "Que du natif Apple, rien d'autre.", "zh": "只有 Apple 原生技術，別無其他。"},
+     "blocks": [{"type": "specs", "items": [
+       {"h": {"en": "Serverless &amp; private", "fr": "Sans serveur &amp; privé", "zh": "無伺服器且私密"},
+        "p": {"en": "Parsing, watch, grouping and briefing all run on-device. No account, no telemetry.",
+              "fr": "Parsing, veille, regroupement et briefing tournent sur l'appareil. Aucun compte, aucune télémétrie.",
+              "zh": "解析、追蹤、分組與簡報都在裝置上執行。不需帳號，沒有遙測。"}},
+       {"h": {"en": "Dynamic catalog", "fr": "Catalogue dynamique", "zh": "動態目錄"},
+        "p": {"en": "Built-in journals + your RSS feeds, <code>Feed.catalog = builtIn + custom</code>.",
+              "fr": "Journaux fournis + tes flux RSS, <code>Feed.catalog = builtIn + custom</code>.",
+              "zh": "內建報紙 + 你的 RSS 訂閱源，<code>Feed.catalog = builtIn + custom</code>。"}},
+       {"h": {"en": "Almost zero dependency", "fr": "Quasi zéro dépendance", "zh": "幾乎零依賴"},
+        "p": {"en": "SwiftData, XMLParser, UserNotifications, WidgetKit, CloudKit. Only exception: Sparkle, for macOS auto-update outside the App Store.",
+              "fr": "SwiftData, XMLParser, UserNotifications, WidgetKit, CloudKit. Seule exception : Sparkle, pour l'auto-update macOS hors App Store.",
+              "zh": "SwiftData、XMLParser、UserNotifications、WidgetKit、CloudKit。唯一例外是 Sparkle，用於 App Store 之外的 macOS 自動更新。"}},
+       {"h": {"en": "Open source (MIT)", "fr": "Open source (MIT)", "zh": "開源（MIT）"},
+        "p": {"en": "One shared SwiftUI codebase for macOS &amp; iOS.",
+              "fr": "Un codebase SwiftUI partagé macOS &amp; iOS.",
+              "zh": "macOS 與 iOS 共用同一份 SwiftUI 程式碼。"}}
+     ]}]}
+  ],
+  "close": {
+    "h": {"en": "Built around one idea: many sources, one place, nothing leaves your device.",
+          "fr": "Autour d'une idée : plusieurs sources, un seul endroit, rien ne quitte l'appareil.",
+          "zh": "圍繞一個想法：多個來源、一個地方，任何資料都不離開裝置。"},
+    "actions": [
+      {"primary": true, "href": "https://github.com/vincentlauriat/TheNews/releases/latest",
+       "label": {"en": "Download for macOS", "fr": "Télécharger pour macOS", "zh": "下載 macOS 版"}},
+      {"href": "https://github.com/vincentlauriat/TheNews",
+       "label": {"en": "View on GitHub", "fr": "Voir sur GitHub", "zh": "在 GitHub 上檢視"}}
+    ]
+  },
+  "colophon": {
+    "notes": [
+      {"en": "Made by <a href=\"https://lauriat.fr\">Vincent Lauriat</a>",
+       "fr": "Par <a href=\"https://lauriat.fr\">Vincent Lauriat</a>",
+       "zh": "作者：<a href=\"https://lauriat.fr\">Vincent Lauriat</a>"}
+    ]
+  }
+}

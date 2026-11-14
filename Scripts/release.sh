@@ -30,6 +30,20 @@
 # Overridable via env: APP_NAME, SCHEME, PROJECT, SIGNING_IDENTITY, NOTARY_PROFILE
 set -euo pipefail
 
+# Notary credentials: an App Store Connect API key (.p8) when NOTARY_KEY_ID, NOTARY_ISSUER_ID and
+# NOTARY_KEY_PATH are set or read from ~/.config/notarytool/api-key.env (it survives a keychain
+# reset); otherwise the keychain profile given as first argument. Usage: notary_run <profile> <args>
+notary_run() {
+  _np="$1"; shift
+  _nf="${NOTARY_ENV_FILE:-$HOME/.config/notarytool/api-key.env}"
+  if [ -z "${NOTARY_KEY_ID:-}" ] && [ -f "$_nf" ]; then . "$_nf"; fi
+  if [ -n "${NOTARY_KEY_ID:-}" ]; then
+    xcrun notarytool "$@" --key "${NOTARY_KEY_PATH/#\~/$HOME}" --key-id "$NOTARY_KEY_ID" --issuer "${NOTARY_ISSUER_ID:-}"
+  else
+    xcrun notarytool "$@" --keychain-profile "$_np"
+  fi
+}
+
 VERSION="${1:-}"
 if [ -z "$VERSION" ]; then
   echo "usage: $0 <version>   (e.g. $0 1.0.0)" >&2
@@ -160,7 +174,7 @@ hdiutil detach "$MOUNT" -quiet
 hdiutil convert "$RW_DMG" -format UDZO -imagekey zlib-level=9 -ov -o "$DMG" >/dev/null
 
 # 6. Notarize + staple
-if ! xcrun notarytool history --keychain-profile "$NOTARY_PROFILE" >/dev/null 2>&1; then
+if ! notary_run "$NOTARY_PROFILE" history >/dev/null 2>&1; then
   cat >&2 <<EOF
 ✗ Notary profile "$NOTARY_PROFILE" not found.
   Create it once (interactive):
@@ -171,7 +185,7 @@ EOF
   exit 1
 fi
 echo "▶︎ notarize (this takes a few minutes)"
-xcrun notarytool submit "$DMG" --keychain-profile "$NOTARY_PROFILE" --wait
+notary_run "$NOTARY_PROFILE" submit "$DMG" --wait
 echo "▶︎ staple"
 xcrun stapler staple "$DMG"
 xcrun stapler validate "$DMG"

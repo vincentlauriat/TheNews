@@ -69,6 +69,7 @@ lus »**), apparence & langue (fr/en).
 | Rafraîchissement en tâche de fond | 30 min | `BGAppRefreshTask` |
 | Widget d'écran d'accueil | ✅ | ✅ |
 | **App compagnon Apple Watch** | — | ✅ |
+| **iPhone Duo** : lecture adaptée à la posture (paysage plié, demi-plié image + titre en haut) | — | ✅ |
 | Sync iCloud (SwiftData + CloudKit) | ✅ | ✅ |
 | Écran de veille (embarqué, auto-update) | ✅ | — |
 

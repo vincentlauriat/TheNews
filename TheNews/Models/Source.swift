@@ -37,6 +37,17 @@ struct Source: Identifiable, Hashable, Codable, Sendable {
         homepageURL: URL(string: "https://www.lopinion.fr")!
     )
 
+    /// Numerama, média en ligne sur la tech, les sciences et la culture numérique.
+    /// Publié sous WordPress : chaque section expose `/<section>/feed/`. Le flux
+    /// racine `/feed/` n'est pas catalogué (c'est l'union des sections), pas plus que
+    /// « Société » (`/politique/`) et « Business », dont les entrées sont pour l'essentiel
+    /// des articles des autres sections re-tagués.
+    static let numerama = Source(
+        id: "numerama",
+        name: "Numerama",
+        homepageURL: URL(string: "https://www.numerama.com")!
+    )
+
     /// Pseudo-source regroupant les flux RSS ajoutés par l'utilisateur (`CustomFeed`).
     static let custom = Source(
         id: "custom",
@@ -45,7 +56,7 @@ struct Source: Identifiable, Hashable, Codable, Sendable {
     )
 
     /// Sources agrégées par TheNews, dans l'ordre d'affichage. « Mes flux » en dernier.
-    static let all: [Source] = [.leMonde, .lesEchos, .lopinion, .calipia, .custom]
+    static let all: [Source] = [.leMonde, .lesEchos, .lopinion, .calipia, .numerama, .custom]
 
     static func byID(_ id: String) -> Source? { all.first { $0.id == id } }
 }

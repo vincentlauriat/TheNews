@@ -1,6 +1,6 @@
 # Architecture
 
-Application SwiftUI **à codebase unique partagé** entre les cibles macOS et iOS/iPadOS. Les différences de plateforme sont gérées par des blocs `#if os(macOS)` / `#if os(iOS)`, jamais par duplication de fichiers. TheNews est **multi-sources** : il agrège plusieurs journaux (Le Monde, Les Echos, L'Opinion, Calipia) dans une même interface. Deux compagnons **autonomes** (watchOS, tvOS) réutilisent une partie de ce codebase (`Source`/`Feed`/`RSSService`/`RSSParser`) sans SwiftData ni CloudKit — voir leurs sections dédiées plus bas.
+Application SwiftUI **à codebase unique partagé** entre les cibles macOS et iOS/iPadOS. Les différences de plateforme sont gérées par des blocs `#if os(macOS)` / `#if os(iOS)`, jamais par duplication de fichiers. TheNews est **multi-sources** : il agrège plusieurs journaux (Le Monde, Les Echos, L'Opinion, Calipia, Numerama) dans une même interface. Deux compagnons **autonomes** (watchOS, tvOS) réutilisent une partie de ce codebase (`Source`/`Feed`/`RSSService`/`RSSParser`) sans SwiftData ni CloudKit — voir leurs sections dédiées plus bas.
 
 ## Vue d'ensemble
 
@@ -63,7 +63,7 @@ soit leur journal.
 
 Le catalogue n'est plus figé : `Feed.catalog = builtInCatalog + customCatalog`.
 
-- `builtInCatalog` — les journaux fournis (Le Monde, Les Echos, L'Opinion, Calipia), statiques en code.
+- `builtInCatalog` — les journaux fournis (Le Monde, Les Echos, L'Opinion, Calipia, Numerama), statiques en code.
 - `customCatalog` — cache des flux ajoutés par l'utilisateur, dérivé du modèle SwiftData `CustomFeed`.
   `CustomFeedStore.reloadCatalog()` le reconstruit depuis la base au démarrage (`FeedViewModel.load`,
   `RefreshEngine.run`) et après chaque ajout/suppression. Tous les consommateurs du catalogue étant
@@ -257,6 +257,10 @@ perso). Les réglages d'interface (`UserDefaults`) ne sont pas synchronisés.
 - `RSSService.fetch(Feed)` télécharge le flux (`URLSession`, hors `MainActor`).
 - `RSSParser.parse(Data)` — délégué `XMLParser` natif : mappe chaque `<item>` en `ParsedArticle`
   (`Sendable`), gère `media:content`/`enclosure`, décode le HTML du chapô, parse les dates RFC 822.
+  Ordre de résolution de l'illustration : `enclosure`/`media:content`, puis `media:thumbnail`, puis
+  le premier `<img src>` de `content:encoded` ou de `description` (`firstImageSource`) — dernier
+  recours pour les flux WordPress qui ne déclarent aucune image en attribut (Numerama : 75/75
+  articles illustrés uniquement ainsi, mesuré le 2026-09-21).
 - `FeedStore.ingest(...)` insère dans SwiftData en **dédupliquant par `id`** (guid, ou lien à défaut)
   et renvoie uniquement les **nouveaux** articles — base de déclenchement des alertes.
 - Le corps complet n'est **pas** dans le flux : `ArticleDetailView` ouvre le lien dans le navigateur.
@@ -269,7 +273,7 @@ perso). Les réglages d'interface (`UserDefaults`) ne sont pas synchronisés.
 
 - **Observation** (`@Observable`, Swift 5.9) plutôt que `ObservableObject`. Les ViewModels sont `@MainActor`.
 - **Multi-sources par concaténation de catalogues** : le mix Le Monde + Les Echos + L'Opinion +
-  Calipia ne demande aucun refactor des services — seuls `Source`/`Feed` et deux vues (sidebar,
+  Calipia + Numerama ne demande aucun refactor des services — seuls `Source`/`Feed` et deux vues (sidebar,
   gestion) connaissent la notion de source. Extensible à un N-ième journal sans refonte.
   ⚠️ Le catalogue intégré est répété dans **quatre** fichiers (`Feed.builtInCatalog`, les deux
   `WatchFeedConfiguration` — partagée et watchOS —, et `watchFeedGroups` dans `SettingsView` /
@@ -290,8 +294,11 @@ perso). Les réglages d'interface (`UserDefaults`) ne sont pas synchronisés.
   la première. Or `RefreshEngine` ingère dans l'**ordre d'arrivée réseau** (`withTaskGroup`), pas
   dans l'ordre du catalogue. Conséquence : ne jamais mettre au catalogue un flux « tout le site » à
   côté de ses propres sous-ensembles — le contenu des rubriques deviendrait non déterministe d'un
-  rafraîchissement à l'autre. C'est la raison pour laquelle `index.rss` de L'Opinion et les
-  catégories « Actualité »/« Divers » de Calipia sont écartés.
+  rafraîchissement à l'autre. C'est la raison pour laquelle `index.rss` de L'Opinion, les
+  catégories « Actualité »/« Divers » de Calipia, et pour Numerama le flux racine `/feed/` ainsi que
+  les sections « Société » (`/politique/`) et « Business » sont écartés : ces deux dernières
+  republient surtout des articles des autres sections (respectivement 4/15 et 2/15 articles propres,
+  contre 12 à 15/15 pour Tech, Sciences, Pop culture, Vroom et Cyberguerre).
 - **Réglages** : `AppSettings` centralise apparence, langue et secrets (`UserDefaults` + **Keychain**). Injecté dans l'environnement SwiftUI.
 - **Localisation maison** : dictionnaire `[lang: [clé: valeur]]` (`Strings.swift`) avec repli `en`, résolu par `settings.t("clé")`.
 - **Build** : projet Xcode **généré** par XcodeGen (`project.yml`) — le `.xcodeproj` n'est pas versionné. Régénérer avec `xcodegen generate`.

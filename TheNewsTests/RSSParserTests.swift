@@ -211,6 +211,64 @@ final class RSSParserTests: XCTestCase {
     }
 
     /// Un média explicitement non-image ne doit pas être retenu comme illustration.
+    /// Flux WordPress (Numerama) sans `enclosure` ni Media RSS : l'illustration
+    /// n'existe que comme `<img>` dans `content:encoded`, avec une query string
+    /// dont le `&` est encodé en entité.
+    func testFallsBackToFirstImageInContentEncoded() {
+        let xml = """
+        <?xml version="1.0"?>
+        <rss xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel>
+        <item>
+          <title>Robot laveur</title>
+          <link>https://example.com/robot</link>
+          <description><![CDATA[Un chapô sans image.]]></description>
+          <content:encoded><![CDATA[<p><img width="1200" src="https://img.example.com/freo.jpg?resize=1200,675&amp;key=abc" class="attachment-full" alt="" /></p><p>Corps.</p>]]></content:encoded>
+        </item>
+        </channel></rss>
+        """
+        let articles = RSSParser.parse(Data(xml.utf8), feedID: "test.feed")
+        XCTAssertEqual(articles.count, 1)
+        XCTAssertEqual(articles[0].imageURL,
+                       URL(string: "https://img.example.com/freo.jpg?resize=1200,675&key=abc"))
+        XCTAssertEqual(articles[0].summary, "Un chapô sans image.")
+    }
+
+    /// Une image déclarée en attribut (`enclosure`, Media RSS) prime toujours sur
+    /// celle trouvée dans le HTML, qui n'est qu'un dernier recours.
+    func testPrefersDeclaredImageOverContentEncodedImage() {
+        let xml = """
+        <?xml version="1.0"?>
+        <rss xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel>
+        <item>
+          <title>Deux images</title>
+          <link>https://example.com/deux</link>
+          <content:encoded><![CDATA[<img src="https://example.com/dans-le-corps.png">]]></content:encoded>
+          <enclosure url="https://example.com/declaree.jpg" type="image/jpeg"/>
+        </item>
+        </channel></rss>
+        """
+        let articles = RSSParser.parse(Data(xml.utf8), feedID: "test.feed")
+        XCTAssertEqual(articles[0].imageURL, URL(string: "https://example.com/declaree.jpg"))
+    }
+
+    /// Sans `content:encoded`, un `<img>` dans la `description` HTML fait aussi office
+    /// de repli ; le chapô, lui, reste nettoyé de la balise.
+    func testFallsBackToImageInDescriptionHTML() {
+        let xml = """
+        <?xml version="1.0"?>
+        <rss><channel>
+        <item>
+          <title>Image dans le chapô</title>
+          <link>https://example.com/chapo</link>
+          <description><![CDATA[<img src='http://example.com/chapo.png'/> Un chapô.]]></description>
+        </item>
+        </channel></rss>
+        """
+        let articles = RSSParser.parse(Data(xml.utf8), feedID: "test.feed")
+        XCTAssertEqual(articles[0].imageURL, URL(string: "https://example.com/chapo.png"))
+        XCTAssertEqual(articles[0].summary, "Un chapô.")
+    }
+
     func testIgnoresNonImageMediaContent() {
         let xml = """
         <?xml version="1.0"?>

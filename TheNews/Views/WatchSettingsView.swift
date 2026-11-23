@@ -189,7 +189,8 @@ struct WatchSettingsView: View {
             (Source.leMonde, Feed.leMondeCatalog),
             (Source.lesEchos, Feed.lesEchosCatalog),
             (Source.lopinion, Feed.lopinionCatalog),
-            (Source.calipia, Feed.calipiaCatalog)
+            (Source.calipia, Feed.calipiaCatalog),
+            (Source.numerama, Feed.numeramaCatalog)
         ]
     }
 

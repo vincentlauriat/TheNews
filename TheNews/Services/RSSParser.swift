@@ -45,7 +45,8 @@ struct ParsedArticle: Sendable, Hashable {
 /// Parseur RSS 2.0 basé sur `XMLParser` natif (aucune dépendance externe).
 /// Gère les balises standard (`title`, `link`, `description`, `pubDate`, `guid`)
 /// ainsi que l'image via `<enclosure url>` ou `<media:content url>`, avec repli
-/// sur `<media:thumbnail url>`.
+/// sur `<media:thumbnail url>`, puis sur le premier `<img>` de `content:encoded`
+/// ou de `description`.
 enum RSSParser {
     /// Parse les données d'un flux. Retourne une liste éventuellement vide ;
     /// ne lève pas — un flux malformé donne les items lisibles, pas une erreur.
@@ -75,6 +76,10 @@ enum RSSParser {
         private var pubDate = ""
         private var imageURL: String?
         private var thumbnailURL: String?
+        /// HTML brut de `content:encoded` et de `description`, conservé pour y
+        /// chercher une illustration en dernier recours.
+        private var encodedHTML = ""
+        private var descriptionHTML = ""
 
         init(feedID: String) { self.feedID = feedID }
 
@@ -86,6 +91,7 @@ enum RSSParser {
                 inItem = true
                 title = ""; link = ""; summary = ""; guid = ""; pubDate = ""
                 imageURL = nil; thumbnailURL = nil
+                encodedHTML = ""; descriptionHTML = ""
             }
             element = tag
             buffer = ""
@@ -132,7 +138,11 @@ enum RSSParser {
             case "title":       if title.isEmpty { title = Self.cleanText(text) }
             case "link":        if link.isEmpty { link = text }
             case "guid":        guid = text
-            case "description": if summary.isEmpty { summary = Self.cleanText(text) }
+            case "description":
+                if summary.isEmpty { summary = Self.cleanText(text) }
+                if descriptionHTML.isEmpty { descriptionHTML = text }
+            case "content:encoded":
+                if encodedHTML.isEmpty { encodedHTML = text }
             case "pubDate":     pubDate = text
             case "item":        finishItem()
             default:            break
@@ -150,7 +160,10 @@ enum RSSParser {
                 title: title,
                 summary: summary,
                 link: url,
-                imageURL: (imageURL ?? thumbnailURL).flatMap { Self.secureImageURL(from: $0) },
+                imageURL: (imageURL ?? thumbnailURL
+                           ?? Self.firstImageSource(in: encodedHTML)
+                           ?? Self.firstImageSource(in: descriptionHTML))
+                    .flatMap { Self.secureImageURL(from: $0) },
                 publishedAt: Self.date(from: pubDate) ?? Date()
             ))
         }
@@ -167,6 +180,26 @@ enum RSSParser {
 
         private static func date(from string: String) -> Date? {
             rfc822.date(from: string)
+        }
+
+        /// Premier `src` d'une balise `<img>` dans un fragment HTML, ou `nil`.
+        ///
+        /// Dernier recours pour les flux WordPress qui ne déclarent aucune image
+        /// en attribut (ni `enclosure`, ni Media RSS) et ne l'exposent que dans le
+        /// corps HTML de `content:encoded` — Numerama, par exemple. Le `src` peut
+        /// porter des entités (`&amp;` dans une query string), d'où le décodage.
+        static func firstImageSource(in html: String) -> String? {
+            guard !html.isEmpty,
+                  let regex = try? NSRegularExpression(
+                    pattern: #"<img\b[^>]*?\ssrc\s*=\s*["']([^"']+)["']"#,
+                    options: .caseInsensitive),
+                  let match = regex.firstMatch(
+                    in: html, range: NSRange(html.startIndex..., in: html)),
+                  let range = Range(match.range(at: 1), in: html)
+            else { return nil }
+            let src = decodingEntities(String(html[range]))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            return src.isEmpty ? nil : src
         }
 
         /// Force `https` sur les URLs d'images. App Transport Security bloque les

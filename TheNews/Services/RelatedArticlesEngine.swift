@@ -41,23 +41,17 @@ enum RelatedArticlesEngine {
         return union > 0 ? Double(inter) / Double(union) : 0
     }
 
-    /// Données minimales et `Sendable` extraites d'un `Article` pour pouvoir scorer les
-    /// candidats hors du MainActor (un `@Model` SwiftData ne peut pas traverser les acteurs).
-    private struct Candidate: Sendable {
-        let id: String
-        let title: String
-        let summary: String
-    }
-
     /// Articles d'**autres sources** couvrant le même sujet que `article`, triés par
     /// pertinence décroissante. `days` borne la fenêtre temporelle ; `threshold` le
     /// score minimal ; `limit` le nombre de résultats.
     ///
-    /// Isolée sur le MainActor pour le fetch SwiftData, mais le scoring (tokenisation +
-    /// Jaccard sur potentiellement des centaines de candidats) tourne en tâche de fond
-    /// détachée : appelée depuis `.task(id: article.id)` dans `ArticleDetailView` à **chaque**
-    /// page du pager iOS, un scoring synchrone sur le MainActor gelait l'animation de swipe
-    /// (« le défilement s'arrête en milieu puis reprend »).
+    /// Appelée depuis `.task(id: article.id)` dans `ArticleDetailView` à **chaque** page du
+    /// pager iOS — y compris la page voisine que le `TabView` instancie pendant le geste.
+    /// Tout le travail lourd (fetch des centaines d'articles de la fenêtre, lecture de leurs
+    /// titres/chapôs, filtrage par source, tokenisation + Jaccard) tourne donc dans un
+    /// `ModelContext` d'arrière-plan : fait sur le MainActor, il gelait l'animation de swipe.
+    /// Le MainActor ne fait que préparer des valeurs `Sendable` puis recharger les ≤ `limit`
+    /// articles retenus.
     @MainActor
     static func related(
         to article: Article,
@@ -70,28 +64,31 @@ enum RelatedArticlesEngine {
         guard base.count >= 2 else { return [] }
 
         let sourceID = Feed.byID(article.feedID)?.sourceID
+        // Rubriques de la même source, écartées : leurs articles se ressemblent déjà par
+        // style/rubrique (on ne veut que du cross-source). Calculé ici car le catalogue
+        // (`Feed.customCatalog`) n'est muté que sur le MainActor.
+        let sameSourceFeedIDs = Set(Feed.catalog.filter { $0.sourceID == sourceID }.map(\.id))
         let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? .distantPast
         let excludeID = article.id
-        let rows = (try? context.fetch(FetchDescriptor<Article>(
-            predicate: #Predicate { $0.publishedAt >= cutoff && $0.id != excludeID }
-        ))) ?? []
-        // Cross-source uniquement : on écarte la même source (dont les articles internes se
-        // ressemblent déjà par style/rubrique). Filtré ici, encore sur le MainActor, car il
-        // faut `Feed.byID` + `candidate.feedID` (accès à l'`Article` SwiftData).
-        let candidates = rows.compactMap { row -> Candidate? in
-            guard Feed.byID(row.feedID)?.sourceID != sourceID else { return nil }
-            return Candidate(id: row.id, title: row.title, summary: row.summary)
-        }
+        let container = context.container
 
-        let topIDs = await Task.detached(priority: .userInitiated) {
+        let topIDs = await Task.detached(priority: .userInitiated) { () -> [String] in
+            let background = ModelContext(container)
+            let rows = (try? background.fetch(FetchDescriptor<Article>(
+                predicate: #Predicate { $0.publishedAt >= cutoff && $0.id != excludeID }
+            ))) ?? []
             var scored: [(id: String, score: Double)] = []
-            for candidate in candidates {
-                let score = similarity(base, tokens(candidate.title + " " + candidate.summary))
-                if score >= threshold { scored.append((candidate.id, score)) }
+            for row in rows where !sameSourceFeedIDs.contains(row.feedID) {
+                let score = similarity(base, tokens(row.title + " " + row.summary))
+                if score >= threshold { scored.append((row.id, score)) }
             }
             return scored.sorted { $0.score > $1.score }.prefix(limit).map(\.id)
         }.value
 
+        guard !topIDs.isEmpty, !Task.isCancelled else { return [] }
+        let rows = (try? context.fetch(FetchDescriptor<Article>(
+            predicate: #Predicate { topIDs.contains($0.id) }
+        ))) ?? []
         let byID = Dictionary(rows.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         return topIDs.compactMap { byID[$0] }
     }

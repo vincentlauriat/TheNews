@@ -48,8 +48,12 @@ private struct TabletopPostureModifier: ViewModifier {
         .animation(.smooth, value: creaseY)
     }
 
+    /// `onHingeChange` n'existe que dans le SDK iOS 27.1 (Xcode 27, Swift 6.4) : le garde de
+    /// compilation laisse les toolchains plus anciennes (dont la CI, Xcode 26) compiler sans
+    /// détection de posture ; `#available` gère ensuite les appareils sous iOS < 27.1.
     @ViewBuilder
     private func observingHinge(_ view: some View) -> some View {
+        #if compiler(>=6.4)
         if #available(iOS 27.1, *) {
             view.onHingeChange { _, context in
                 hingePartiallyOpen = context.hinge?.status == .partiallyOpen
@@ -57,6 +61,9 @@ private struct TabletopPostureModifier: ViewModifier {
         } else {
             view
         }
+        #else
+        view
+        #endif
     }
 }
 

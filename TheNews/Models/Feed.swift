@@ -188,7 +188,19 @@ extension Feed {
     /// synchrone depuis `byID`/`catalog`. Rechargé par `CustomFeedStore.reloadCatalog()`
     /// au démarrage et à chaque ajout/suppression. Muté uniquement sur le `MainActor`
     /// (tous les consommateurs du catalogue le sont : vues, FeedStore, RefreshEngine).
-    static var customCatalog: [Feed] = []
+    static var customCatalog: [Feed] = [] {
+        didSet { index = makeIndex() }
+    }
+
+    /// Index `id → Feed` du catalogue complet, reconstruit à chaque mutation de
+    /// `customCatalog`. `byID` est appelé pour chaque ligne de liste et chaque candidat
+    /// du regroupement cross-source : une recherche linéaire sur `catalog` (qui
+    /// concatène deux tableaux à chaque accès) coûtait cher sur le MainActor.
+    private static var index: [String: Feed] = makeIndex()
+
+    private static func makeIndex() -> [String: Feed] {
+        Dictionary(catalog.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+    }
 
     /// Toutes les rubriques de toutes les sources (intégrées + perso).
     static var catalog: [Feed] { builtInCatalog + customCatalog }
@@ -207,5 +219,5 @@ extension Feed {
     /// Rubrique par défaut affichée au premier lancement (la « Une » du Monde).
     static var frontPage: Feed { leMondeCatalog[0] }
 
-    static func byID(_ id: String) -> Feed? { catalog.first { $0.id == id } }
+    static func byID(_ id: String) -> Feed? { index[id] }
 }

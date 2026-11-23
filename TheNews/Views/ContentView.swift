@@ -27,6 +27,7 @@ struct ContentView: View {
         .task { await requestNotificationsIfNeeded() }
         #if os(iOS)
         .task { await listenForWatchOpenRequests() }
+        .tracksTabletopPosture()   // iPhone Duo demi-plié en paysage → cf. ArticleDetailView
         #endif
         #if os(macOS)
         .task { await runPeriodicRefresh() }
